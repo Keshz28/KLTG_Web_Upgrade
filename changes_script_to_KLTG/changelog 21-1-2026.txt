@@ -1,0 +1,12 @@
+changelog 21-1-2026:
+able to search blog with title/content.
+
+new file = a) fetch_blogger_search.php   200126
+
+	
+
+file edit: a) blog.php on the breadcrumbs   200126
+	      JS submit_search_blog()	
+		
+	   b) blog2.js  - function activebutton(tage)   200126
+	

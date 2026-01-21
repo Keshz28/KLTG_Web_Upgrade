@@ -1,0 +1,179 @@
+/* POPPINS FONT */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+*{
+    font-family: 'Poppins', sans serif;
+}
+body,html{
+    background-image: url("images/1.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: rgb(203, 247, 255);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container{
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    padding: 0 15px 0 15px;
+    border-radius: 30px;
+    box-shadow: 0px 5px 30px rgba(0, 0, 0, 0.2);
+    padding: 30px 30px 30px 20px;
+}
+span{
+    color: #7a7a7a;
+    font-size: small;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 5px;
+}
+.form-title{
+    color: black;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 0 -10px;
+    font-weight: 800;
+}
+.form_title{
+    color: #0ea2bd;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    padding: 0px 0 10px 0;
+    font-weight: 800;
+}
+
+.form__row{
+    display: flex;
+    flex-direction: column;
+}
+.form__input{
+    height: 22px;
+    width: 87%;
+    border: none;
+    outline: none;
+    border-radius: 30px;
+    color: #000000;
+    padding: 0 0 0 22px;
+    background: rgba(255,255,255,0.7);
+}
+i{
+    position: relative;
+    top: -31px;
+    left: 17px;
+    color: #fff;
+}
+::-webkit-input-placeholder{
+    color: #fff;
+}
+.submit{
+    margin-top:10px;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    height: 45px;
+    outline: none;
+    width: 100%;
+    background: rgba(255,255,255,0.7);
+    cursor: pointer;
+    transition: .3s;
+}
+.submit:hover{
+    box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.2);
+    background: #0ea2bd;
+}
+.bottom{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: small;
+    color: #fff;
+    margin-top: 10px;
+}
+.left{
+    display: flex;
+}
+label a{
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Media Queries for Mobile Compatibility */
+@media screen and (max-width: 600px) {
+    body, html {
+        padding: 20px;
+    }
+    .container {
+        width: 100%;
+        padding: 20px;
+        border-radius: 15px;
+    }
+    .form-title, .form_title {
+        font-size: 24px;
+    }
+    .form__input {
+        width: 100%;
+        padding: 0 0 0 15px;
+    }
+    .submit {
+        font-size: 14px;
+        height: 40px;
+    }
+    .bottom {
+        flex-direction: column;
+        align-items: center;
+    }
+    .bottom .left {
+        margin-top: 10px;
+    }
+    .bottom label a {
+        font-size: smaller;
+    }
+    .error {
+    color: red;
+    display: block; /* Ensures that it appears on a new line */
+}
+
+    
+    input::placeholder {
+        color: rgb(101, 101, 101); /* Change the placeholder text color to black */
+    }
+    select::placeholder {
+        color: rgb(95, 95, 95); /* Change the placeholder text color to black */
+    }
+    
+    .form_msg {
+        margin-bottom: 20px; /* Adjust the bottom margin as needed */
+    }
+}
+
+.error {
+    color: red;
+    font-size: 14px; /* Adjust the font size as needed */
+    margin-top: 5px;
+    display: block; /* Ensures that it appears on a new line */
+}
+
+input::placeholder {
+    color: rgb(101, 101, 101); /* Change the placeholder text color to black */
+}
+select::placeholder {
+    color: rgb(95, 95, 95); /* Change the placeholder text color to black */
+}
+
+.form_msg {
+    margin-bottom: 20px; /* Adjust the bottom margin as needed */
+    font-size: 16px; /* Adjust the font size as needed */
+}

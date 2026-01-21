@@ -1,0 +1,11 @@
+User-agent: Googlebot
+Disallow: /admin/*
+Disallow: index2.php
+Disallow: blog2.php
+Disallow: bloglist.php
+Disallow: ebook-details2.php
+Disallow: header2.php
+Disallow: blog-details2.php
+Disallow: highlights2.php
+
+Sitemap: https://www.kltheguide.com.my/sitemap.xml

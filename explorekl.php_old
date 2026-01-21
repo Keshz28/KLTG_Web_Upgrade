@@ -1,0 +1,1939 @@
+<?php include('admin/functions.php');
+
+
+$query = "SELECT * FROM indexpage ";
+$result = mysqli_query($db, $query);
+
+while ($row = mysqli_fetch_assoc($result)) {
+
+
+  $hero_title = $row['hero_title'];
+  $hero_title2 = $row['hero_title2'];
+  $hero_subtitle = $row['hero_subtitle'];
+  $tile1_title = $row['tile1_title'];
+  $tile1_subtitle = $row['tile1_subtitle'];
+  $tile1_photo1 = $row['tile1_photo1'];
+  $tile1_photo2 = $row['tile1_photo2'];
+  $tile1_photo3 = $row['tile1_photo3'];
+  $tile1_photo4 = $row['tile1_photo4'];
+  $tile1_title1 = $row['tile1_title1'];
+  $tile1_title2 = $row['tile1_title2'];
+  $tile1_title3= $row['tile1_title3'];
+  $tile1_title4 = $row['tile1_title4'];
+  $tile2_title = $row['tile2_title'];
+  $tile2_subtitle = $row['tile2_subtitle'];
+
+  $tile2_photo1 = $row['tile2_photo1'];
+  $tile2_photo2 = $row['tile2_photo2'];
+  $tile2_photo3 = $row['tile2_photo3'];
+  $tile2_photo4 = $row['tile2_photo4'];
+  $tile2_photo5 = $row['tile2_photo5'];
+  $tile2_photo6 = $row['tile2_photo6'];
+
+  $tile2_title1 = $row['tile2_title1'];
+  $tile2_title2 = $row['tile2_title2'];
+  $tile2_title3 = $row['tile2_title3'];
+  $tile2_title4 = $row['tile2_title4'];
+  $tile2_title5 = $row['tile2_title5'];
+  $tile2_title6 = $row['tile2_title6'];
+
+  $tile3_title = $row['tile3_title'];
+  $tile3_subtitle = $row['tile3_subtitle'];
+  $tile4_title = $row['tile4_title'];
+  $tile4_subtitle = $row['tile4_subtitle'];
+
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>KL The Guide - <?php echo $tile2_title1 ?></title>
+
+  <meta name="description"
+    content="This page contains the menu for navigating to the various sights, activities and locations throughout Kuala Lumpur">
+  <meta content="" name="keywords">
+
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.kltheguide.com.my/explorekl.php" />
+  <meta property="og:title" content="KL The Guide - <?php echo $tile2_title1 ?>" />
+  <meta property="og:description"
+    content="This page contains the menu for navigating to the various sights, activities and locations throughout Kuala Lumpur" />
+  <meta property="og:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://www.kltheguide.com.my/explorekl.php" />
+  <meta property="twitter:title" content="KL The Guide - <?php echo $tile2_title1 ?>" />
+  <meta property="twitter:description"
+    content="This page contains the menu for navigating to the various sights, activities and locations throughout Kuala Lumpur" />
+  <meta property="twitter:image" content="assets/img/kltgseo.jpg" />
+
+
+  <?php include 'header.php'; ?>
+
+</head>
+
+<body>
+
+  <?php include 'nav.php'; ?>
+
+
+
+  <main id="exploreklbody">
+
+
+
+    <br>
+
+
+    <!-- ======= Features Section ======= -->
+    <section id="explorekl" class="features">
+
+      <div class="container" data-aos="fade-up">
+
+        <ul class="nav nav-tabs row gy-4  my-5 d-flex justify-content-center">
+          <?php
+          $query = "SELECT *  FROM explorekl_nav WHERE display='1' ORDER BY orderof ASC ";
+          $result = mysqli_query($db, $query);
+
+          while ($row = mysqli_fetch_assoc($result)) {
+            if ($row['id'] <= 8) {
+
+
+              ?>
+              <li class="nav-item col-4 col-md-3 col-lg-3 ">
+                <a class="nav-link explorekl" id="tab-<?php echo $row['id'] ?>-link" href="#tab-<?php echo $row['id'] ?>"
+                  data-bs-toggle="tab" data-bs-target="#tab-<?php echo $row['id'] ?>" style="">
+                  <img src="assets/img/explorekl/<?php echo $row['filename'] ?>" class="img-fluid" alt="">
+                  <h4 class="text-center align-middle">
+                    <?php echo $row['name'] ?>
+                  </h4>
+                </a>
+              </li><!-- End Tab 1 Nav -->
+            <?php } else {
+              ?>
+              <li class="nav-item col text-center text-break">
+                <a class="nav-link" id="tab-<?php echo $row['id'] ?>-link" href="<?php echo $row['name'] ?>">
+                  <img src="assets/img/medical_tourism/<?php echo $row['filename'] ?>" class="img-fluid" alt="">
+                  <!-- <h4><?php echo $row['name'] ?></h4> -->
+                </a>
+              </li>
+              <?php
+            }
+
+          } ?>
+
+
+        </ul>
+
+        <div class="tab-content">
+
+          <div class="tab-pane" id="tab-1">
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>What To Do In KL</h3>
+
+                </p>
+              </div>
+
+            </div>
+
+            <?php
+
+            $query = "SELECT * FROM explorekl_wtd ";
+            $result = mysqli_query($db, $query);
+            $counter = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
+              if ($counter % 2 != 0) {
+                ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-2  ">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_wtd_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_wtd_content']) ?>
+                    </p>
+
+
+                  </div>
+                  <div class="col-md-4 order-1  text-center">
+                    <img src="assets/img/explorekl/wtd/<?php echo urldecode($row['explorekl_wtd_image']) ?>"
+                      alt="<?php echo urldecode($row['explorekl_wtd_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+
+              <?php } else { ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-md-1 order-2 ">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_wtd_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_wtd_content']) ?>
+                    </p>
+
+                  </div>
+                  <div class="col-md-4 order-md-2 order-1 text-center">
+                    <img src="assets/img/explorekl/wtd/<?php echo urldecode($row['explorekl_wtd_image']) ?>"
+                      alt="<?php echo urldecode($row['explorekl_wtd_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+              <?php }
+              ?>
+
+              <hr>
+              <?php
+              $counter++;
+            }
+            ?>
+
+          </div><!-- End Tab Content 1 -->
+
+
+
+          <div class="tab-pane" id="tab-2">
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>Historical Sites</h3>
+
+                </p>
+              </div>
+
+            </div>
+
+            <?php
+
+            $query = "SELECT * FROM explorekl_hs ";
+            $result = mysqli_query($db, $query);
+            $counter = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
+              if ($counter % 2 != 0) {
+                ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-2 ">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_hs_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_hs_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_hs_location']) { ?>
+
+                      <p>
+                        <b>Location : </b><a href="<?php echo $row['explorekl_hs_locationurl'] ?>">
+                          <?php echo urldecode($row['explorekl_hs_location']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_hs_hours']) { ?>
+                      <p>
+                        <b>Operating Hours : </b>
+                        <?php echo $row['explorekl_hs_hours'] ?>
+                      </p>
+                    <?php } ?>
+                  </div>
+                  <div class="col-md-4 order-1  text-center">
+                    <img src="assets/img/explorekl/hs/<?php echo $row['explorekl_hs_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_hs_title']) ?>" class="img-fluid " loading="lazy">
+                  </div>
+                </div>
+
+              <?php } else { ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-md-1 order-2">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_hs_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_hs_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_hs_location']) { ?>
+
+                      <p>
+                        <b>Location : </b><a href="<?php echo $row['explorekl_hs_locationurl'] ?>">
+                          <?php echo urldecode($row['explorekl_hs_location']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_hs_hours']) { ?>
+                      <p>
+                        <b>Operating Hours : </b>
+                        <?php echo $row['explorekl_hs_hours'] ?>
+                      </p>
+                    <?php } ?>
+
+                  </div>
+                  <div class="col-md-4 order-md-2 order-1 text-center">
+                    <img src="assets/img/explorekl/hs/<?php echo $row['explorekl_hs_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_hs_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+              <?php }
+              ?>
+              <hr>
+
+              <?php
+              $counter++;
+            }
+            ?>
+
+          </div><!-- End Tab Content 2 -->
+
+
+          <div class="tab-pane" id="tab-3">
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>Places Of Worship</h3>
+
+                </p>
+              </div>
+
+              <!-- ======= About Section ======= -->
+              <div class="container" data-aos="fade-up">
+
+
+                <div class="row g-4 g-lg-5" data-aos="fade-up" data-aos-delay="200">
+
+
+                  <div class="col-lg-12">
+
+                    <!-- Tabs -->
+                    <ul class="nav d-flex  nav-pills mb-3 justify-content-center">
+                      <li><a class="nav-link  d-flex justify-content-center active" data-bs-toggle="pill"
+                          href="#tabc1">Muslim</a></li>
+                      <li><a class="nav-link  d-flex justify-content-center " data-bs-toggle="pill"
+                          href="#tabc2">Buddhist/Tao</a></li>
+                      <li><a class="nav-link   d-flex justify-content-center " data-bs-toggle="pill"
+                          href="#tabc3">Hindu</a></li>
+                      <li><a class="nav-link   d-flex justify-content-center " data-bs-toggle="pill"
+                          href="#tabc4">Others</a></li>
+
+                    </ul><!-- End Tabs -->
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+
+                      <div class="tab-pane fade show active" id="tabc1">
+                        <div class="row">
+
+
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_pwor WHERE explorekl_pwor_category='muslim'";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+
+
+                            echo '<div class="col-12 col-lg-6 mb-3  ">';
+                            echo '  <div class="card h-100">';
+                            echo '    <div class="row  h-100">';
+                            echo '      <div class="col-6">';
+                            echo '        <img class="card-img " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy" >';
+                            echo '      </div>';
+                            echo '      <div class="col-6 " >';
+                            echo '        <div class="card-body h-100">';
+                            echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
+                            if ($row['explorekl_pwor_location']) {
+                              echo '          <p class="card-text">Location: <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                            }
+                            if ($row['explorekl_pwor_hours']) {
+                              echo '          <p class="card-text">Operating Hours: ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
+                            }
+                            if ($row['explorekl_pwor_phone']) {
+                              echo '          <p class="card-text">Contact Number: ' . $row['explorekl_pwor_phone'] . '</p>';
+                            }
+                            if ($row['explorekl_pwor_website']) {
+                              echo '          <p class="card-text">Website: <a href="' . $row['explorekl_pwor_website'] . '">' . $row['explorekl_pwor_website'] . '</a></p>';
+                            }
+                            echo '        </div>';
+                            echo '      </div>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+                          }
+                          ?>
+
+                        </div>
+
+
+
+                      </div><!-- End Tab 1 Content -->
+
+                      <div class="tab-pane fade show" id="tabc2">
+
+                        <div class="row">
+
+
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_pwor WHERE explorekl_pwor_category='tao'";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+
+
+
+                            echo '<div class="col-12 col-lg-6 mb-3  ">';
+                            echo '  <div class="card h-100">';
+                            echo '    <div class="row  h-100">';
+                            echo '      <div class="col-6">';
+                            echo '        <img class="card-img  " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '      </div>';
+                            echo '      <div class="col-6 " >';
+                            echo '        <div class="card-body h-100 ">';
+                            echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
+                            if ($row['explorekl_pwor_location']) {
+                              echo '          <p class="card-text">Location: <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                            }
+                            if ($row['explorekl_pwor_hours']) {
+                              echo '          <p class="card-text">Operating Hours: ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
+                            }
+                            if ($row['explorekl_pwor_phone']) {
+                              echo '          <p class="card-text">Contact Number: ' . $row['explorekl_pwor_phone'] . '</p>';
+                            }
+                            if ($row['explorekl_pwor_website']) {
+                              echo '          <p class="card-text">Website: <a href="' . $row['explorekl_pwor_website'] . '">' . $row['explorekl_pwor_website'] . '</a></p>';
+                            }
+                            echo '        </div>';
+                            echo '      </div>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+                          }
+                          ?>
+
+                        </div>
+
+                      </div><!-- End Tab 2 Content -->
+
+                      <div class="tab-pane fade show" id="tabc3">
+
+                        <div class="row">
+
+
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_pwor WHERE explorekl_pwor_category='hindu'";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+
+
+
+                            echo '<div class="col-12 col-lg-6 mb-3  ">';
+                            echo '  <div class="card h-100">';
+                            echo '    <div class="row h-100">';
+                            echo '      <div class="col-6">';
+                            echo '        <img class="card-img  " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '      </div>';
+                            echo '      <div class="col-6 " >';
+                            echo '        <div class="card-body h-100 ">';
+                            echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
+                            if ($row['explorekl_pwor_location']) {
+                              echo '          <p class="card-text">Location: <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                            }
+                            if ($row['explorekl_pwor_hours']) {
+                              echo '          <p class="card-text">Operating Hours: ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
+                            }
+                            if ($row['explorekl_pwor_phone']) {
+                              echo '          <p class="card-text">Contact Number: ' . $row['explorekl_pwor_phone'] . '</p>';
+                            }
+                            if ($row['explorekl_pwor_website']) {
+                              echo '          <p class="card-text">Website: <a href="' . $row['explorekl_pwor_website'] . '">' . $row['explorekl_pwor_website'] . '</a></p>';
+                            }
+                            echo '        </div>';
+                            echo '      </div>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+                          }
+                          ?>
+
+                        </div>
+
+                      </div><!-- End Tab 3 Content -->
+
+
+                      <div class="tab-pane fade show" id="tabc4">
+
+                        <div class="row">
+
+
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_pwor WHERE explorekl_pwor_category='other'";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+
+
+
+                            echo '<div class="col-12 col-lg-6 mb-3  ">';
+                            echo '  <div class="card h-100">';
+                            echo '    <div class="row h-100">';
+                            echo '      <div class="col-6">';
+                            echo '        <img class="card-img  " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '      </div>';
+                            echo '      <div class="col-6" >';
+                            echo '        <div class="card-body h-100 ">';
+                            echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
+                            if ($row['explorekl_pwor_location']) {
+                              echo '          <p class="card-text">Location: <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                            }
+                            if ($row['explorekl_pwor_hours']) {
+                              echo '          <p class="card-text">Operating Hours: ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
+                            }
+                            if ($row['explorekl_pwor_phone']) {
+                              echo '          <p class="card-text">Contact Number: ' . $row['explorekl_pwor_phone'] . '</p>';
+                            }
+                            if ($row['explorekl_pwor_website']) {
+                              echo '          <p class="card-text">Website: <a href="' . $row['explorekl_pwor_website'] . '">' . $row['explorekl_pwor_website'] . '</a></p>';
+                            }
+                            echo '        </div>';
+                            echo '      </div>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+                          }
+                          ?>
+
+                        </div>
+
+                      </div><!-- End Tab 4 Content -->
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+
+          </div><!-- End Tab Content 3 places of worship -->
+
+
+
+          <div class="tab-pane" id="tab-4">
+
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>What To Eat In KL</h3>
+
+                </p>
+              </div>
+
+              <!-- ======= About Section ======= -->
+              <div class="container" data-aos="fade-up">
+
+
+                <div class="row g-4 g-lg-5" data-aos="fade-up" data-aos-delay="200">
+
+
+                  <div class="col-lg-12">
+
+                    <!-- Tabs -->
+                    <ul class="nav nav-pills mb-3 justify-content-center">
+                      <li><a class="nav-link  d-flex justify-content-center  active" data-bs-toggle="pill"
+                          href="#tabd1">Street Food</a></li>
+                      <li><a class="nav-link  d-flex justify-content-center" data-bs-toggle="pill"
+                          href="#tabd2">Cafes</a></li>
+                      <li><a class="nav-link  d-flex justify-content-center" data-bs-toggle="pill" href="#tabd3"
+                          id="reinitportfolio" onclick="reinitportfolio()">Restaurants</a></li>
+
+                    </ul><!-- End Tabs -->
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+
+                      <div class="tab-pane fade show active" id="tabd1">
+                        <div class="row">
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_wte_sf ";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+                            if ($counter % 2 != 0) {
+                              ?>
+                              <div class="row gy-4 mb-5">
+
+                                <div class="col-md-8 order-2 ">
+                                  <h3>
+                                    <?php echo urldecode($row['explorekl_wte_sf_title']) ?>
+                                  </h3>
+                                  <p>
+                                    <?php echo urldecode($row['explorekl_wte_sf_content']) ?>
+                                  </p>
+                                  <?php if ($row['explorekl_wte_sf_location']) { ?>
+
+                                    <p><b>Location : </b><a href="<?php echo $row['explorekl_wte_sf_locationurl'] ?>">
+                                        <?php echo urldecode($row['explorekl_wte_sf_location']) ?>
+                                      </a></p>
+
+                                  <?php } ?>
+                                  <?php if ($row['explorekl_wte_sf_hours']) { ?>
+
+                                    <p><b>Operating Hours : <br></b>
+                                      <?php echo $row['explorekl_wte_sf_hours'] ?>
+                                    </p>
+
+                                  <?php } ?>
+                                  <?php if ($row['explorekl_wte_sf_website']) { ?>
+
+                                    <p><b>Website : <br></b>
+                                      <a href="<?php echo $row['explorekl_wte_sf_website'] ?>">
+                                        <?php echo $row['explorekl_wte_sf_website'] ?>
+                                      </a>
+                                    </p>
+
+                                  <?php } ?>
+
+                                </div>
+                                <div class="col-md-4 order-1  text-center">
+                                  <img src="assets/img/explorekl/wte/sf/<?php echo $row['explorekl_wte_sf_image'] ?>" alt=""
+                                    class="img-fluid">
+                                </div>
+                              </div>
+
+                            <?php } else { ?>
+                              <div class="row gy-4 mb-5">
+
+                                <div class="col-md-8 order-md-1 order-2">
+                                  <h3>
+                                    <?php echo urldecode($row['explorekl_wte_sf_title']) ?>
+                                  </h3>
+                                  <p>
+                                    <?php echo urldecode($row['explorekl_wte_sf_content']) ?>
+                                  </p>
+
+                                  <?php if ($row['explorekl_wte_sf_location']) { ?>
+
+                                    <p><b>Location : </b><a href="<?php echo $row['explorekl_wte_sf_locationurl'] ?>">
+                                        <?php echo urldecode($row['explorekl_wte_sf_location']) ?>
+                                      </a></p>
+
+                                  <?php } ?>
+                                  <?php if ($row['explorekl_wte_sf_hours']) { ?>
+
+                                    <p><b>Operating Hours : <br></b>
+                                      <?php echo $row['explorekl_wte_sf_hours'] ?>
+                                    </p>
+
+                                  <?php } ?>
+                                  <?php if ($row['explorekl_wte_sf_website']) { ?>
+
+                                    <p><b>Website : <br></b>
+                                      <a href="<?php echo $row['explorekl_wte_sf_website'] ?>">
+                                        <?php echo $row['explorekl_wte_sf_website'] ?>
+                                      </a>
+                                    </p>
+
+                                  <?php } ?>
+                                </div>
+                                <div class="col-md-4 order-md-2 order-1 ">
+                                  <img src="assets/img/explorekl/wte/sf/<?php echo $row['explorekl_wte_sf_image'] ?>" alt=""
+                                    class="img-fluid ">
+                                </div>
+                              </div>
+                            <?php }
+                            ?>
+
+                            <hr>
+                            <?php
+                            $counter++;
+                          }
+                          ?>
+
+
+                        </div>
+
+
+
+                      </div><!-- End Tab 1 Content -->
+
+                      <div class="tab-pane fade show" id="tabd2">
+
+                        <div class="row">
+
+
+
+                          <?php
+
+                          $query = "SELECT * FROM explorekl_wte_c ";
+                          $result = mysqli_query($db, $query);
+                          $counter = 1;
+                          while ($row = mysqli_fetch_assoc($result)) {
+
+
+
+                            echo '<div class="col-12 col-lg-6 my-3">';
+                            echo '  <div class="card h-100">';
+                            echo '    <div class="row  h-100">';
+                            echo '      <div class="col-6  h-100">';
+                            echo '        <img class="card-img" src="assets/img/explorekl/wte/c/' . $row['explorekl_wte_c_image'] . '" alt="Card image cap">';
+                            echo '      </div>';
+                            echo '      <div class="col-6  h-100">';
+                            echo '        <div class="card-body h-100">';
+                            echo '          <h5 class="card-title">' . $row['explorekl_wte_c_title'] . '</h5>';
+                            if ($row['explorekl_wte_c_location']) {
+                              echo '          <p class="card-text">Location: <a href="' . $row['explorekl_wte_c_locationurl'] . '">' . $row['explorekl_wte_c_location'] . '</a></p>';
+                            }
+                            if ($row['explorekl_wte_c_hours']) {
+                              echo '          <p class="card-text">Operating Hours: ' . $row['explorekl_wte_c_hours'] . '</p>';
+                            }
+                            if ($row['explorekl_wte_c_phone']) {
+                              echo '          <p class="card-text">Contact Number: ' . $row['explorekl_wte_c_phone'] . '</p>';
+                            }
+                            if ($row['explorekl_wte_c_website']) {
+                              echo '          <p class="card-text">Website: <a href="' . $row['explorekl_wte_c_website'] . '">' . $row['explorekl_wte_c_website'] . '</a></p>';
+                            }
+                            echo '        </div>';
+                            echo '      </div>';
+                            echo '    </div>';
+                            echo '  </div>';
+                            echo '</div>';
+
+
+                            $counter++;
+                          }
+                          ?>
+
+                        </div>
+
+                      </div><!-- End Tab 2 Content -->
+
+                      <div class="tab-pane fade show" id="tabd3">
+
+                        <!-- ======= Portfolio Section ======= -->
+                        <section id="portfolio" class="portfolio" data-aos="fade-up">
+
+
+                          <div class="container">
+
+                            <div class="portfolio-isotope" data-portfolio-filter="*" data-portfolio-layout="masonry"
+                              data-portfolio-sort="original-order">
+
+                              <ul class="portfolio-flters">
+                                <li data-filter="*" class="filter-active"><a class="btn  btn-primary"
+                                    aria-pressed="true">All</a></li>
+                                <li data-filter=".filter-malay"><a class="btn btn-primary" aria-pressed="true">Malay</a>
+                                </li>
+                                <li data-filter=".filter-chinese"><a class="btn btn-primary"
+                                    aria-pressed="true">Chinese</a></li>
+                                <li data-filter=".filter-indian"><a class="btn btn-primary"
+                                    aria-pressed="true">Indian</a></li>
+                                <li data-filter=".filter-arabic"><a class="btn btn-primary"
+                                    aria-pressed="true">Arabic</a></li>
+                                <li data-filter=".filter-korean"><a class="btn btn-primary"
+                                    aria-pressed="true">Korean</a></li>
+                                <li data-filter=".filter-japanese"><a class="btn btn-primary"
+                                    aria-pressed="true">Japanese</a></li>
+                                <li data-filter=".filter-mexican"><a class="btn btn-primary"
+                                    aria-pressed="true">Mexican</a></li>
+                                <li data-filter=".filter-fastfood"><a class="btn btn-primary" aria-pressed="true">Fast
+                                    Food</a></li>
+                                <li data-filter=".filter-westernfood"><a class="btn btn-primary"
+                                    aria-pressed="true">Western Food</a></li>
+
+                              </ul><!-- End Portfolio Filters -->
+
+                              <div class="row  portfolio-container">
+
+
+                                <?php
+
+                                $query = "SELECT * FROM explorekl_wte_r ";
+                                $result = mysqli_query($db, $query);
+                                while ($row = mysqli_fetch_assoc($result)) { ?>
+
+
+                                  <div
+                                    class="col-12 col-lg-6 my-3  portfolio-item2  filter-<?php echo $row['explorekl_wte_r_category'] ?>">
+                                    <div class="card h-100">
+                                      <div class="row h-100">
+                                        <div class="col-6 ">
+                                          <img class="card-img "
+                                            src="assets/img/explorekl/wte/r/<?php echo $row['explorekl_wte_r_image'] ?>"
+                                            alt="<?php echo $row['explorekl_wte_r_title'] ?>" loading="lazy">
+                                        </div>
+                                        <div class="col-6">
+                                          <div class="card-body h-100">
+                                            <h5 class="card-title"><b>
+                                                <?php echo $row['explorekl_wte_r_title'] ?>
+                                              </b></h5>
+                                            <?php if ($row['explorekl_wte_r_location']) { ?>
+                                              <p class="card-text">Location : <a
+                                                  href="<?php echo $row['explorekl_wte_r_locationurl'] ?>">
+                                                  <?php echo $row['explorekl_wte_r_location'] ?>
+                                                </a></p>
+                                            <?php } ?>
+
+                                            <?php if ($row['explorekl_wte_r_hours']) { ?>
+                                              <p class="card-text">Operating Hours : <br>
+                                                <?php echo $row['explorekl_wte_r_hours'] ?>
+                                              </p>
+                                            <?php } ?>
+                                            <?php if ($row['explorekl_wte_r_phone']) { ?>
+
+                                              <p class="card-text">Contact Number : <br>
+                                                <?php echo $row['explorekl_wte_r_phone'] ?>
+                                              </p>
+                                            <?php } ?>
+                                            <?php if ($row['explorekl_wte_r_website']) { ?>
+                                              <p class="card-text">Website : <a
+                                                  href="<?php echo $row['explorekl_wte_r_website'] ?>">
+                                                  <?php echo $row['explorekl_wte_r_website'] ?>
+                                                </a></p>
+                                            <?php } ?>
+                                            <?php if ($row['explorekl_wte_r_content']) { ?>
+
+                                              <p class="card-text">Remark : <br>
+                                                <?php echo $row['explorekl_wte_r_content'] ?>
+                                              </p>
+                                            <?php } ?>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+
+                                <?php }
+                                ?>
+
+                                <!-- End Portfolio Item -->
+
+
+                              </div><!-- End Portfolio Container -->
+
+                            </div>
+
+                          </div>
+                        </section><!-- End Portfolio Section -->
+                      </div><!-- End Tab 3 Content -->
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </div><!-- End Tab Content 4 -->
+
+
+          <div class="tab-pane" id="tab-5">
+
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>Night Life</h3>
+
+                </p>
+              </div>
+
+              <!-- ======= About Section ======= -->
+              <div class="container" data-aos="fade-up">
+
+
+                <div class="row g-4 g-lg-5" data-aos="fade-up" data-aos-delay="200">
+
+
+                  <div class="col-lg-12">
+
+                    <!-- Tabs -->
+                    <ul class="nav nav-pills mb-3 justify-content-center">
+                      <li><a class="nav-link  d-flex justify-content-center active" data-bs-toggle="pill"
+                          href="#tabe1">Night-Life</a></li>
+                      <li><a class="nav-link d-flex justify-content-center" data-bs-toggle="pill" href="#tabe2">Bars</a>
+                      </li>
+                      <li><a class="nav-link d-flex justify-content-center" data-bs-toggle="pill" href="#tabe3">Night
+                          Market</a></li>
+
+                    </ul><!-- End Tabs -->
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+
+                      <div class="tab-pane fade show active" id="tabe1">
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_nl WHERE explorekl_nl_category='nl'  ORDER BY explorekl_nl_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_nl_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_nl_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+
+
+
+                      </div><!-- End Tab 1 Content -->
+
+                      <div class="tab-pane fade show" id="tabe2">
+
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_nl WHERE explorekl_nl_category='bars'  ORDER BY explorekl_nl_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_nl_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                    <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                  </a>
+                                </p>
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+
+
+                      </div><!-- End Tab 2 Content -->
+
+                      <div class="tab-pane fade show" id="tabe3">
+
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_nl WHERE explorekl_nl_category='nm'  ORDER BY explorekl_nl_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_nl_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_nl_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_nl_content']) ?>
+                                </p>
+                                <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_nl_locationurl']) ?>">
+                                    <?php echo urldecode($row['explorekl_nl_location']) ?>
+                                  </a>
+                                </p>
+                                <?php if ($row['explorekl_nl_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_nl_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_nl_phone'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/nl/<?php echo urldecode($row['explorekl_nl_image']) ?>"
+                                  alt="<?php echo urldecode($row['explorekl_nl_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+                      </div><!-- End Tab 3 Content -->
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+
+          </div><!-- End Tab Content 5 -->
+
+
+          <div class="tab-pane" id="tab-6">
+
+            <div class="row gy-10 mb-4">
+              <div class="col-12 text-center">
+                <h3>KL 4 Kids</h3>
+
+                </p>
+              </div>
+
+            </div>
+
+            <?php
+
+            $query = "SELECT * FROM explorekl_kl4k  ORDER BY explorekl_kl4k_order DESC  ";
+            $result = mysqli_query($db, $query);
+            $counter = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
+              if ($counter % 2 != 0) {
+                ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-2 ">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_kl4k_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_kl4k_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_kl4k_content2']) { ?>
+                      <div class="collapse" id="collapseKL4K1-<?php echo $counter ?>">
+                        <?php echo urldecode($row['explorekl_kl4k_content2']) ?>
+
+                      </div>
+                      <p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#collapseKL4K1-<?php echo $counter ?>" aria-expanded="false"
+                          aria-controls="collapseExample">
+                          Read More
+                        </button>
+
+                      </p>
+
+                    <?php } ?>
+                    <?php if ($row['explorekl_kl4k_location']) { ?>
+
+                      <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_kl4k_locationurl']) ?>">
+                          <?php echo urldecode($row['explorekl_kl4k_location']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_kl4k_hours']) { ?>
+                      <p><b>Operation Hours :</b><br>
+                        <?php echo str_replace("/", "<br>", urldecode($row['explorekl_kl4k_hours'])); ?>
+                      </p>
+                    <?php } ?>
+                    <?php if ($row['explorekl_kl4k_phone']) { ?>
+
+                      <p><b>Phone :</b><br>
+                        <?php echo str_replace("/", "<br>", $row['explorekl_kl4k_phone']); ?>
+                      </p>
+                    <?php } ?>
+                    <?php if ($row['explorekl_kl4k_website']) { ?>
+
+                      <p><b>Website :</b><a href=" <?php echo urldecode($row['explorekl_kl4k_website']) ?>">
+                          <?php echo urldecode($row['explorekl_kl4k_website']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                  </div>
+                  <div class="col-md-4 order-1  text-center align-self-center">
+                    <img src="assets/img/explorekl/kl4k/<?php echo $row['explorekl_kl4k_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_kl4k_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+                <hr>
+              <?php } else { ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-md-1 order-2">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_kl4k_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_kl4k_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_kl4k_content2']) { ?>
+                      <div class="collapse" id="collapseKL4K1-<?php echo $counter ?>">
+                        <?php echo urldecode($row['explorekl_kl4k_content2']) ?>
+
+                      </div>
+                      <p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#collapseKL4K1-<?php echo $counter ?>" aria-expanded="false"
+                          aria-controls="collapseExample">
+                          Read More
+                        </button>
+
+                      </p>
+
+                    <?php } ?>
+                    <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_kl4k_locationurl']) ?>">
+                        <?php echo urldecode($row['explorekl_kl4k_location']) ?>
+                      </a>
+                    </p>
+                    <?php if ($row['explorekl_kl4k_hours']) { ?>
+                      <p><b>Operation Hours :</b><br>
+                        <?php echo str_replace("/", "<br>", urldecode($row['explorekl_kl4k_hours'])); ?>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_kl4k_phone']) { ?>
+                      <p><b>Phone :</b><br>
+                        <?php echo str_replace("/", "<br>", $row['explorekl_kl4k_phone']); ?>
+                      </p>
+                    <?php } ?>
+                    <?php if ($row['explorekl_kl4k_website']) { ?>
+
+                      <p><b>Website :</b><a href=" <?php echo urldecode($row['explorekl_kl4k_website']) ?>">
+                          <?php echo urldecode($row['explorekl_kl4k_website']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                  </div>
+                  <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                    <img src="assets/img/explorekl/kl4k/<?php echo $row['explorekl_kl4k_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_kl4k_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+                <hr>
+              <?php }
+              ?>
+
+
+              <?php
+              $counter++;
+            }
+            ?>
+
+          </div><!-- End Tab Content 6 -->
+
+
+
+          <div class="tab-pane" id="tab-7">
+
+            <div class="row gy-10 mb-5">
+              <div class="col-12 text-center">
+                <h3>Sightseeing</h3>
+
+                </p>
+              </div>
+
+              <!-- ======= About Section ======= -->
+              <div class="container" data-aos="fade-up">
+
+
+                <div class="row g-4 g-lg-5" data-aos="fade-up" data-aos-delay="200">
+
+
+                  <div class="col-lg-12">
+
+                    <!-- Tabs -->
+                    <ul class="nav nav-pills mb-3 justify-content-center">
+                      <li><a class="nav-link mx-4 active" data-bs-toggle="pill" href="#tabg1">Must Visit</a></li>
+                      <li><a class="nav-link mx-4" data-bs-toggle="pill" href="#tabg2">Memorial & Museums</a></li>
+                      <li><a class="nav-link mx-4" data-bs-toggle="pill" href="#tabg3">KL Art Scene</a></li>
+
+                    </ul><!-- End Tabs -->
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+
+                      <div class="tab-pane fade show active" id="tabg1">
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_ss  WHERE explorekl_ss_category='mv' ORDER BY explorekl_ss_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+                                  <p>
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+                                  </p>
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+                                <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                    <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                  </a>
+                                </p>
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+
+
+                      </div><!-- End Tab 1 Content -->
+
+                      <div class="tab-pane fade show" id="tabg2">
+
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_ss  WHERE explorekl_ss_category='mm' ORDER BY explorekl_ss_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+                                  <p>
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+                                  </p>
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+                                <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                    <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                  </a>
+                                </p>
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+
+
+                      </div><!-- End Tab 2 Content -->
+
+                      <div class="tab-pane fade show" id="tabg3">
+
+                        <?php
+
+                        $query = "SELECT * FROM explorekl_ss  WHERE explorekl_ss_category='art' ORDER BY explorekl_ss_order DESC  ";
+                        $result = mysqli_query($db, $query);
+                        $counter = 1;
+                        while ($row = mysqli_fetch_assoc($result)) {
+                          if ($counter % 2 != 0) {
+                            ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-2 ">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_location']) { ?>
+
+                                  <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                      <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                    </a>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-1  text-center align-self-center">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php } else { ?>
+                            <div class="row gy-4 mb-5">
+
+                              <div class="col-md-8 order-md-1 order-2">
+                                <h3>
+                                  <?php echo urldecode($row['explorekl_ss_title']) ?>
+                                </h3>
+                                <p>
+                                  <?php echo urldecode($row['explorekl_ss_content']) ?>
+                                </p>
+                                <?php if ($row['explorekl_ss_content2']) { ?>
+
+                                  <p>
+                                    <?php echo urldecode($row['explorekl_ss_content2']) ?>
+                                  </p>
+                                  <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                                    <?php echo urldecode($row['explorekl_ss_content']) ?>
+
+                                  </div>
+                                  <p>
+                                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                      data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                                      aria-controls="collapseExample">
+                                      Read More
+                                    </button>
+
+                                  </p>
+                                <?php } ?>
+                                <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_ss_locationurl']) ?>">
+                                    <?php echo urldecode($row['explorekl_ss_location']) ?>
+                                  </a>
+                                </p>
+                                <?php if ($row['explorekl_ss_hours']) { ?>
+                                  <p><b>Operation Hours :</b><br>
+                                    <?php echo str_replace("/", "<br>", urldecode($row['explorekl_ss_hours'])); ?>
+                                  </p>
+                                <?php } ?>
+
+                                <?php if ($row['explorekl_ss_phone']) { ?>
+                                  <p><b>Phone :</b><br>
+                                    <?php echo str_replace("/", "<br>", $row['explorekl_ss_phone']); ?>
+                                  </p>
+                                <?php } ?>
+
+                              </div>
+                              <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                                <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  alt="<?php echo urldecode($row['explorekl_ss_title']) ?>" class="img-fluid"
+                                  loading="lazy">
+                              </div>
+                            </div>
+                            <hr>
+                          <?php }
+                          ?>
+
+
+                          <?php
+                          $counter++;
+                        }
+                        ?>
+                      </div><!-- End Tab 3 Content -->
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </div><!-- End Tab Content 7 -->
+
+
+          <div class="tab-pane" id="tab-8">
+
+
+            <div class="row gy-10 mb-4">
+              <div class="col-12 text-center">
+                <h3>Parks</h3>
+
+                </p>
+              </div>
+
+            </div>
+
+            <?php
+
+            $query = "SELECT * FROM explorekl_p   ORDER BY explorekl_p_order DESC  ";
+            $result = mysqli_query($db, $query);
+            $counter = 1;
+            while ($row = mysqli_fetch_assoc($result)) {
+              if ($counter % 2 != 0) {
+                ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-2 ">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_p_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_p_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_p_content2']) { ?>
+                      <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                        <?php echo urldecode($row['explorekl_p_content2']) ?>
+
+                      </div>
+                      <p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                          aria-controls="collapseExample">
+                          Read More
+                        </button>
+
+                      </p>
+
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_p_location']) { ?>
+
+                      <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_p_locationurl']) ?>">
+                          <?php echo urldecode($row['explorekl_p_location']) ?>
+                        </a>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_p_hours']) { ?>
+                      <p><b>Operation Hours :</b><br>
+                        <?php echo str_replace("/", "<br>", urldecode($row['explorekl_p_hours'])); ?>
+                      </p>
+                    <?php } ?>
+                    <?php if ($row['explorekl_p_phone']) { ?>
+
+                      <p><b>Phone :</b><br>
+                        <?php echo str_replace("/", "<br>", $row['explorekl_p_phone']); ?>
+                      </p>
+                    <?php } ?>
+
+                  </div>
+                  <div class="col-md-4 order-1  text-center align-self-center">
+                    <img src="assets/img/explorekl/p/<?php echo $row['explorekl_p_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_p_title']) ?>" class="img-fluid" loading="lazy">
+                  </div>
+                </div>
+                <hr>
+              <?php } else { ?>
+                <div class="row gy-4 mb-5">
+
+                  <div class="col-md-8 order-md-1 order-2">
+                    <h3>
+                      <?php echo urldecode($row['explorekl_p_title']) ?>
+                    </h3>
+                    <p>
+                      <?php echo urldecode($row['explorekl_p_content']) ?>
+                    </p>
+                    <?php if ($row['explorekl_p_content2']) { ?>
+                      <div class="collapse" id="collapseSS1-<?php echo $counter ?>">
+                        <?php echo urldecode($row['explorekl_p_content2']) ?>
+
+                      </div>
+                      <p>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                          data-bs-target="#collapseSS1-<?php echo $counter ?>" aria-expanded="false"
+                          aria-controls="collapseExample">
+                          Read More
+                        </button>
+
+                      </p>
+
+                    <?php } ?>
+                    <p><b>Location :</b><a href=" <?php echo urldecode($row['explorekl_p_locationurl']) ?>">
+                        <?php echo urldecode($row['explorekl_p_location']) ?>
+                      </a>
+                    </p>
+                    <?php if ($row['explorekl_p_hours']) { ?>
+                      <p><b>Operation Hours :</b><br>
+                        <?php echo str_replace("/", "<br>", urldecode($row['explorekl_p_hours'])); ?>
+                      </p>
+                    <?php } ?>
+
+                    <?php if ($row['explorekl_p_phone']) { ?>
+                      <p><b>Phone :</b><br>
+                        <?php echo str_replace("/", "<br>", $row['explorekl_p_phone']); ?>
+                      </p>
+                    <?php } ?>
+
+                  </div>
+                  <div class="col-md-4 order-md-2 order-1 text-center align-self-center ">
+                    <img src="assets/img/explorekl/p/<?php echo $row['explorekl_p_image'] ?>"
+                      alt="<?php echo urldecode($row['explorekl_p_title']) ?>" class="img-fluid" loading="lazy">
+
+                  </div>
+                </div>
+                <hr>
+              <?php }
+              ?>
+
+
+              <?php
+              $counter++;
+            }
+            ?>
+
+          </div><!-- End Tab Content 8 -->
+
+
+        </div>
+
+    </section><!-- End Features Section -->
+
+
+
+
+
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <?php include 'footer.php'; ?>
+  <!-- End Footer -->
+
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+    crossorigin="anonymous"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+  <script>
+    $(document).ready(function () {
+
+      $(window.location.hash).addClass('active show');
+
+      $(window.location.hash + "-link").addClass('active show');
+
+
+    });
+    window.addEventListener(
+      "hashchange",
+      () => {
+        let text = window.location.hash;
+        let result = text.includes("tab");
+        if (result) {
+
+          location.reload()
+
+          //  block of code to be executed if the condition is true
+        }
+      },
+      false
+    );
+  </script>
+</body>
+
+</html>
