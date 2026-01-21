@@ -1,0 +1,4 @@
+changelog 21-1-2026 LATEST:
+able to search blog with title/content.
+
+fixed search bug.
