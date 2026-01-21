@@ -208,7 +208,7 @@ while ($row = mysqli_fetch_assoc($result)) {
   <script src="assets/js/main.js"></script>
   <script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
     crossorigin="anonymous"></script>
-  <script src="assets/js/blog2.js"></script>
+  <script src="assets/js/blog2.js?v=210126"></script>
 
   <script>
     <?php
