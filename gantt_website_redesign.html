@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KL The Guide — Website Redesign Gantt Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #ffffff;
+  --bg-alt:   #f8f9fa;
+  --bg-light: #f0f1f3;
+  --border:   #d0d4dc;
+  --border2:  #e5e7eb;
+  --text1:    #1a1d2e;
+  --text2:    #505766;
+  --text3:    #8b92a9;
+  --accent:   #2563eb;
+  --green:    #059669;
+  --amber:    #d97706;
+  --red:      #dc2626;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text1);
+  padding: 32px 40px;
+  min-height: 100vh;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Header & Controls */
+.header-ctrl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.hdr {
+  flex: 1;
+}
+
+.pdf-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+}
+
+.pdf-btn:hover {
+  background: #1d4ed8;
+}
+
+.proj-tag { font-size: 11px; color: var(--accent); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+.proj-title { font-size: 24px; font-weight: 700; color: var(--text1); margin: 0 0 4px 0; }
+.proj-sub { font-size: 13px; color: var(--text2); }
+.ver { font-size: 11px; color: var(--text3); }
+
+/* Progress Banner */
+.prog-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.prog-label { font-size: 11px; color: var(--green); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+.prog-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 16px;
+  padding: 4px 11px;
+}
+
+/* Stats Grid */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.stat {
+  background: var(--bg-alt);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.stat-l { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; font-weight: 600; }
+.stat-v { font-size: 18px; font-weight: 700; color: var(--accent); margin-bottom: 3px; }
+.stat-s { font-size: 10px; color: var(--text3); }
+
+.stat.hi { border-color: #bbf7d0; background: #f0fdf4; }
+.stat.hi .stat-v { color: var(--green); }
+
+.stat.wa { border-color: #fcd34d; background: #fefce8; }
+.stat.wa .stat-v { color: var(--amber); }
+
+.stat.ac { border-color: #bfdbfe; background: #eff6ff; }
+.stat.ac .stat-v { color: var(--accent); }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.lpill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.ldot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ldiam { width: 6px; height: 6px; border-radius: 1px; transform: rotate(45deg); flex-shrink: 0; }
+
+/* Table Wrapper */
+.tw {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Table Headers */
+.th-mo {
+  background: var(--bg-light);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text1);
+  padding: 8px 4px;
+  border-bottom: 2px solid var(--border);
+  border-left: 1px solid var(--border2);
+  white-space: nowrap;
+}
+
+.th-ms {
+  background: var(--bg-light);
+  text-align: center;
+  font-size: 9px;
+  padding: 6px 2px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.th-ms.tc { background: #eff6ff; }
+.th-ms.lc { background: #f0fdf4; }
+
+.th-wk {
+  background: var(--bg-light);
+  text-align: center;
+  font-size: 9px;
+  color: var(--text2);
+  white-space: nowrap;
+  padding: 5px 2px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.th-wk.tc { background: #eff6ff; }
+.th-wk.lc { background: #f0fdf4; }
+
+.th-task {
+  background: var(--bg-light);
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text1);
+  border-bottom: 2px solid var(--border);
+}
+
+/* Phase Rows */
+.ph-row td {
+  background: var(--bg-light);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ph-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ph-accent { width: 4px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+.ph-name { font-size: 12px; font-weight: 700; }
+
+.badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.b0   { background: #dc2626; }
+.b01  { background: #d97706; }
+.b1   { background: #7c3aed; }
+.bfin { background: #059669; }
+
+/* Task Rows */
+.tk-row td {
+  border-bottom: 1px solid var(--border2);
+  height: 30px;
+}
+
+.tk-row:last-child td {
+  border-bottom: none;
+}
+
+.tk-name {
+  padding: 0 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: #fff;
+}
+
+.tk-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 100%;
+}
+
+.tk-text {
+  font-size: 11px;
+  color: var(--text2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.who {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wrs { color: #92400e; background: #fef3c7; border: 1px solid #fcd34d; }
+.wd  { color: #831843; background: #fce7f3; border: 1px solid #fbcfe8; }
+.wc  { color: #1e40af; background: #dbeafe; border: 1px solid #bfdbfe; }
+.wb  { color: var(--text2); background: #f3f4f6; border: 1px solid #e5e7eb; }
+
+/* Bar Cells */
+.bc {
+  padding: 4px 0;
+  height: 30px;
+  background: #fff;
+}
+
+.bc.tc { background: #eff6ff; }
+.bc.lc { background: #f0fdf4; }
+
+.bar {
+  height: 20px;
+  opacity: 0.9;
+  margin: 5px 2px 0 2px;
+}
+
+/* Milestones */
+.ms-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 1px 0;
+}
+
+.ms-diam { width: 5px; height: 5px; border-radius: 1px; transform: rotate(45deg); flex-shrink: 0; }
+.ms-txt { font-size: 8px; font-weight: 700; white-space: nowrap; }
+
+/* Footer Legend */
+.fl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.fli {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+.fldot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+
+/* Dev Key */
+.devkey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.dki {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+}
+
+/* Notes */
+.note {
+  margin-top: 18px;
+  background: #fffbeb;
+  border: 1px solid #fed7aa;
+  border-left: 4px solid var(--amber);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.note strong { color: var(--text1); font-weight: 600; }
+.note code { font-family: 'Courier New', monospace; font-size: 11px; background: rgba(0,0,0,0.05); padding: 2px 5px; border-radius: 3px; }
+
+/* Print Styles */
+@media print {
+  body { padding: 20px 15px; }
+  .header-ctrl { display: none; }
+  .pdf-btn { display: none; }
+  .note { page-break-inside: avoid; }
+  .tw { border: 1px solid var(--border); }
+  table { font-size: 10px; }
+  .th-task { font-size: 10px; padding: 6px 8px; }
+  .ph-row td { padding: 6px 8px; }
+  .tk-row td { height: 24px; }
+  .tk-text { font-size: 10px; }
+}
+
+@page {
+  size: A4 landscape;
+  margin: 15mm;
+}
+</style>
+</head>
+<body>
+
+<!-- Header with PDF Button -->
+<div class="header-ctrl">
+  <div class="hdr">
+    <div class="proj-tag">Remaining Work Plan · May–Jun 2026</div>
+    <div class="proj-title">KL The Guide — Website Redesign</div>
+    <div class="proj-sub">Bootstrap 5 · PHP 8 · Mon–Fri only · Tab-level breakdown</div>
+  </div>
+  <button class="pdf-btn" onclick="generatePDF()">📥 Export to PDF</button>
+</div>
+
+<!-- Progress Banner -->
+<div class="prog-banner">
+  <span class="prog-label">✓ Done</span>
+  <div class="prog-item">✓ Homepage landing</div>
+  <div class="prog-item">✓ KL @ A Glance tab</div>
+  <div class="prog-item">✓ Map & Merchandise</div>
+  <div class="prog-item">✓ Global header/nav/footer</div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat ac">
+    <div class="stat-l">Today</div>
+    <div class="stat-v">13 May</div>
+    <div class="stat-s">Week 1 · 3 days</div>
+  </div>
+  <div class="stat wa">
+    <div class="stat-l">Pages Left</div>
+    <div class="stat-v">13 pages</div>
+    <div class="stat-s">30+ sub-tabs</div>
+  </div>
+  <div class="stat">
+    <div class="stat-l">Most Complex</div>
+    <div class="stat-v">Explore KL</div>
+    <div class="stat-s">8 tabs · sub-categories</div>
+  </div>
+  <div class="stat">
+    <div class="stat-l">Working Days</div>
+    <div class="stat-v">26 days</div>
+    <div class="stat-s">Mon–Fri only</div>
+  </div>
+  <div class="stat hi">
+    <div class="stat-l">Launch Date</div>
+    <div class="stat-v">17 Jun 2026</div>
+    <div class="stat-s">End of Week 6</div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="lpill"><div class="ldot" style="background:#2563eb;"></div>Today — Week 1</div>
+  <div class="lpill"><div class="ldiam" style="background:#059669;"></div>Highlights done — W2</div>
+  <div class="lpill"><div class="ldiam" style="background:#3b82f6;"></div>Explore KL done — W4</div>
+  <div class="lpill"><div class="ldiam" style="background:#dc2626;"></div>Complex pages done — W5</div>
+  <div class="lpill"><div class="ldiam" style="background:#059669;"></div>Launch — W6</div>
+</div>
+
+<!-- Gantt Table -->
+<div class="tw"><table id="gt"></table></div>
+
+<!-- Phase Footer -->
+<div class="fl" id="fl"></div>
+
+<!-- Dev Key -->
+<div class="devkey">
+  <div class="dki"><span class="who wrs">Research</span>Planning & data gathering</div>
+  <div class="dki"><span class="who wd">Design</span>Wireframe & visual design</div>
+  <div class="dki"><span class="who wc">Code</span>Implementation</div>
+  <div class="dki"><span class="who wb">Both</span>Design + code together</div>
+</div>
+
+<!-- Notes -->
+<div class="note">
+  <strong>Tab Breakdown:</strong>
+  <code>explorekl.php</code> = 8 tabs · <code>beyondkl.php</code> = 5 tabs · <code>medical-tourism.php</code> = 5 tabs · <code>accommodation.php</code> = 4 tabs · All share carousel template — design once, adapt per tab.
+</div>
+
+<script>
+const WEEKS = [
+  {n:1, d:"11–15 May", mo:"May 2026"},
+  {n:2, d:"18–22 May", mo:"May 2026"},
+  {n:3, d:"25–29 May", mo:"May 2026"},
+  {n:4, d:"1–5 Jun",   mo:"Jun 2026"},
+  {n:5, d:"8–12 Jun",  mo:"Jun 2026"},
+  {n:6, d:"15–17 Jun", mo:"Jun 2026"},
+];
+
+const TODAY = 1, HLDONE = 2, EXPLDONE = 4, CXDONE = 5, LAUNCH = 6;
+
+const PHASES = [
+  {
+    name: "Phase A — KL Highlights (highlights.php) — Tabs 2, 3, 4 remaining",
+    color: "#059669", bc: "b0", bt: "P0",
+    tasks: [
+      {t: "Research: Getting Around KL — transport lines, routes, taxi, Grab", s:1, e:1, w:"wrs"},
+      {t: "Design Getting Around KL tab (transport map, route cards)", s:1, e:2, w:"wd"},
+      {t: "Implement Getting Around KL tab", s:2, e:2, w:"wc"},
+      {t: "Design + implement Travel Tips tab (tips grid, categories)", s:2, e:2, w:"wb"},
+      {t: "Design + implement Travel News tab (news cards)", s:2, e:2, w:"wb"},
+    ]
+  },
+  {
+    name: "Phase B — Explore KL (explorekl.php) — 8 category tabs [MOST COMPLEX]",
+    color: "#3b82f6", bc: "b0", bt: "P0",
+    tasks: [
+      {t: "Design tab nav, card template, sub-category system", s:2, e:3, w:"wd"},
+      {t: "Tab 1 — What To Do In KL (explorekl_wtd)", s:3, e:3, w:"wc"},
+      {t: "Tab 2 — Historical Sites (explorekl_hs)", s:3, e:3, w:"wc"},
+      {t: "Tab 3 — Places of Worship (4 sub-categories)", s:3, e:4, w:"wc"},
+      {t: "Tab 4 — What To Eat In KL (3 sub-categories)", s:3, e:4, w:"wc"},
+      {t: "Tab 5 — Night Life (3 sub-categories)", s:4, e:4, w:"wc"},
+      {t: "Tab 6 — KL 4 Kids (explorekl_kl4k)", s:4, e:4, w:"wc"},
+      {t: "Tab 7 — Sightseeing (3 sub-categories)", s:4, e:4, w:"wc"},
+      {t: "Tab 8 — Parks (explorekl_p)", s:4, e:4, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase C — Beyond KL (beyondkl.php) — 5 destination tabs",
+    color: "#d97706", bc: "b01", bt: "P0/P1",
+    tasks: [
+      {t: "Design destination card layout, region nav, travel-time tags", s:3, e:4, w:"wd"},
+      {t: "Tab 1 — Islands (beyondkl_i)", s:4, e:4, w:"wc"},
+      {t: "Tab 2 — Hill Station (beyondkl_hs)", s:4, e:4, w:"wc"},
+      {t: "Tab 3 — Waterfall (beyondkl_w)", s:4, e:5, w:"wc"},
+      {t: "Tab 4 — Hiking (beyondkl_h)", s:5, e:5, w:"wc"},
+      {t: "Tab 5 — Extreme Sports (beyondkl_es)", s:5, e:5, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase D — Medical Tourism (medical-tourism.php) — 5 specialist tabs",
+    color: "#dc2626", bc: "b01", bt: "P0/P1",
+    tasks: [
+      {t: "Design specialist cards, trust signals, category nav", s:4, e:5, w:"wd"},
+      {t: "Tab 1 — Healthcare (hospitals & clinics)", s:5, e:5, w:"wc"},
+      {t: "Tab 2 — Dental clinics", s:5, e:5, w:"wc"},
+      {t: "Tab 3 — Dermatologist clinics", s:5, e:5, w:"wc"},
+      {t: "Tab 4 — Ophthalmologist (eye care)", s:5, e:5, w:"wc"},
+      {t: "Tab 5 — Plastic Surgery", s:5, e:5, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase E — Places to Stay (accommodation.php) — 4 tabs",
+    color: "#7c3aed", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Design accommodation card layout, star badges, tab nav", s:5, e:5, w:"wd"},
+      {t: "Tab 1 — Top Places To Stay (accommodation_top)", s:5, e:5, w:"wc"},
+      {t: "Tab 2 — Hotels (accommodation_h)", s:5, e:5, w:"wc"},
+      {t: "Tab 3 — Budget Hotels (accommodation_bh)", s:5, e:6, w:"wc"},
+      {t: "Tab 4 — Backpackers Lodge (accommodation_bks)", s:5, e:6, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase F — Where to Shop (where-to-shop.php)",
+    color: "#c2410c", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Design + implement shopping guide (place_shop table)", s:5, e:6, w:"wb"},
+    ]
+  },
+  {
+    name: "Phase G — Spa & Wellness (spa.php)",
+    color: "#be185d", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Design + implement Spa directory (spa_* table)", s:5, e:6, w:"wb"},
+    ]
+  },
+  {
+    name: "Phase H — Events (event.php)",
+    color: "#6d28d9", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Design event calendar view, category tags", s:5, e:5, w:"wd"},
+      {t: "Implement event.php (filters, DB-driven)", s:5, e:6, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase I — Blog (blog.php + blog-details.php)",
+    color: "#4f46e5", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Redesign blog.php — grid, tag filters, pagination", s:5, e:6, w:"wb"},
+      {t: "Redesign blog-details.php — layout, schema, sharing", s:6, e:6, w:"wb"},
+    ]
+  },
+  {
+    name: "Phase J — E-Books (ebook.php + ebook-details.php)",
+    color: "#15803d", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Redesign ebook.php — library grid, filters", s:5, e:6, w:"wb"},
+      {t: "Redesign ebook-details.php — DearFlip viewer", s:6, e:6, w:"wb"},
+    ]
+  },
+  {
+    name: "Phase K — Info Pages (aboutus · contribute · advertise)",
+    color: "#64748b", bc: "b1", bt: "P1",
+    tasks: [
+      {t: "Redesign aboutus.php (company story, contact)", s:6, e:6, w:"wb"},
+      {t: "Redesign contribute.php + advertisewithus.php", s:6, e:6, w:"wb"},
+      {t: "Update verify-email.php + 500.php error page", s:6, e:6, w:"wc"},
+    ]
+  },
+  {
+    name: "Phase L — Testing, Polish & Launch",
+    color: "#059669", bc: "bfin", bt: "final",
+    tasks: [
+      {t: "Cross-browser + mobile QA (Chrome, Firefox, Safari, Edge)", s:5, e:6, w:"wb"},
+      {t: "Performance: image optimization, CSS/JS minification", s:6, e:6, w:"wc"},
+      {t: "SEO: meta tags, sitemap.xml, structured data", s:6, e:6, w:"wb"},
+      {t: "Final content review & bug fixes", s:6, e:6, w:"wb"},
+      {t: "Deploy to production server", s:6, e:6, w:"wc"},
+    ]
+  },
+];
+
+// Month header spans
+const spans = [];
+let curMo = null, cnt = 0;
+WEEKS.forEach(w => {
+  if (w.mo === curMo) cnt++;
+  else { if (curMo !== null) spans.push({mo:curMo, span:cnt}); curMo=w.mo; cnt=1; }
+});
+spans.push({mo:curMo, span:cnt});
+
+const TW = 340, WW = 120;
+
+function cc(w) {
+  if (w.n === TODAY)  return "tc";
+  if (w.n === LAUNCH) return "lc";
+  return "";
+}
+
+const tbl = document.getElementById('gt');
+let h = '<thead>';
+
+// Month row
+h += `<tr><th class="th-task" style="width:${TW}px;min-width:${TW}px;"></th>`;
+spans.forEach(sp => h += `<th class="th-mo" colspan="${sp.span}" style="width:${sp.span*WW}px;">${sp.mo}</th>`);
+h += '</tr>';
+
+// Milestone row
+h += `<tr><th class="th-task" style="width:${TW}px;min-width:${TW}px;border-bottom:1px solid var(--border);"></th>`;
+WEEKS.forEach(w => {
+  let inner = '';
+  if      (w.n === TODAY)    inner = `<div class="ms-wrap"><span class="ms-txt" style="color:#2563eb;">▸ today</span></div>`;
+  else if (w.n === HLDONE)   inner = `<div class="ms-wrap"><span class="ms-diam" style="background:#059669;"></span><span class="ms-txt" style="color:#059669;">HL ✓</span></div>`;
+  else if (w.n === EXPLDONE) inner = `<div class="ms-wrap"><span class="ms-diam" style="background:#3b82f6;"></span><span class="ms-txt" style="color:#3b82f6;">EKL ✓</span></div>`;
+  else if (w.n === CXDONE)   inner = `<div class="ms-wrap"><span class="ms-diam" style="background:#dc2626;"></span><span class="ms-txt" style="color:#dc2626;">CX ✓</span></div>`;
+  else if (w.n === LAUNCH)   inner = `<div class="ms-wrap"><span class="ms-diam" style="background:#059669;"></span><span class="ms-txt" style="color:#059669;">🚀</span></div>`;
+  h += `<th class="th-ms ${cc(w)}" style="width:${WW}px;min-width:${WW}px;">${inner}</th>`;
+});
+h += '</tr>';
+
+// Week row
+h += `<tr><th class="th-task" style="width:${TW}px;min-width:${TW}px;">Task</th>`;
+WEEKS.forEach(w => h += `<th class="th-wk ${cc(w)}" style="width:${WW}px;min-width:${WW}px;">W${w.n} · ${w.d}</th>`);
+h += '</tr></thead><tbody>';
+
+// Phases
+PHASES.forEach(ph => {
+  h += `<tr class="ph-row"><td colspan="${WEEKS.length+1}">
+    <div class="ph-inner">
+      <div class="ph-accent" style="background:${ph.color};"></div>
+      <span class="ph-name" style="color:${ph.color};">${ph.name}</span>
+      <span class="badge ${ph.bc}">${ph.bt}</span>
+    </div>
+  </td></tr>`;
+
+  ph.tasks.forEach((tk, ti) => {
+    const bg = ti % 2 === 0 ? '#fff' : '#f9fafb';
+    const wl = tk.w==='wc' ? 'Code' : tk.w==='wd' ? 'Design' : tk.w==='wrs' ? 'Research' : 'Both';
+    h += `<tr class="tk-row" style="background:${bg};">`;
+    h += `<td class="tk-name" style="width:${TW}px;min-width:${TW}px;background:${bg};">
+      <div class="tk-inner">
+        <span class="tk-text">${tk.t}</span>
+        <span class="who ${tk.w}">${wl}</span>
+      </div>
+    </td>`;
+    WEEKS.forEach(w => {
+      const ccl = cc(w);
+      const active = w.n >= tk.s && w.n <= tk.e;
+      if (!active) { h += `<td class="bc ${ccl}" style="width:${WW}px;min-width:${WW}px;"></td>`; return; }
+      const isF = w.n === tk.s, isL = w.n === tk.e, isSi = tk.s === tk.e;
+      const br = isSi ? '4px' : isF ? '4px 0 0 4px' : isL ? '0 4px 4px 0' : '0';
+      h += `<td class="bc ${ccl}" style="width:${WW}px;min-width:${WW}px;">
+        <div class="bar" style="background:${ph.color};border-radius:${br};"></div>
+      </td>`;
+    });
+    h += '</tr>';
+  });
+});
+
+h += '</tbody>';
+tbl.innerHTML = h;
+
+document.getElementById('fl').innerHTML = PHASES.map(p =>
+  `<div class="fli"><div class="fldot" style="background:${p.color};"></div>${p.name.replace(/Phase [A-L] — /,'').replace(/ — .*/,'')}</div>`
+).join('');
+
+// PDF Export
+function generatePDF() {
+  const element = document.body;
+  const opt = {
+    margin: 10,
+    filename: 'KL-The-Guide-Gantt-Chart.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a4' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+</script>
+
+</body>
+</html>

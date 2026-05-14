@@ -110,7 +110,7 @@ $travelnews = mysqli_fetch_assoc($result);
         <ul class="nav nav-tabs row gy-4 my-5 d-flex justify-content-center">
 
           <li class="nav-item col d-flex justify-content-center">
-            <a class="nav-link active show" id="tab-1-link" href="#tab-1" data-bs-toggle="tab" data-bs-target="#tab-1">
+            <a class="nav-link" href="kl-glance.php">
               <img src="assets/img/highlights/<?php echo $tile1_photo1 ?>" class="" alt="Kuala Lumpur Guide - Kuala Lumpur At A Glance">
               <h4 class="text-center align-middle  text-break"><?php echo $tile1_title1 ?></h4>
             </a>

@@ -138,16 +138,17 @@ document.querySelector('#subscribe-form').addEventListener('submit', async (e) =
     const data = await res.json().catch(() => ({}));
     
     if (data.ok) {
-      if (data.inserted && data.sent) {
-        alert('Successfully subscribed! Confirmation email has been sent.');
-      } else if (data.inserted && !data.sent) {
-        alert('Successfully subscribed! Confirmation email is queued for delivery.');
-      } else {
+      if (data.status === 'duplicate') {
         alert('This email is already subscribed to our newsletter.');
+      } else if (data.status === 'verification_sent') {
+        alert('Almost there! Please check your inbox and click the confirmation link to complete your subscription.');
+        e.target.reset();
+      } else {
+        alert('Please check your inbox and click the confirmation link to complete your subscription.');
+        e.target.reset();
       }
-      e.target.reset();
     } else {
-      alert(data.message || 'Subscription failed. Please try again.');
+      alert(data.message || data.error || 'Subscription failed. Please try again.');
     }
   } catch (error) {
     alert('An error occurred. Please try again later.');

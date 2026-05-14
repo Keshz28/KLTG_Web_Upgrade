@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($content = Get-Content \"d:\\\\xampp\\\\htdocs\\\\kltheguide.com.my - backup\\\\assets\\\\css\\\\main.css\" -Raw; $matches4 = [regex]::Matches\\($content, 'url\\\\\\([^\\\\\\)]+\\\\\\)'\\); Write-Output \"Total URL references: $\\($matches4.Count\\)\"; $matches4 | ForEach-Object { $_.Value } | Where-Object { $_ -match 'img/' -and $_ -notmatch 'vendor|icon|logo|adsbygoogle|fancybox' } | Select-Object -Unique)",
+      "PowerShell($file = \"d:\\\\xampp\\\\htdocs\\\\kltheguide.com.my - backup\\\\assets\\\\css\\\\main.css\"; \\(Get-Item $file\\).Length; \\(Get-Content $file -TotalCount 1\\).Length)"
+    ]
+  }
+}

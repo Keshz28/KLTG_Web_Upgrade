@@ -893,7 +893,7 @@ if (isset($_POST['sendmail'])) {
     $emailcontent = $_POST['emailcontent'];
     $emailtitle = $_POST['emailtitle'];
 
-    $query = "SELECT * FROM emailsub  ";
+    $query = "SELECT * FROM emailsub WHERE verified = 1";
     $result = mysqli_query($db, $query);
 
     while ($row = mysqli_fetch_assoc($result)) {
@@ -969,7 +969,7 @@ if (isset($_POST['queuemail'])) {
     }
 
 
-    $query = "SELECT * FROM emailsub";
+    $query = "SELECT * FROM emailsub WHERE verified = 1";
     $result = mysqli_query($db, $query);
 
     while ($row = mysqli_fetch_assoc($result)) {

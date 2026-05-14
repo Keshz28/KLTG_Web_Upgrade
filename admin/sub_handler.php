@@ -297,157 +297,100 @@ if ($action === 'assets.list') {
 if ($action === 'subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
 
-    // Validate email
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         json_out(['ok' => false, 'error' => 'Invalid email address'], 422);
     }
 
-    $email = strtolower($email);
+    $email   = strtolower($email);
     $country = trim($_POST['country'] ?? '');
     $consent = isset($_POST['consent']) ? 1 : 0;
 
-    // Insert into database (ignore duplicates)
-    $stmt = mysqli_prepare($db, "
-        INSERT IGNORE INTO emailsub (emailsub_email, emailsub_country, emailsub_consent, emailsub_date)
-        VALUES (?, ?, ?, NOW())
-    ");
+    // Check if this email already exists
+    $chk = mysqli_prepare($db, "SELECT emailsub_id, verified FROM emailsub WHERE emailsub_email = ? LIMIT 1");
+    mysqli_stmt_bind_param($chk, 's', $email);
+    mysqli_stmt_execute($chk);
+    $chkRes  = mysqli_stmt_get_result($chk);
+    $existing = mysqli_fetch_assoc($chkRes);
+    mysqli_stmt_close($chk);
 
-    if (!$stmt) {
-        db_or_500(false, $db, 'subscribe prepare');
+    // Already verified — nothing more to do
+    if ($existing && (int)$existing['verified'] === 1) {
+        json_out(['ok' => true, 'inserted' => false, 'status' => 'duplicate']);
     }
 
-    mysqli_stmt_bind_param($stmt, 'ssi', $email, $country, $consent);
-    mysqli_stmt_execute($stmt);
-    $inserted = (mysqli_stmt_affected_rows($stmt) > 0);
-    mysqli_stmt_close($stmt);
+    // Generate a fresh token (64 hex chars) valid for 48 hours
+    $token   = bin2hex(random_bytes(32));
+    $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
 
-    // If duplicate subscription, return early without sending email
-    if (!$inserted) {
-        json_out(['ok' => true, 'inserted' => false, 'sent' => false, 'status' => 'duplicate']);
-    }
-    
-// Try to load ACTIVE template first
-$sql = "SELECT * FROM email_templates WHERE is_active_subscribe = 1 LIMIT 1";
-$res = mysqli_query($db, $sql);
-$tpl = null;
-//justin
-// json_out(['ok' => true, 'inserted' => true, 'sent' => true, 'status' => 'sent']);
- //justin
-if ($res && mysqli_num_rows($res) > 0) {
-    $tpl = mysqli_fetch_assoc($res);
-}
-
-// Fallback to welcome_subscribe if no active template
-if (!$tpl) {
-    //$tpl = get_template_by_slug($db, 'welcome_subscribe');
-}
-
-if ($tpl) {
-        // Template found - use it
-        $placeholders = [
-            'email' => $email,
-            'date'  => date('d M Y'),
-            'site_name' => brand_name(),
-            'unsubscribe_url' => app_base_url() . '/unsubscribe.php?e=' . urlencode($email),
-        ];
-
-        $html = render_email_html(
-            $tpl['subject'],
-            $tpl['preheader'] ?? '',
-            $tpl['from_name'] ?? brand_name(),
-            $tpl['body_html'],
-            $tpl['footer_html'] ?? '',
-            $placeholders
-        );
-
-        $subject = $tpl['subject'];
-        $fromName = $tpl['from_name'] ?? brand_name();
+    if ($existing) {
+        // Pending verification — refresh token so a new email can be sent
+        $upd = mysqli_prepare($db, "UPDATE emailsub SET verify_token = ?, verify_expires = ? WHERE emailsub_email = ?");
+        mysqli_stmt_bind_param($upd, 'sss', $token, $expires, $email);
+        mysqli_stmt_execute($upd);
+        mysqli_stmt_close($upd);
     } else {
-        // Template not found - use fallback email
-        $subject = 'Welcome to ' . brand_name();
-        $fromName = brand_name();
-        $html = '
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Welcome</title>
-            </head>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                    <h2 style="color: #2c3e50;">Thank you for subscribing!</h2>
-                    <p>Welcome to our newsletter. We\'re excited to have you with us.</p>
-                    <p>You\'ll receive updates and news from ' . htmlspecialchars(brand_name()) . '.</p>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-                    <p style="font-size: 12px; color: #999;">
-                        <a href="' . htmlspecialchars(app_base_url()) . '/unsubscribe.php?e=' . urlencode($email) . '">Unsubscribe</a>
-                    </p>
-                </div>
-            </body>
-            </html>';
-    }
-
-    // === Send email directly (NO QUEUE) ===
-    $sent = send_email_html($email, $subject, $html, $fromName);
-json_out(['ok' => true, 'inserted' => true, 'sent' => true, 'status' => 'sent']);
-    // Record result in mailqueue for tracking purposes only
-    $status = $sent ? 'sent' : 'smtp_failed';
-
-    if ($sent) {
-        $stmt = mysqli_prepare($db, "
-            INSERT INTO mailqueue (sendstatus, sendto, sendtitle, sendbody, init_time, send_time)
-            VALUES (?, ?, ?, ?, NOW(), NOW())
+        // New subscriber — insert as unverified
+        $ins = mysqli_prepare($db, "
+            INSERT INTO emailsub (emailsub_email, emailsub_country, emailsub_consent, emailsub_date, verified, verify_token, verify_expires)
+            VALUES (?, ?, ?, NOW(), 0, ?, ?)
         ");
-        mysqli_stmt_bind_param($stmt, 'ssss', $status, $email, $subject, $html);
-    } else {
-        $stmt = mysqli_prepare($db, "
-            INSERT INTO mailqueue (sendstatus, sendto, sendtitle, sendbody, init_time, send_time)
-            VALUES (?, ?, ?, ?, NOW(), NULL)
-        ");
-        mysqli_stmt_bind_param($stmt, 'ssss', $status, $email, $subject, $html);
-    }
-
-    if ($stmt) {
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
-    }
-
-    // Detect if this is from QR page (based on a hidden field or referrer)
-    $is_qr_page = isset($_POST['source']) && $_POST['source'] === 'qrpage';
-
-    if ($is_qr_page) {
-        if ($sent) {
-            echo "<!DOCTYPE html>
-        <html lang='en'>
-        <head>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-            <title>KL The Guide</title>
-            <link rel='stylesheet' type='text/css' href='../assets/css/lpage.css'>
-        </head>
-        <body>
-            <div class='box'>
-                <div class='container'>
-                    <div class='form-title'>KL The Guide</div>
-                    <p>Subscribe NOW and stand a chance to be the next MONTHLY WINNER!</p>
-                    <a href='../index.php'>Click Here to KL The Guide Homepage !!</a>
-                </div>
-            </div>
-        </body>
-        </html>";
-        } else {
-            echo "<p class='error'>Failed to send email. Please try again.</p>";
+        if (!$ins) {
+            db_or_500(false, $db, 'subscribe insert prepare');
         }
-        exit;
+        mysqli_stmt_bind_param($ins, 'ssiss', $email, $country, $consent, $token, $expires);
+        mysqli_stmt_execute($ins);
+        if (mysqli_stmt_affected_rows($ins) < 1) {
+            mysqli_stmt_close($ins);
+            json_out(['ok' => false, 'error' => 'Could not save subscription'], 500);
+        }
+        mysqli_stmt_close($ins);
     }
 
+    // Build the verification email
+    $verifyUrl  = app_base_url() . '/verify-email.php?token=' . urlencode($token);
+    $brandName  = brand_name();
+    $subject    = 'Confirm your subscription – ' . $brandName;
+    $fromName   = $brandName;
+    $urlEsc     = htmlspecialchars($verifyUrl, ENT_QUOTES, 'UTF-8');
+    $brandEsc   = htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8');
 
-    // Return result to front-end
-    if ($sent) {
-        json_out(['ok' => true, 'inserted' => true, 'sent' => true, 'status' => 'sent']);
-    } else {
-        json_out(['ok' => false, 'inserted' => true, 'sent' => false, 'status' => 'smtp_failed'], 500);
+    $html = '<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Confirm your subscription</title></head>
+<body style="font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f5f5f5;margin:0;padding:0;">
+  <div style="max-width:600px;margin:40px auto;background:#fff;padding:36px;border-radius:8px;">
+    <h2 style="color:#2c3e50;margin-top:0;">One more step!</h2>
+    <p>Thanks for subscribing to <strong>' . $brandEsc . '</strong>.</p>
+    <p>Click the button below to confirm your email address and activate your subscription:</p>
+    <p style="text-align:center;margin:32px 0;">
+      <a href="' . $urlEsc . '" style="background:#c8a96e;color:#fff;padding:14px 32px;text-decoration:none;border-radius:4px;font-weight:bold;font-size:16px;display:inline-block;">Confirm my subscription</a>
+    </p>
+    <p style="color:#666;font-size:13px;">Or paste this link into your browser:<br>
+      <a href="' . $urlEsc . '" style="color:#c8a96e;word-break:break-all;">' . $urlEsc . '</a>
+    </p>
+    <p style="color:#888;font-size:12px;margin-top:24px;">This link expires in 48 hours. If you did not subscribe, you can safely ignore this email.</p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+    <p style="font-size:12px;color:#aaa;">' . $brandEsc . '</p>
+  </div>
+</body>
+</html>';
+
+    $sent = send_email_html($email, $subject, $html, $fromName);
+
+    // Log in mailqueue for tracking
+    $qStatus   = $sent ? 'sent' : 'smtp_failed';
+    $qSendTime = $sent ? date('Y-m-d H:i:s') : null;
+    $qStmt = mysqli_prepare($db, "
+        INSERT INTO mailqueue (sendstatus, sendto, sendtitle, sendbody, init_time, send_time)
+        VALUES (?, ?, ?, ?, NOW(), ?)
+    ");
+    if ($qStmt) {
+        mysqli_stmt_bind_param($qStmt, 'sssss', $qStatus, $email, $subject, $html, $qSendTime);
+        mysqli_stmt_execute($qStmt);
+        mysqli_stmt_close($qStmt);
     }
+
+    json_out(['ok' => true, 'inserted' => true, 'sent' => $sent, 'status' => 'verification_sent']);
 }
 
 // ============================================

@@ -50,8 +50,65 @@ $travelnews = mysqli_fetch_assoc($result);
 
 
 ?>
+<!-- ── Transparent-over-video navbar (only active when body has .has-video-hero) ── -->
+<style>
+  /* Smooth transitions for any state change */
+  #header,
+  #header .navbar > ul > li > a,
+  #header .navbar .dropdown > a,
+  #header .logo img,
+  #header .btn-getstarted {
+    transition: background-color .35s ease, color .3s ease, box-shadow .35s ease, filter .35s ease, border-color .3s ease;
+  }
+
+  /* Transparent state: applied only on pages with .has-video-hero, while at top of page and not hovered */
+  body.has-video-hero #header.header-transparent {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Light/white text + indicators when transparent */
+  body.has-video-hero #header.header-transparent .navbar > ul > li > a,
+  body.has-video-hero #header.header-transparent .navbar .dropdown > a,
+  body.has-video-hero #header.header-transparent .navbar > ul > li > a > span,
+  body.has-video-hero #header.header-transparent .navbar .dropdown-indicator {
+    color: #fff !important;
+  }
+
+  /* Underline accent on active link should still show, but white */
+  body.has-video-hero #header.header-transparent .navbar .active,
+  body.has-video-hero #header.header-transparent .navbar .active:focus,
+  body.has-video-hero #header.header-transparent .navbar li:hover > a {
+    color: #fff !important;
+  }
+
+  /* Logo: invert to white silhouette over the dark video */
+  body.has-video-hero #header.header-transparent .logo img {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Contact-us pill: glass-style outline so it's readable on video */
+  body.has-video-hero #header.header-transparent .btn-getstarted {
+    background-color: rgba(255, 255, 255, .14) !important;
+    border: 1.5px solid rgba(255, 255, 255, .55) !important;
+    color: #fff !important;
+    backdrop-filter: blur(6px);
+  }
+
+  body.has-video-hero #header.header-transparent .btn-getstarted:hover {
+    background-color: rgba(255, 255, 255, .25) !important;
+    border-color: #fff !important;
+  }
+
+  /* Mobile-nav toggle (burger) becomes white when transparent */
+  body.has-video-hero #header.header-transparent .mobile-nav-toggle {
+    color: #fff !important;
+  }
+</style>
+
 <!-- ======= Header ======= -->
-<header id="header" class="header fixed-top" data-scrollto-offset="0">
+<header id="header" class="header fixed-top<?php echo in_array(basename($_SERVER['PHP_SELF']), ['index.php', 'travel-tips.php', 'kl-glance.php', 'getting-around-kl.php']) ? ' header-transparent' : ''; ?>" data-scrollto-offset="0">
   <div class="container-fluid d-flex align-items-center justify-content-between">
 
     <a href="index.php#index" class="logo d-flex align-items-center scrollto me-auto me-lg-0">
@@ -149,6 +206,7 @@ $travelnews = mysqli_fetch_assoc($result);
         <li><a class="nav-link scrollto" href="blog.php" id="blognavlink">Blog</a></li>
         <li><a class="nav-link scrollto" href="map.php#map">Map</a></li>
         <li><a class="nav-link scrollto" href="event.php">Event</a></li>
+        <li><a class="nav-link scrollto" href="merchandise.php">Merchandise</a></li>
       </ul>
       <i class="bi bi-list mobile-nav-toggle d-none"></i>
     </nav><!-- .navbar -->
@@ -159,3 +217,29 @@ $travelnews = mysqli_fetch_assoc($result);
 
   </div>
 </header><!-- End Header -->
+
+<!-- ── Transparent navbar: scroll + hover toggling (only runs on .has-video-hero pages) ── -->
+<script>
+  (function () {
+    if (!document.body.classList.contains('has-video-hero')) return;
+    var header = document.getElementById('header');
+    if (!header) return;
+
+    var threshold = 80;       // px scrolled before navbar turns solid
+    var hovered = false;
+
+    function update() {
+      var atTop = window.scrollY < threshold;
+      if (atTop && !hovered) {
+        header.classList.add('header-transparent');
+      } else {
+        header.classList.remove('header-transparent');
+      }
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    header.addEventListener('mouseenter', function () { hovered = true; update(); });
+    header.addEventListener('mouseleave', function () { hovered = false; update(); });
+    update();
+  })();
+</script>

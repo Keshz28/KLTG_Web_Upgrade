@@ -5,30 +5,536 @@
 <style>
   .country-list {
     z-index: 9999 !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22) !important;
   }
 
-  .carousel-item img {
-    max-height: 300px;
-    /* adjust as needed */
-    object-fit: cover;
+  .country-list li,
+  .country-list .country-name,
+  .country-list .dial-code {
+    color: #111 !important;
+  }
+
+  .country-list li:hover,
+  .country-list li.highlight {
+    background: rgba(0, 180, 216, 0.12) !important;
+  }
+
+  #hero.home-ad-carousel {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    z-index: 4;
+    display: block;
+    margin: 0;
+    padding: 0;
+    width: min(96%, 1180px);
+    background: transparent;
+    overflow: visible;
+    border-radius: 14px;
+  }
+
+  #hero.home-ad-carousel .carousel-inner {
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .45);
+  }
+
+  #hero.home-ad-carousel .carousel-item {
+    background: transparent;
+  }
+
+  #hero.home-ad-carousel .hero-ad-link,
+  #hero.home-ad-carousel .hero-ad-frame,
+  #hero.home-ad-carousel picture {
+    display: block;
     width: 100%;
   }
 
-  .hero-animated h1 {
+  #hero.home-ad-carousel .hero-ad-frame {
+    aspect-ratio: 1920 / 300;
+    max-height: 170px;
+    min-height: 110px;
+    overflow: hidden;
+  }
+
+  #hero.home-ad-carousel .hero-ad-img {
+    display: block;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+  }
+
+  #hero.home-ad-carousel .carousel-control-prev,
+  #hero.home-ad-carousel .carousel-control-next {
+    left: auto;
+    right: auto;
+    width: 36px;
+    height: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(14, 162, 189, .88);
+    border-radius: 50%;
+    opacity: .92;
+  }
+
+  #hero.home-ad-carousel .carousel-control-prev {
+    left: 12px;
+  }
+
+  #hero.home-ad-carousel .carousel-control-next {
+    right: 12px;
+  }
+
+  #hero.home-ad-carousel .carousel-indicators {
+    position: static;
+    margin: 10px 0 0;
+    gap: 7px;
+  }
+
+  #hero.home-ad-carousel .carousel-indicators li {
+    width: 9px;
+    height: 9px;
+    margin: 0;
+    background-color: rgba(255, 255, 255, .85);
+    border: 0;
+    border-radius: 50%;
+    opacity: .65;
+  }
+
+  #hero.home-ad-carousel .carousel-indicators li.active {
+    opacity: 1;
+    background-color: #fff;
+  }
+
+  #hero-animated.home-video-hero {
+    position: relative;
+    isolation: isolate;
+    height: 100vh !important;
+    min-height: 640px !important;
+    padding: 80px 16px 230px !important;
+    overflow: hidden;
+    align-items: center !important;
+    background: #071926 url("assets/img/kltgseohp.jpeg") center / cover no-repeat;
+  }
+
+  #hero-animated.home-video-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgba(3, 18, 31, .66), rgba(3, 18, 31, .34) 48%, rgba(3, 18, 31, .62)),
+      linear-gradient(180deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, .48));
+  }
+
+  #hero-animated.home-video-hero .home-video-hero__video {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  #hero-animated.home-video-hero .home-video-hero__content {
+    max-width: 1060px;
+    margin: 0 auto;
+    color: #fff;
+  }
+
+  #hero-animated.home-video-hero h1 {
+    max-width: 100%;
+    margin: 0 0 12px;
+    color: #fff;
+    font-family: var(--font-secondary);
+    font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+    font-weight: 800;
+    line-height: .96;
+    letter-spacing: 0;
+    text-shadow: 0 6px 28px rgba(0, 0, 0, .48);
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
-    max-width: 100%;
   }
 
-  .hero-animated {
-    z-index: 10;
+  #hero-animated.home-video-hero .home-video-hero__eyebrow {
+    display: block;
+    margin-bottom: 4px;
+    color: #d5f8ff;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1.1;
   }
 
-  .hero-animated h1 {
-    z-index: 11;
-    font-size: clamp(1.5rem, 5vw, 3rem);
-    line-height: 1.2;
+  #hero-animated.home-video-hero .home-video-hero__title-accent {
+    display: block;
+    color: #fff;
+  }
+
+  #hero-animated.home-video-hero p {
+    max-width: 980px;
+    margin: 0 auto 18px;
+    color: rgba(255, 255, 255, .96);
+    font-size: clamp(0.9rem, 1.2vw, 1rem);
+    font-weight: 600;
+    line-height: 1.4;
+    text-shadow: 0 3px 18px rgba(0, 0, 0, .5);
+  }
+
+  #hero-animated.home-video-hero .home-video-hero__form {
+    width: min(100%, 830px);
+    margin: 0 auto;
+  }
+
+  #hero-animated.home-video-hero .home-video-hero__fields {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  #hero-animated.home-video-hero .inputemailsub,
+  #hero-animated.home-video-hero .location {
+    box-sizing: border-box;
+    min-height: 54px;
+    border: 1px solid rgba(255, 255, 255, .72);
+    background: rgba(255, 255, 255, .96);
+    color: #17212b;
+    font-size: 16px;
+    outline: 0;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+  }
+
+  #hero-animated.home-video-hero .inputemailsub {
+    width: min(100%, 330px);
+    padding: 0 18px;
+    border-radius: 8px 0 0 8px;
+  }
+
+  #hero-animated.home-video-hero .country-select {
+    flex: 0 1 260px;
+  }
+
+  #hero-animated.home-video-hero .country-select .location {
+    width: 100%;
+    padding: 0 12px 0 44px;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  #hero-animated.home-video-hero .inputemailsubbtn {
+    box-sizing: border-box;
+    min-height: 54px;
+    border: 0;
+    border-radius: 0 8px 8px 0;
+    background: var(--color-primary);
+    color: #fff;
+    padding: 0 28px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: .25s ease;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+  }
+
+  #hero-animated.home-video-hero .inputemailsubbtn:hover,
+  #hero-animated.home-video-hero .inputemailsubbtn:focus {
+    background: var(--color-primary-light);
+  }
+
+  #hero-animated.home-video-hero .home-video-hero__consent {
+    color: rgba(255, 255, 255, .94);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .45);
+  }
+
+  #hero-animated.home-video-hero .form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-top: .18rem;
+  }
+
+  @media (max-width: 767px) {
+    #hero.home-ad-carousel {
+      bottom: 20px;
+      width: 92%;
+    }
+
+    #hero.home-ad-carousel .hero-ad-frame {
+      aspect-ratio: 16 / 9;
+      max-height: 160px;
+      min-height: 100px;
+    }
+
+    #hero.home-ad-carousel .carousel-control-prev,
+    #hero.home-ad-carousel .carousel-control-next {
+      width: 30px;
+      height: 30px;
+    }
+
+    #hero-animated.home-video-hero {
+      height: 100vh !important;
+      min-height: 600px !important;
+      padding: 80px 14px 220px !important;
+      align-items: center !important;
+    }
+
+    #hero-animated.home-video-hero .container-fluid {
+      width: 100vw;
+      max-width: 100vw;
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+
+    #hero-animated.home-video-hero .row {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #hero-animated.home-video-hero [class*="col-"] {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    #hero-animated.home-video-hero .home-video-hero__content {
+      width: 100%;
+      max-width: 350px;
+      margin-left: 0;
+      margin-right: auto;
+    }
+
+    #hero-animated.home-video-hero h1 {
+      font-size: clamp(1.95rem, 8.5vw, 2.45rem);
+      line-height: 1.02;
+    }
+
+    #hero-animated.home-video-hero .home-video-hero__eyebrow {
+      font-size: clamp(1.05rem, 5vw, 1.3rem);
+    }
+
+    #hero-animated.home-video-hero p {
+      max-width: 100%;
+      font-size: .98rem;
+    }
+
+    #hero-animated.home-video-hero .home-video-hero__form {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    #hero-animated.home-video-hero .home-video-hero__fields {
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    #hero-animated.home-video-hero .inputemailsub,
+    #hero-animated.home-video-hero .country-select,
+    #hero-animated.home-video-hero .inputemailsubbtn {
+      width: 100%;
+      flex-basis: auto;
+      border-radius: 8px;
+    }
+
+    #hero-animated.home-video-hero .country-select .location {
+      border-left: 1px solid rgba(255, 255, 255, .72);
+      border-radius: 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #hero-animated.home-video-hero .home-video-hero__video {
+      display: none;
+    }
+  }
+
+  .featured-services.home-highlights {
+    padding: 0;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .home-highlights__layout {
+    display: grid;
+    grid-template-columns: 45.5% 54.5%;
+    min-height: 650px;
+  }
+
+  .home-highlights__feature {
+    min-height: 650px;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .home-highlights__feature img,
+  .home-highlights__card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .home-highlights__feature img {
+    object-position: center;
+  }
+
+  .home-highlights__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 38px clamp(34px, 6vw, 105px) 44px;
+    background: #fff;
+  }
+
+  .home-highlights__header {
+    width: 100%;
+    max-width: 760px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .home-highlights__header h2 {
+    margin: 0 0 12px;
+    color: #e60012;
+    font-family: "Caveat", "Comic Sans MS", cursive;
+    font-size: clamp(44px, 4vw, 60px);
+    font-weight: 700;
+    line-height: .9;
+    letter-spacing: 0;
+  }
+
+  .home-highlights__header p {
+    max-width: 760px;
+    margin: 0 auto;
+    color: #050505;
+    font-family: var(--font-secondary);
+    font-size: clamp(18px, 1.45vw, 23px);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: 0;
+  }
+
+  .home-highlights__cards {
+    display: grid;
+    gap: 20px;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .home-highlights__card {
+    position: relative;
+    display: block;
+    height: 128px;
+    overflow: hidden;
+    background: #1a1f24;
+    color: #fff;
+  }
+
+  .home-highlights__card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .18);
+    transition: background .25s ease;
+  }
+
+  .home-highlights__card img {
+    transform: scale(1.01);
+    transition: transform .35s ease;
+  }
+
+  .home-highlights__card span {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    color: #fff;
+    font-family: "Comic Sans MS", "Trebuchet MS", var(--font-secondary);
+    font-size: clamp(18px, 1.95vw, 25px);
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+    text-shadow: 0 2px 7px rgba(0, 0, 0, .65);
+    letter-spacing: 0;
+  }
+
+  .home-highlights__card:hover img,
+  .home-highlights__card:focus img {
+    transform: scale(1.055);
+  }
+
+  .home-highlights__card:hover::after,
+  .home-highlights__card:focus::after {
+    background: rgba(0, 0, 0, .28);
+  }
+
+  .home-highlights__card:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 991px) {
+    .home-highlights__layout {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .home-highlights__feature {
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+    }
+
+    .home-highlights__content {
+      padding: 34px 18px 40px;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .home-highlights__feature {
+      aspect-ratio: 4 / 3;
+    }
+
+    .home-highlights__content {
+      align-items: flex-start;
+    }
+
+    .home-highlights__header {
+      max-width: 350px;
+      margin-bottom: 22px;
+    }
+
+    .home-highlights__header h2 {
+      font-size: 42px;
+    }
+
+    .home-highlights__header p {
+      font-size: 16px;
+    }
+
+    .home-highlights__cards {
+      gap: 14px;
+      max-width: 350px;
+    }
+
+    .home-highlights__card {
+      height: 98px;
+    }
+
+    .home-highlights__card span {
+      font-size: 18px;
+    }
   }
 </style>
 
@@ -55,10 +561,11 @@
   <script src="https://cdn.jsdelivr.net/npm/country-select-js@2.0.1/build/js/countrySelect.min.js"></script>
   
   <!-- Preload Non-Critical CSS (style.css, aos.css if used here) -->
-    <link rel="preload" href="assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
         <link rel="stylesheet" href="assets/css/style.css">
     </noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
 
 
   <!-- Open Graph / Facebook -->
@@ -88,11 +595,207 @@
 
   <?php include 'header.php'; ?>
 
+  <style>
+    /* Reinforce full-viewport video hero — these must match the rules above */
+    #hero-animated.home-video-hero {
+      height: 100vh !important;
+      min-height: 600px !important;
+      align-items: center !important;
+      padding: 80px 16px 50px !important;
+    }
+
+    /* Video and overlay fill the full section */
+    #hero-animated.home-video-hero::before,
+    #hero-animated.home-video-hero .home-video-hero__video {
+      height: 100% !important;
+      min-height: 100% !important;
+    }
+
+    /* Centre-weighted gradient — text stays readable on any video frame */
+    #hero-animated.home-video-hero::before {
+      background:
+        linear-gradient(180deg,
+          rgba(0, 0, 0, .40) 0%,
+          rgba(0, 0, 0, .25) 40%,
+          rgba(0, 0, 0, .45) 100%) !important;
+    }
+
+    /* Carousel now sits below the video hero — no top margin needed */
+    #hero.home-ad-carousel {
+      margin-top: 0;
+    }
+
+    @media (max-width: 767px) {
+      #hero-animated.home-video-hero {
+        height: 100vh !important;
+        min-height: 560px !important;
+        padding: 70px 14px 50px !important;
+        align-items: center !important;
+      }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       GLASSMORPHISM SUBSCRIBE BAR
+    ════════════════════════════════════════════════════════ */
+
+    /* Tighten form width to keep the pill compact and fit in grey area */
+    #hero-animated.home-video-hero .home-video-hero__form {
+      width: min(100%, 420px) !important;
+      margin: 0 auto !important;
+    }
+
+    /* ── Pill wrapper — compact version ── */
+    #hero-animated.home-video-hero .home-video-hero__fields {
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: nowrap !important;
+      justify-content: flex-start !important;
+      gap: 0 !important;
+      /* glass effect */
+      background: rgba(255, 255, 255, 0.14) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
+      border-radius: 9999px !important;
+      padding: 2px !important;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+    }
+
+    /* ── Strip inherited solid styling from both inputs ── */
+    #hero-animated.home-video-hero .inputemailsub,
+    #hero-animated.home-video-hero .location {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      min-height: unset !important;
+    }
+
+    /* ── Country selector region ── */
+    #hero-animated.home-video-hero .country-select {
+      flex: 0 0 auto !important;
+      position: relative !important;
+      /* vertical divider on the right */
+      border-right: 1px solid rgba(255, 255, 255, 0.28) !important;
+    }
+
+    /* The text input inside the country selector (has absolute-positioned flag from library) */
+    #hero-animated.home-video-hero .country-select .location {
+      color: rgba(255, 255, 255, 0.90) !important;
+      font-size: 12px !important;
+      height: 34px !important;
+      width: 110px !important;
+      padding: 0 8px 0 36px !important; /* 36px leaves room for flag icon */
+      cursor: pointer !important;
+      border-radius: 0 !important;
+      border-left: none !important;
+    }
+
+    /* ── Email input ── */
+    #hero-animated.home-video-hero .inputemailsub {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      color: #ffffff !important;
+      font-size: 13px !important;
+      height: 34px !important;
+      padding: 0 12px !important;
+      border-radius: 0 !important;
+      width: auto !important;
+    }
+
+    #hero-animated.home-video-hero .inputemailsub::placeholder {
+      color: rgba(255, 255, 255, 0.52) !important;
+    }
+
+    #hero-animated.home-video-hero .inputemailsub:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* ── Subscribe button — pill inside the pill ── */
+    #hero-animated.home-video-hero .inputemailsubbtn {
+      flex: 0 0 auto !important;
+      background: var(--color-primary) !important;
+      color: #fff !important;
+      border: none !important;
+      border-radius: 9999px !important;
+      padding: 0 18px !important;
+      height: 34px !important;
+      min-height: unset !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.2px !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      box-shadow: 0 4px 14px rgba(0, 180, 216, 0.38) !important;
+      transition: filter .2s ease, box-shadow .2s ease !important;
+    }
+
+    #hero-animated.home-video-hero .inputemailsubbtn:hover,
+    #hero-animated.home-video-hero .inputemailsubbtn:focus {
+      background: var(--color-primary) !important;
+      filter: brightness(1.14) !important;
+      box-shadow: 0 6px 22px rgba(0, 180, 216, 0.55) !important;
+    }
+
+    /* ── Consent line ── */
+    #hero-animated.home-video-hero .home-video-hero__consent {
+      margin-top: 8px !important;
+      font-size: 0.75rem !important;
+    }
+
+    #hero-animated.home-video-hero .form-check-input {
+      width: 15px !important;
+      height: 15px !important;
+      margin-top: 0 !important;
+    }
+
+
+    /* ── Mobile: stack gracefully ── */
+    @media (max-width: 600px) {
+      #hero-animated.home-video-hero .home-video-hero__fields {
+        flex-wrap: wrap !important;
+        border-radius: 14px !important;
+        padding: 6px !important;
+        gap: 6px !important;
+      }
+
+      #hero-animated.home-video-hero .country-select {
+        flex: 0 0 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+        padding-bottom: 6px !important;
+      }
+
+      #hero-animated.home-video-hero .country-select .location {
+        width: 100% !important;
+        height: 32px !important;
+        font-size: 12px !important;
+      }
+
+      #hero-animated.home-video-hero .inputemailsub {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        height: 32px !important;
+        font-size: 12px !important;
+      }
+
+      #hero-animated.home-video-hero .inputemailsubbtn {
+        flex: 0 0 auto !important;
+        height: 32px !important;
+        padding: 0 16px !important;
+        font-size: 12px !important;
+      }
+
+    }
+  </style>
+
 
 
 </head>
 
-<body>
+<body class="has-video-hero">
   <?php include 'nav.php'; ?>
   <div id="fb-root"></div>
   <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v20.0&appId=1469540920331510" nonce="7D6fqBsd"></script>
@@ -101,31 +804,74 @@
 
   <main id="index">
 
-    <!-- ======= Hero Section ======= -->
-    <section id="hero" class="hero carousel lazy carousel-fade" data-bs-ride="carousel" data-bs-interval="5000"
-      touch="true">
+    <!-- ======= Video Hero (sits under transparent navbar) ======= -->
+    <section id="hero-animated" class="home-video-hero d-flex align-items-center justify-content-center w-100">
+      <video class="home-video-hero__video" autoplay muted loop playsinline poster="assets/img/kltgseohp.jpeg" aria-hidden="true">
+        <source src="asset-backups/KLOverview.mp4" type="video/mp4">
+      </video>
+      <div class="container-fluid position-relative">
+        <div class="row justify-content-center">
+          <div class="col-12 col-xl-10">
+            <div class="home-video-hero__content text-center">
+              <h1>
+                <span class="home-video-hero__eyebrow"><?php echo $hero_title ?></span>
+                <span class="home-video-hero__title-accent"><?php echo $hero_title2 ?></span>
+              </h1>
+              <p>
+                <?php echo $hero_subtitle ?>
+              </p>
 
-      <div class="carousel-inner">
+              <form id="subscribeForm" method="post" class="home-video-hero__form">
+                <div class="home-video-hero__fields">
+                  <input type="email" name="email" id="emailsubscribe" placeholder="Your email address" class="inputemailsub" required>
+                  <input type="text" id="country_selector" name="country" class="location" aria-label="Country">
+                  <input type="submit" value="Subscribe" name="subscribe" class="inputemailsubbtn">
+                </div>
+                <div class="form-check home-video-hero__consent d-flex justify-content-center align-items-start mt-3">
+                  <input class="form-check-input me-2" type="checkbox" value="1" id="monthlyUpdates" name="consent">
+                  <label class="form-check-label" for="monthlyUpdates">
+                    I want to receive monthly updates from KL The Guide
+                  </label>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= Banner Carousel (overlay inside hero video) ======= -->
+      <section id="hero" class="hero home-ad-carousel carousel lazy carousel-fade" data-bs-ride="carousel" data-bs-interval="5000"
+        touch="true">
+
+        <div class="carousel-inner">
         <?php
         $query = "SELECT * FROM banner WHERE status='1' OR status='2' ORDER BY banner_order ASC ";
         $result = mysqli_query($db, $query);
         $counter = 1;
         while ($row = mysqli_fetch_assoc($result)) {
+          $bannerFile = htmlspecialchars($row['banner_filename'], ENT_QUOTES);
+          $bannerName = htmlspecialchars($row['banner_name'], ENT_QUOTES);
+          $bannerMobile = !empty($row['banner_filename2']) ? htmlspecialchars($row['banner_filename2'], ENT_QUOTES) : '';
+          $loadingAttr = $counter == 1 ? 'eager' : 'lazy';
+
           if ($counter == 1) {
-            echo '<div class="carousel-item active" data-filename="' . $row['banner_filename'] . '" data-name="' . $row['banner_name'] . '">';
+            echo '<div class="carousel-item active" data-filename="' . $bannerFile . '" data-name="' . $bannerName . '">';
           } else {
-            echo '<div class="carousel-item" data-filename="' . $row['banner_filename'] . '" data-name="' . $row['banner_name'] . '">';
+            echo '<div class="carousel-item" data-filename="' . $bannerFile . '" data-name="' . $bannerName . '">';
           }
 
           if ($row['banner_url']) {
             // Pass the banner data directly in the onclick function
-            echo '<a href="' . $row['banner_url'] . '" onclick="banner_clicks(\'' . addslashes($row['banner_filename']) . '\', \'' . addslashes($row['banner_name']) . '\'); return true;">';
+            echo '<a class="hero-ad-link" href="' . htmlspecialchars($row['banner_url'], ENT_QUOTES) . '" onclick="banner_clicks(\'' . addslashes($row['banner_filename']) . '\', \'' . addslashes($row['banner_name']) . '\'); return true;">';
           }
 
-          echo '<div class="container">';
-          echo '<div class="row justify-content-center gy-6">';
-          echo '<img src="assets/img/banner/' . $row['banner_filename'] . '" alt="' . $row['banner_name'] . '" class="img-fluid">';
-          echo '</div>';
+          echo '<div class="hero-ad-frame">';
+          echo '<picture>';
+          if ($bannerMobile) {
+            echo '<source media="(max-width: 767px)" srcset="assets/img/banner/' . $bannerMobile . '">';
+          }
+          echo '<img src="assets/img/banner/' . $bannerFile . '" alt="' . $bannerName . '" class="hero-ad-img" loading="' . $loadingAttr . '" decoding="async">';
+          echo '</picture>';
           echo '</div>';
 
           if ($row['banner_url']) {
@@ -137,125 +883,80 @@
         }
         ?>
 
-        <a class="carousel-control-prev" href="#hero" role="button" data-bs-slide="prev">
-          <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-        </a>
+          <a class="carousel-control-prev" href="#hero" role="button" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
+          </a>
 
-        <a class="carousel-control-next" href="#hero" role="button" data-bs-slide="next">
-          <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-        </a>
-      </div>
-      <!-- Indicators BELOW -->
-      <ol class="carousel-indicators"></ol>
-    </section>
-    <!-- End Hero Section -->
-
-
-    <section id="hero-animated" class="hero-animated d-flex  justify-content-center w-100">
-      <div class="container-fluid">
-        <div class="row justify-content-center">
-          <div class="col-12 col-lg-8">
-            <div class="text-center" data-aos="zoom-out">
-              <h1>
-                <?php echo $hero_title ?><br>
-                <span><?php echo $hero_title2 ?></span>
-              </h1>
-              <p>
-                <?php echo $hero_subtitle ?>
-              </p><br>
-
-              <div class="d-flex justify-content-center">
-                <form id="subscribeForm" method="post" class="row g-2">
-                  <div class="col-12 col-md">
-                    <input type="email" name="email" id="emailsubscribe" placeholder="Your email address" class="inputemailsub me-2" required>
-                  </div>
-                  <div class="col-12 col-md">
-                    <input type="text" id="country_selector" name="country" class="location me-2">
-                  </div>
-                  <div class="col-12 col-md-auto">
-                    <input type="submit" value="Subscribe" name="subscribe" class="inputemailsubbtn">
-                  </div>
-              </div>
-              <div class="form-check mt-3 justify-content-center">
-                <input class="form-check-input me-2" type="checkbox" value="1" id="monthlyUpdates" name="consent">
-                <label class="form-check-label" for="monthlyUpdates">
-                  I want to receive monthly updates from KL The Guide
-                </label>
-              </div>
-              </form>
-              </form>
-            </div>
-          </div>
+          <a class="carousel-control-next" href="#hero" role="button" data-bs-slide="next">
+            <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
+          </a>
         </div>
-      </div>
+        <!-- Indicators BELOW -->
+        <ol class="carousel-indicators"></ol>
+      </section>
+      <!-- End Banner Carousel -->
     </section>
+    <!-- End Video Hero -->
 
 
     <!-- ======= Featured Services Section ======= -->
-    <section id="featured-services" class="featured-services">
-      <div class="container justify-content-center">
-        <div class="section-header">
-          <h2>
-            <?php echo urldecode($tile1_title) ?>
-          </h2>
-          <p>
-            <?php echo urldecode($tile1_subtitle) ?>
-          </p>
-        </div>
-        <div class="row gy-4 justify-content-center">
+    <section id="featured-services" class="featured-services home-highlights" aria-labelledby="homeHighlightsTitle">
+      <?php
+      $home_highlights_main_image = 'highlights/klhighlightside.jpg';
+      $home_highlights_glance_image = 'highlights/kl@aglance.jpg';
+      $home_highlights_getting_around_image = 'highlights/gettingaroundkl.jpg';
+      $home_highlights_travel_tips_image = 'highlights/traveltips.jpg';
 
-          <div class="col  d-flex bg-image" data-aos="zoom-out">
-            <div class="service-item  position-relative d-flex align-items-center justify-content-center  ">
-              <div class="icon"> <img src="assets/img/highlights/<?php echo urldecode($tile1_photo1) ?>" class=""
-                  alt="Kuala Lumpur Guide - Kuala Lumpur At A Glance"></div>
-              <a class="stretched-link" href="highlights.php#tab-1"></a>
-              <h4 class="text-center text"><?php echo $tile1_title1 ?></h4>
-              <!-- <p>KL @ A Glance</p> -->
-            </div>
-          </div><!-- End Service Item -->
-          <div class="col  d-flex" data-aos="zoom-out">
-            <div class="service-item  position-relative d-flex align-items-center justify-content-center">
+      if (!file_exists(__DIR__ . '/assets/img/' . $home_highlights_main_image)) {
+        $home_highlights_main_image = 'highlights/' . urldecode($tile1_photo1);
+      }
 
-              <div class="icon"> <img src="assets/img/highlights/<?php echo urldecode($tile1_photo2) ?>" class=""
-                  alt="Kuala Lumpur Guide - Getting Around Kuala Lumpur"></div>
-              <a class="stretched-link" href="highlights.php#tab-2"></a>
-              <h4 class="text-center text"><?php echo $tile1_title2 ?></h4>
-              <!-- <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi</p> -->
-            </div>
-          </div><!-- End Service Item -->
-          <div class="col d-flex" data-aos="zoom-out">
-            <div class="service-item  position-relative d-flex align-items-center justify-content-center">
-              <div class="icon"> <img src="assets/img/highlights/<?php echo urldecode($tile1_photo3) ?>" class=""
-                  alt="Kuala Lumpur Guide - Travel Tips"></div>
-              <a href="highlights.php#tab-3" class="stretched-link"></a>
-              <h4 class="text-center text"><?php echo $tile1_title3 ?></h4>
+      if (!file_exists(__DIR__ . '/assets/img/' . $home_highlights_glance_image)) {
+        $home_highlights_glance_image = 'highlights/' . urldecode($tile1_photo1);
+      }
 
-            </div>
+      if (!file_exists(__DIR__ . '/assets/img/' . $home_highlights_getting_around_image)) {
+        $home_highlights_getting_around_image = 'highlights/' . urldecode($tile1_photo2);
+      }
+
+      if (!file_exists(__DIR__ . '/assets/img/' . $home_highlights_travel_tips_image)) {
+        $home_highlights_travel_tips_image = 'highlights/' . urldecode($tile1_photo3);
+      }
+      ?>
+      <div class="home-highlights__layout">
+        <figure class="home-highlights__feature">
+          <img src="assets/img/<?php echo htmlspecialchars($home_highlights_main_image, ENT_QUOTES); ?>"
+            alt="Kuala Lumpur skyline with Petronas Twin Towers" loading="lazy" decoding="async">
+        </figure>
+        <div class="home-highlights__content">
+          <div class="home-highlights__header">
+            <h2 id="homeHighlightsTitle"><?php echo htmlspecialchars(urldecode($tile1_title), ENT_QUOTES); ?></h2>
+            <p><?php echo htmlspecialchars(urldecode($tile1_subtitle), ENT_QUOTES); ?></p>
           </div>
-          <!-- End Service Item -->
 
-          <?php
+          <div class="home-highlights__cards">
+            <a class="home-highlights__card" href="kl-glance.php"
+              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title1), ENT_QUOTES); ?>">
+              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_glance_image, ENT_QUOTES); ?>"
+                alt="Kuala Lumpur skyline at sunset" loading="lazy" decoding="async">
+              <span><?php echo htmlspecialchars(urldecode($tile1_title1), ENT_QUOTES); ?></span>
+            </a>
 
-          if ($travelnews) {
-          ?>
+            <a class="home-highlights__card" href="highlights.php#tab-2"
+              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title2), ENT_QUOTES); ?>">
+              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_getting_around_image, ENT_QUOTES); ?>"
+                alt="Rapid KL train in Kuala Lumpur" loading="lazy" decoding="async">
+              <span><?php echo htmlspecialchars(urldecode($tile1_title2), ENT_QUOTES); ?></span>
+            </a>
 
-            <div class="col  d-flex" data-aos="zoom-out">
-              <div class="service-item  position-relative d-flex align-items-center justify-content-center">
-                <div class="icon"> <img src="assets/img/highlights/<?php echo urldecode($tile1_photo4) ?>" class=""
-                    alt=""></div>
-                <a href="highlights.php#tab-4" class="stretched-link"></a>
-                <h4 class="text-center text"><?php echo $tile1_title4 ?></h4>
-
-              </div>
-            </div>
-            <!-- End Service Item -->
-          <?php
-          }
-          ?>
-
-
+            <a class="home-highlights__card" href="travel-tips.php"
+              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title3), ENT_QUOTES); ?>">
+              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_travel_tips_image, ENT_QUOTES); ?>"
+                alt="Aerial view of Kuala Lumpur city centre" loading="lazy" decoding="async">
+              <span><?php echo htmlspecialchars(urldecode($tile1_title3), ENT_QUOTES); ?></span>
+            </a>
+          </div>
         </div>
-
       </div>
     </section><!-- End Featured Services Section -->
 
