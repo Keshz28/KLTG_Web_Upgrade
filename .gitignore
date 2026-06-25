@@ -1,0 +1,9 @@
+# Secrets — never commit live credentials
+.env
+admin/.env
+--settingsEnv/.env
+
+# Local build / deploy artifacts
+admin/node_modules/
+*.zip
+kltg_stage/

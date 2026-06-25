@@ -1,4 +1,11 @@
-<?php include('admin/functions.php');
+<?php
+/* ============================================================================
+ *                             travel-tips.php
+ *
+ *   Public page — travel tips.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('admin/functions.php');
 $query = "SELECT tile1_title1, tile1_title2, tile1_title3 FROM indexpage";
 $result = mysqli_query($db, $query);
 $row = mysqli_fetch_assoc($result);
@@ -12,7 +19,7 @@ $tile1_title3 = $row['tile1_title3'];
 <head>
   <title>KL The Guide - Travel Tips</title>
 
-  <link rel="canonical" href="https://kltheguide.com.my/travel-tips.php/" />
+  <link rel="canonical" href="https://www.kltheguide.com.my/travel-tips.php" />
   <meta name="description" content="Essential travel tips for visiting Kuala Lumpur, Malaysia. Communication, safety, finance, packing, and logistics advice for tourists.">
   <meta name="keywords" content="KL travel tips, Kuala Lumpur tips, Malaysia travel advice, KL tourist guide, KL safety, KL currency, KL SIM card, KL accommodation">
 
@@ -53,12 +60,24 @@ $tile1_title3 = $row['tile1_title3'];
       overflow: hidden;
       text-decoration: none;
       border-bottom: 4px solid transparent;
-      transition: border-color .25s;
+      z-index: 0;
+      transition: border-color .25s, transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
     }
 
     .klag-tab + .klag-tab { border-left: 1px solid rgba(255,255,255,.12); }
 
-    .klag-tab.is-active { border-bottom-color: #0ea2bd; }
+    .klag-tab:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.45);
+      z-index: 1;
+    }
+
+    .klag-tab.is-active {
+      border-bottom-color: #0ea2bd;
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.55);
+      z-index: 2;
+    }
 
     .klag-tab__bg {
       position: absolute;
@@ -66,11 +85,11 @@ $tile1_title3 = $row['tile1_title3'];
       background-size: cover;
       background-position: center;
       filter: brightness(0.48);
-      transition: filter .25s;
+      transition: filter .3s;
     }
 
-    .klag-tab:hover .klag-tab__bg,
-    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.62); }
+    .klag-tab:hover .klag-tab__bg { filter: brightness(0.68); }
+    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.85); }
 
     .klag-tab__label {
       position: relative;
@@ -113,18 +132,14 @@ $tile1_title3 = $row['tile1_title3'];
     #tt-section .tt-bg {
       position: absolute;
       inset: 0;
-      background-image: url('asset-backups/KLGlanceBackground.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      filter: brightness(0.7) saturate(1.05);
+      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%);
       z-index: 0;
     }
 
     #tt-section .tt-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(18, 8, 38, 0.28) 0%, rgba(8, 18, 48, 0.22) 100%);
+      background: transparent;
       z-index: 1;
     }
 
@@ -166,17 +181,59 @@ $tile1_title3 = $row['tile1_title3'];
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.13);
       color: rgba(255, 255, 255, 0.8);
-      padding: 15px 18px;
+      padding: 14px 18px;
       border-radius: 10px;
       cursor: pointer;
       font-family: 'Poppins', sans-serif;
-      font-size: 0.87rem;
-      font-weight: 500;
-      line-height: 1.45;
+      line-height: 1.4;
       text-align: center;
       transition: background 0.25s, color 0.25s, border-color 0.25s, box-shadow 0.25s;
       outline: none;
+      /* Stack the section label on top, name underneath — uniform height so
+         the tabs line up as a clean column */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 92px;
     }
+
+    .tt-tab__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1px;
+    }
+
+    .tt-tab__icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.7);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.25s;
+    }
+
+    .tt-tab:hover .tt-tab__icon svg { stroke: #fff; }
+    .tt-tab.active .tt-tab__icon svg { stroke: #fff; }
+
+    .tt-tab__label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.65;
+    }
+
+    .tt-tab__name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .tt-tab.active .tt-tab__label { opacity: 0.85; }
 
     .tt-tab:hover {
       background: rgba(255, 255, 255, 0.15);
@@ -448,11 +505,41 @@ $tile1_title3 = $row['tile1_title3'];
 
           <!-- LEFT: Section Tabs -->
           <nav class="tt-tabs" aria-label="Travel tip sections">
-            <button class="tt-tab active" data-target="tt-a">Section A: Communication &amp; Connectivity</button>
-            <button class="tt-tab" data-target="tt-b">Section B: Essential Information</button>
-            <button class="tt-tab" data-target="tt-c">Section C: Finance &amp; Documents</button>
-            <button class="tt-tab" data-target="tt-d">Section D: Packing &amp; Gear</button>
-            <button class="tt-tab" data-target="tt-e">Section E: Logistics</button>
+            <button class="tt-tab active" data-target="tt-a">
+              <span class="tt-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+              </span>
+              <span class="tt-tab__label">Section A</span>
+              <span class="tt-tab__name">Communication &amp; Connectivity</span>
+            </button>
+            <button class="tt-tab" data-target="tt-b">
+              <span class="tt-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </span>
+              <span class="tt-tab__label">Section B</span>
+              <span class="tt-tab__name">Essential Information</span>
+            </button>
+            <button class="tt-tab" data-target="tt-c">
+              <span class="tt-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </span>
+              <span class="tt-tab__label">Section C</span>
+              <span class="tt-tab__name">Finance &amp; Documents</span>
+            </button>
+            <button class="tt-tab" data-target="tt-d">
+              <span class="tt-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              </span>
+              <span class="tt-tab__label">Section D</span>
+              <span class="tt-tab__name">Packing &amp; Gear</span>
+            </button>
+            <button class="tt-tab" data-target="tt-e">
+              <span class="tt-tab__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              </span>
+              <span class="tt-tab__label">Section E</span>
+              <span class="tt-tab__name">Logistics</span>
+            </button>
           </nav>
 
           <!-- RIGHT: Accordion Panel -->
@@ -488,7 +575,7 @@ $tile1_title3 = $row['tile1_title3'];
                   <div class="tt-acc-inner">
                     <p class="tt-q">"How do I make affordable international calls back home while in KL?"</p>
                     <p class="tt-a">The easiest method is to use internet-based apps like WhatsApp, Telegram, or FaceTime over your local data plan — these are free and widely used in Malaysia. For traditional calls, purchase a prepaid SIM with an international calling add-on from Maxis or CelcomDigi, offering rates from as low as RM0.09 per minute to most countries.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.nerdwallet.com/article/utilities/international-calling-plans" target="_blank" rel="noopener noreferrer">Compare Call Rates</a></div>
+                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.gulfsip.com/rates/calls/Malaysia" target="_blank" rel="noopener noreferrer">Compare Call Rates</a></div>
                   </div>
                 </div>
               </div>
@@ -520,7 +607,7 @@ $tile1_title3 = $row['tile1_title3'];
                 <div class="tt-acc-bd">
                   <div class="tt-acc-inner">
                     <p class="tt-q">"Which areas of KL should I be cautious in, and what are the most common tourist scams to avoid?"</p>
-                    <p class="tt-a">KL is generally safe for tourists. Exercise extra caution in Chow Kit and parts of Bukit Bintang late at night. The most common scams include taxi overcharging (always use the Grab app instead), gem and jewellery scams near Masjid India, and "friendly strangers" offering unsolicited tours. Keep bags zipped and body-side in crowded areas like Petaling Street and the Central Market.</p>
+                    <p class="tt-a">Kuala Lumpur is a safe and welcoming destination for most visitors, with popular areas such as Bukit Bintang, KLCC, and Petaling Street attracting millions of tourists each year. As in any major city, visitors should stay aware of their surroundings in crowded places and be cautious of common issues such as taxi overcharging, counterfeit goods, and unofficial ticket sellers. Using ride-hailing apps, securing valuables, and purchasing from trusted sources are simple steps that help ensure a smooth and enjoyable visit.</p>
                   </div>
                 </div>
               </div>
@@ -534,7 +621,7 @@ $tile1_title3 = $row['tile1_title3'];
                   <div class="tt-acc-inner">
                     <p class="tt-q">"Are there any environmental laws or local practices I should be aware of as a visitor in KL?"</p>
                     <p class="tt-a">Malaysia enforces strict anti-littering laws with fines up to RM500. Smoking is banned in all air-conditioned public spaces, restaurants, bars, and within 3 metres of any food premises — penalties can reach RM10,000. Many malls and attractions have gone plastic-bag-free, so carrying a reusable tote is strongly recommended. Haze season (June–October) can occasionally affect air quality; check the daily API index before outdoor activities.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.doe.gov.my/" target="_blank" rel="noopener noreferrer">Read Local Rules</a></div>
+                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.elaw.my/Default.aspx?returnUrl=https%3a%2f%2fwww.elaw.my%2f" target="_blank" rel="noopener noreferrer">Read Local Rules</a></div>
                   </div>
                 </div>
               </div>
@@ -637,7 +724,11 @@ $tile1_title3 = $row['tile1_title3'];
                   <div class="tt-acc-inner">
                     <p class="tt-q">"Which neighbourhood in KL is the best base for first-time visitors who plan to rely on public transport?"</p>
                     <p class="tt-a">The Golden Triangle area — spanning Bukit Bintang, KLCC, and Chow Kit — is ideal for first-time visitors. It provides direct access to multiple LRT, MRT, and Monorail lines, is walkable to iconic attractions including the Petronas Twin Towers, Berjaya Times Square, and Pavilion KL, and offers accommodation at every price point from budget guesthouses and hostels to international 5-star hotels.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.trivago.com.my/" target="_blank" rel="noopener noreferrer">Browse Hotels</a></div>
+                    <div class="tt-cta-row">
+                      <button class="tt-cta tt-map-btn" data-map-query="hotels near me">
+                        <svg width="11" height="14" viewBox="0 0 11 14" fill="currentColor" style="margin-right:5px;vertical-align:-1px" aria-hidden="true"><path d="M5.5 0C3.02 0 1 2.02 1 4.5c0 3.37 4.5 9.5 4.5 9.5S10 7.87 10 4.5C10 2.02 7.98 0 5.5 0zm0 6.25a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5z"/></svg>Find Nearby Hotels
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

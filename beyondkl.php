@@ -1,4 +1,12 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                                beyondkl.php
+
+     Public page — 'Beyond KL' day-trip destinations.
+     Has its own inline View-on-Map button (uses beyondkl_mapcoords.php).
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
 
 
 $query = "SELECT * FROM indexpage ";
@@ -42,12 +50,60 @@ while ($row = mysqli_fetch_assoc($result)) {
   $tile4_title = $row['tile4_title'];
   $tile4_subtitle = $row['tile4_subtitle'];
 }
+
+// Exact "lat,lng" per place, resolved once from the goo.gl location links.
+$beyondkl_coords = include __DIR__ . '/beyondkl_mapcoords.php';
+
+/**
+ * Renders a "View on Map" button that deep-links to map.php, focusing the
+ * location. Beyond KL places are spread across Malaysia (not just KL), so for
+ * an exact marker we pin by precise coordinates ($coords = "lat,lng") whenever
+ * they're known — see beyondkl_mapcoords.php. When coords are missing we fall
+ * back to a name search anchored to Malaysia (NOT Kuala Lumpur, which would
+ * mislocate places like Pangkor or Langkawi). Returns '' when there's nothing
+ * usable to search.
+ */
+function viewOnMapButton($title, $address = '', $coords = '')
+{
+  $coords = trim((string) $coords);
+
+  // Exact coordinates pin the precise spot — preferred when available.
+  if ($coords !== '' && preg_match('~^-?[0-9.]+,-?[0-9.]+$~', $coords)) {
+    return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
+      . 'href="map.php?q=' . urlencode($coords) . '">'
+      . '<i class="bi bi-pin-map"></i> View on Map</a>';
+  }
+
+  $title = trim((string) $title);
+  $addr  = trim((string) $address);
+
+  // Some rows have a URL pasted into the address field — never search on that.
+  if ($addr !== '' && preg_match('~^https?://~i', $addr)) {
+    $addr = '';
+  }
+
+  $parts = array_filter([$title, $addr], static fn($p) => $p !== '');
+  if (!$parts) {
+    return '';
+  }
+
+  $query = implode(', ', $parts);
+  // Anchor to Malaysia only — these places are nationwide, not KL-bound.
+  if (stripos($query, 'malaysia') === false) {
+    $query .= ', Malaysia';
+  }
+
+  return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
+    . 'href="map.php?q=' . urlencode($query) . '">'
+    . '<i class="bi bi-pin-map"></i> View on Map</a>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title6 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/beyondkl.php" />
 
   <meta name="description"
     content="Beyond KL is the best KL guide for discovering the city beyond KL's everyday destinations.">
@@ -63,7 +119,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://www.kltheguide.com.my" />
+  <meta property="twitter:url" content="https://www.kltheguide.com.my/beyondkl.php" />
   <meta property="twitter:title" content="KL The Guide - <?php echo $tile2_title6 ?>" />
   <meta property="twitter:description"
     content="<?php echo $tile2_title6 ?> is the best KL guide for discovering the city beyond KL's everyday destinations." />
@@ -89,7 +145,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 
     <!-- ======= Features Section ======= -->
-    <section id="features" class="features">
+    <section id="features" class="features tiles-section">
 
       <div class="container" data-aos="fade-up">
 
@@ -108,6 +164,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   data-bs-toggle="tab" data-bs-target="#tab-<?php echo $row['id'] ?>" style="">
                   <img src="assets/img/beyondkl/<?php echo $row['filename'] ?>" class="img-fluid" alt="">
                   <h4 class="text-center align-middle">
+                    <i class="bi <?php echo tileIcon($row['name']) ?> tile-icon"></i>
                     <?php echo $row['name'] ?>
                   </h4>
                 </a>
@@ -192,6 +249,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['beyondkl_i_title']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_i_title']), urldecode($row['beyondkl_i_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_i_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_i_hours']) { ?>
@@ -307,6 +365,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['beyondkl_hs_title']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_hs_title']), urldecode($row['beyondkl_hs_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_hs_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_hs_hours']) { ?>
@@ -420,6 +479,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['beyondkl_w_title']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_w_title']), urldecode($row['beyondkl_w_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_w_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_w_hours']) { ?>
@@ -535,6 +595,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['beyondkl_h_title']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_h_title']), urldecode($row['beyondkl_h_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_h_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_h_hours']) { ?>
@@ -648,6 +709,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['beyondkl_es_title']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_es_title']), urldecode($row['beyondkl_es_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_es_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_es_hours']) { ?>

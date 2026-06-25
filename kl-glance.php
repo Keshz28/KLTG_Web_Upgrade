@@ -1,9 +1,43 @@
-<?php include('admin/functions.php'); ?>
+<?php
+/* ============================================================================
+ *                              kl-glance.php
+ *
+ *   Public page — 'KL at a Glance' landmark slides.
+ *   CMS-managed via the klglance table (editor: admin/edit-klglance.php).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('admin/functions.php');
+
+// Landmark slides (managed via admin → Edit Pages → KL @ A Glance)
+$klag_landmarks = [];
+$klag_result = mysqli_query($db, "SELECT * FROM klglance ORDER BY klglance_order ASC");
+if ($klag_result) {
+    while ($klag_row = mysqli_fetch_assoc($klag_result)) {
+        $klag_landmarks[] = $klag_row;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>KL @ A Glance – KL The Guide</title>
   <meta name="description" content="Discover Kuala Lumpur's most iconic landmarks – the Petronas Twin Towers, KL Tower and beyond.">
+  <link rel="canonical" href="https://www.kltheguide.com.my/kl-glance.php" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.kltheguide.com.my/kl-glance.php" />
+  <meta property="og:title" content="KL @ A Glance – KL The Guide" />
+  <meta property="og:description" content="Discover Kuala Lumpur's most iconic landmarks – the Petronas Twin Towers, KL Tower and beyond." />
+  <meta property="og:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://www.kltheguide.com.my/kl-glance.php" />
+  <meta property="twitter:title" content="KL @ A Glance – KL The Guide" />
+  <meta property="twitter:description" content="Discover Kuala Lumpur's most iconic landmarks – the Petronas Twin Towers, KL Tower and beyond." />
+  <meta property="twitter:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg" />
+
   <?php include 'header.php'; ?>
 
   <style>
@@ -20,10 +54,10 @@
     /* Lock body scroll – the fixed viewport handles all scrolling */
     html, body { height: 100%; overflow: hidden; }
 
-    /* Dark backdrop so the transparent navbar has something to sit on top of
-       (otherwise white-on-white = invisible nav items) */
+    /* Solid deep-navy backdrop (replaces the photo background) so the
+       transparent navbar has something to sit on top of */
     body.klag-page {
-      background: #0a1018 url('asset-backups/KLGlanceBackground.jpg') center / cover no-repeat;
+      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%) fixed;
     }
     body.klag-page::before {
       content: "";
@@ -57,12 +91,24 @@
       overflow: hidden;
       text-decoration: none;
       border-bottom: 4px solid transparent;
-      transition: border-color .25s;
+      z-index: 0;
+      transition: border-color .25s, transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
     }
 
     .klag-tab + .klag-tab { border-left: 1px solid rgba(255,255,255,.12); }
 
-    .klag-tab.is-active { border-bottom-color: var(--klag-accent); }
+    .klag-tab:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.45);
+      z-index: 1;
+    }
+
+    .klag-tab.is-active {
+      border-bottom-color: var(--klag-accent);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.55);
+      z-index: 2;
+    }
 
     /* Background image layer inside each tab */
     .klag-tab__bg {
@@ -71,11 +117,11 @@
       background-size: cover;
       background-position: center;
       filter: brightness(0.48);
-      transition: filter .25s;
+      transition: filter .3s;
     }
 
-    .klag-tab:hover .klag-tab__bg,
-    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.62); }
+    .klag-tab:hover .klag-tab__bg { filter: brightness(0.68); }
+    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.85); }
 
     .klag-tab__label {
       position: relative;
@@ -118,18 +164,14 @@
     .klag-bg {
       position: absolute;
       inset: 0;
-      background: url('asset-backups/KLGlanceBackground.jpg') center / cover no-repeat;
-      transform: scale(1.07);
-      transition: transform 1.5s cubic-bezier(.22,.68,0,1.1);
-      will-change: transform;
+      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%);
     }
-    .klag-slide.is-active .klag-bg { transform: scale(1); }
 
     .klag-bg::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(4, 11, 20, 0.64);
+      background: transparent;
     }
 
     /* ── Giant outline text behind featured image ─────────── */
@@ -213,7 +255,7 @@
 
     /* ── Intro slide ─────────────────────────────────────── */
     .klag-slide--intro { flex-direction: column; text-align: center; }
-    .klag-slide--intro .klag-bg::after { background: rgba(4,11,20,.74); }
+    .klag-slide--intro .klag-bg::after { background: transparent; }
 
     .klag-intro-center {
       position: relative;
@@ -372,45 +414,29 @@
       </div>
     </section>
 
-    <!-- Slide 1 : Petronas Twin Towers ───────────────────── -->
-    <section class="klag-slide" data-index="1" aria-label="Petronas Twin Towers">
+    <!-- Landmark slides (managed via admin → Edit Pages → KL @ A Glance) -->
+    <?php foreach ($klag_landmarks as $klag_i => $klag_item):
+      $klag_index  = $klag_i + 1;                 // slide 0 is the intro
+      $klag_title  = $klag_item['klglance_title'];
+      $klag_desc   = $klag_item['klglance_content'];
+      $klag_img    = $klag_item['klglance_image'];
+      $klag_bgword = strtoupper(strtok(trim($klag_title), ' '));
+    ?>
+    <section class="klag-slide" data-index="<?php echo $klag_index; ?>"
+             aria-label="<?php echo htmlspecialchars($klag_title, ENT_QUOTES); ?>">
       <div class="klag-bg"></div>
-      <div class="klag-bg-text" aria-hidden="true">PETRONAS</div>
+      <div class="klag-bg-text" aria-hidden="true"><?php echo htmlspecialchars($klag_bgword, ENT_QUOTES); ?></div>
       <figure class="klag-featured" aria-hidden="true">
-        <img src="asset-backups/klcc.jpg"
-             alt="Petronas Twin Towers illuminated at night with colourful fountain show"
+        <img src="assets/img/kl_glance/<?php echo htmlspecialchars($klag_img, ENT_QUOTES); ?>"
+             alt="<?php echo htmlspecialchars($klag_title, ENT_QUOTES); ?>"
              loading="lazy">
       </figure>
       <div class="klag-content">
-        <span class="klag-eyebrow">Iconic Landmark</span>
-        <h2 class="klag-title">Twin Tower</h2>
-        <p class="klag-desc">
-          Soaring 452 metres into the KL skyline, the Petronas Twin Towers were the world's
-          tallest buildings from 1998 to 2004. Connected by a sky bridge on the 41st and 42nd
-          floors, they remain the defining symbol of modern Malaysia.
-        </p>
+        <h2 class="klag-title"><?php echo htmlspecialchars($klag_title, ENT_QUOTES); ?></h2>
+        <p class="klag-desc"><?php echo nl2br(htmlspecialchars($klag_desc, ENT_QUOTES)); ?></p>
       </div>
     </section>
-
-    <!-- Slide 2 : KL Tower ───────────────────────────────── -->
-    <section class="klag-slide" data-index="2" aria-label="KL Tower">
-      <div class="klag-bg"></div>
-      <div class="klag-bg-text" aria-hidden="true">KL TOWER</div>
-      <figure class="klag-featured" aria-hidden="true">
-        <img src="asset-backups/kltower.jpg"
-             alt="KL Tower rising between city buildings under a blue sky"
-             loading="lazy">
-      </figure>
-      <div class="klag-content">
-        <span class="klag-eyebrow">Iconic Landmark</span>
-        <h2 class="klag-title">KL Tower</h2>
-        <p class="klag-desc">
-          Standing 421 metres tall, Menara Kuala Lumpur is a telecommunications tower and
-          observation deck offering 360° panoramic views of the city. Its distinctive
-          pod-shaped observation deck has become a beloved part of the KL skyline.
-        </p>
-      </div>
-    </section>
+    <?php endforeach; ?>
 
   </div><!-- /klag-viewport -->
 
@@ -418,12 +444,14 @@
   <nav class="klag-pager" id="klagPager" aria-label="Landmark navigation">
     <button class="klag-pager__dot is-active" data-target="0"
             aria-label="Introduction" title="Introduction"></button>
+    <?php foreach ($klag_landmarks as $klag_i => $klag_item):
+      $klag_index = $klag_i + 1;
+      $klag_label = htmlspecialchars($klag_item['klglance_title'], ENT_QUOTES);
+    ?>
     <div class="klag-pager__dash" aria-hidden="true"></div>
-    <button class="klag-pager__dot" data-target="1"
-            aria-label="Petronas Twin Towers" title="Petronas Twin Towers"></button>
-    <div class="klag-pager__dash" aria-hidden="true"></div>
-    <button class="klag-pager__dot" data-target="2"
-            aria-label="KL Tower" title="KL Tower"></button>
+    <button class="klag-pager__dot" data-target="<?php echo $klag_index; ?>"
+            aria-label="<?php echo $klag_label; ?>" title="<?php echo $klag_label; ?>"></button>
+    <?php endforeach; ?>
   </nav>
 
   <!-- Bootstrap JS – needed for nav dropdowns -->

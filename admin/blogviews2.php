@@ -1,13 +1,22 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                              blogviews2.php
+ *
+ *   Admin (auth-gated) — blog view statistics (current version).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 if (!isset($_SESSION['username'])) {
     $_SESSION['msg'] = "You must log in first";
     header('location: login.php');
+    exit;
 }
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['username']);
     header("location: login.php");
+    exit;
 }
 
 
@@ -49,35 +58,49 @@ $totalpageviews = 0;
 
 <?php
 
+$array1 = [];
+$array2 = [];
+
 if (!isset($_GET["startdate"]) && !isset($_GET["enddate"])) {
     $totalvalue = 0;
-    $query = 'SELECT url , sum(views), DATE_FORMAT(dateent, "%Y-%m-%d") as dateent2 FROM `pageview` WHERE url LIKE "%blog-details.php?postid=%"  GROUP BY dateent2  
-    ORDER BY `dateent2`  DESC LIMIT 7';
+    // Default: last 30 days, ascending so chart reads left→right chronologically
+    $query = 'SELECT sum(views) as views, DATE_FORMAT(dateent, "%Y-%m-%d") as dateent2
+              FROM `pageview`
+              WHERE url LIKE "%blog-details.php?postid=%"
+              GROUP BY dateent2
+              ORDER BY dateent2 ASC
+              LIMIT 30';
     $result = mysqli_query($db, $query);
-    while ($row = mysqli_fetch_assoc($result)) { ?>
-
-    <?php
+    while ($row = mysqli_fetch_assoc($result)) {
         $array1[] = $row['dateent2'];
-        $array2[] = intval($row['sum(views)']);
-        $totalvalue += intval($row['sum(views)']);
+        $array2[] = intval($row['views']);
+        $totalvalue += intval($row['views']);
     }
 } else {
-    $startdate = $_GET["startdate"];
-    $enddate = $_GET["enddate"];
-    $query = "SELECT url , sum(views), DATE_FORMAT(dateent, '%Y-%m-%d') as dateent2 FROM `pageview` WHERE url LIKE '%blog-details.php?postid=%' AND DATE_FORMAT(dateent, '%Y-%m-%d') >= '$startdate' AND DATE_FORMAT(dateent, '%Y-%m-%d') <= '$enddate'  GROUP BY dateent2  
-    ORDER BY `dateent2`  DESC";
+    $startdate = mysqli_real_escape_string($db, $_GET["startdate"]);
+    $enddate   = mysqli_real_escape_string($db, $_GET["enddate"]);
+    $query = "SELECT sum(views) as views, DATE_FORMAT(dateent, '%Y-%m-%d') as dateent2
+              FROM `pageview`
+              WHERE url LIKE '%blog-details.php?postid=%'
+              AND DATE_FORMAT(dateent, '%Y-%m-%d') >= '$startdate'
+              AND DATE_FORMAT(dateent, '%Y-%m-%d') <= '$enddate'
+              GROUP BY dateent2
+              ORDER BY dateent2 ASC";
     $result = mysqli_query($db, $query);
-    while ($row = mysqli_fetch_assoc($result)) { ?>
-
-<?php
+    while ($row = mysqli_fetch_assoc($result)) {
         $array1[] = $row['dateent2'];
-        $array2[] = intval($row['sum(views)']);
-        $totalvalue += intval($row['sum(views)']);
+        $array2[] = intval($row['views']);
+        $totalvalue += intval($row['views']);
     }
 }
 
-// echo (json_encode($array1));
-// echo (json_encode($array2));
+// Cumulative running total for the line overlay
+$cumulative = [];
+$running = 0;
+foreach ($array2 as $v) {
+    $running += $v;
+    $cumulative[] = $running;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -417,98 +440,83 @@ if (!isset($_GET["startdate"]) && !isset($_GET["enddate"])) {
             return s.join(dec);
         }
 
-        // Area Chart Example
+        // Bar + Line combo chart
         var ctx = document.getElementById("myAreaChart");
-        var myLineChart = new Chart(ctx, {
-            type: 'line',
+        var myChart = new Chart(ctx, {
+            type: 'bar',
             data: {
-
-                labels:
-
-                    <?php echo (json_encode($array1)); ?>,
-                datasets: [{
-                    label: "Blog Name Views :",
-                    lineTension: 0.1,
-                    backgroundColor: "rgba(78, 115, 223, 0.05)",
-                    borderColor: "rgba(78, 165, 223, 1)",
-                    pointRadius: 3,
-                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHoverRadius: 3,
-                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHitRadius: 10,
-                    pointBorderWidth: 2,
-                    data:
-
-                        <?php echo (json_encode($array2)); ?>
-
-
-                        ,
-                }, ],
+                labels: <?php echo json_encode($array1); ?>,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Daily Views',
+                        data: <?php echo json_encode($array2); ?>,
+                        backgroundColor: 'rgba(78, 115, 223, 0.75)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y-daily',
+                    },
+                    {
+                        type: 'line',
+                        label: 'Cumulative Views',
+                        data: <?php echo json_encode($cumulative); ?>,
+                        borderColor: 'rgba(231, 74, 59, 1)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(231, 74, 59, 1)',
+                        pointBorderColor: 'rgba(231, 74, 59, 1)',
+                        pointHoverRadius: 4,
+                        fill: false,
+                        lineTension: 0.3,
+                        yAxisID: 'y-cumul',
+                    }
+                ],
             },
             options: {
                 maintainAspectRatio: false,
-                layout: {
-                    padding: {
-                        left: 10,
-                        right: 25,
-                        top: 25,
-                        bottom: 0
-                    }
-                },
+                layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
                 scales: {
                     xAxes: [{
-                        time: {
-                            unit: 'date'
-                        },
-                        gridLines: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            maxTicksLimit: 7
-                        }
+                        gridLines: { display: false, drawBorder: false },
+                        ticks: { maxTicksLimit: 15 }
                     }],
-                    yAxes: [{
-                        ticks: {
-                            maxTicksLimit: 5,
-                            padding: 10,
-                            // Include a dollar sign in the ticks
-                            callback: function(value, index, values) {
-                                return number_format(value);
-                            }
+                    yAxes: [
+                        {
+                            id: 'y-daily',
+                            position: 'left',
+                            scaleLabel: { display: true, labelString: 'Daily Views' },
+                            ticks: { beginAtZero: true, maxTicksLimit: 6, padding: 10,
+                                     callback: function(v) { return number_format(v); } },
+                            gridLines: { color: 'rgb(234,236,244)', zeroLineColor: 'rgb(234,236,244)',
+                                         drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] }
                         },
-                        gridLines: {
-                            color: "rgb(234, 236, 244)",
-                            zeroLineColor: "rgb(234, 236, 244)",
-                            drawBorder: false,
-                            borderDash: [2],
-                            zeroLineBorderDash: [2]
+                        {
+                            id: 'y-cumul',
+                            position: 'right',
+                            scaleLabel: { display: true, labelString: 'Cumulative' },
+                            ticks: { beginAtZero: true, maxTicksLimit: 6, padding: 10,
+                                     callback: function(v) { return number_format(v); } },
+                            gridLines: { display: false }
                         }
-                    }],
+                    ]
                 },
-                legend: {
-                    display: false
-                },
+                legend: { display: true, position: 'top' },
                 tooltips: {
-                    backgroundColor: "rgb(255,255,255)",
-                    bodyFontColor: "#858796",
-                    titleMarginBottom: 10,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgb(255,255,255)',
+                    bodyFontColor: '#858796',
                     titleFontColor: '#6e707e',
                     titleFontSize: 14,
                     borderColor: '#dddfeb',
                     borderWidth: 1,
                     xPadding: 15,
                     yPadding: 15,
-                    displayColors: false,
-                    intersect: false,
-                    mode: 'index',
-                    caretPadding: 10,
                     callbacks: {
-                        label: function(tooltipItem, chart) {
-                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                            return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
+                        label: function(item, chart) {
+                            var label = chart.datasets[item.datasetIndex].label || '';
+                            return label + ': ' + number_format(item.yLabel);
                         }
                     }
                 }

@@ -64,41 +64,25 @@ if (isset($_POST["upload_banner"])) {
 
             $filename = basename($_FILES["fileToUpload"]["name"]);
 
-            $query = "INSERT INTO banner (banner_filename) VALUES('$filename')";
-            mysqli_query($db, $query);
+            // New banners are shown by default (status 1), appended to the end of
+            // the carousel order, and named after the uploaded file so they are
+            // identifiable in the table. Prepared statement avoids SQL injection
+            // via the uploaded filename.
+            $nameGuess = pathinfo($filename, PATHINFO_FILENAME);
+            $ordRes    = mysqli_query($db, "SELECT COALESCE(MAX(banner_order), 0) + 1 AS nextord FROM banner");
+            $nextOrd   = ($ordRes && ($r = mysqli_fetch_assoc($ordRes))) ? (int) $r['nextord'] : 1;
 
+            $stmt = mysqli_prepare($db, "INSERT INTO banner (banner_filename, banner_name, banner_order, status) VALUES (?, ?, ?, '1')");
+            mysqli_stmt_bind_param($stmt, 'ssi', $filename, $nameGuess, $nextOrd);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
 
-            $query4 = "SELECT * FROM emailsub ";
-            $result4 = mysqli_query($db, $query4);
-            while ($row4 = mysqli_fetch_assoc($result4)) {
-
-
-                // echo "send";
-                // sendmail3($row4['emailsub_email'], "KL The Guide Just Updated Their Content", "New Content");
-                // echo "send";
-
-                $content = 'KL The Guide Just Updated Their Content';
-                $emailtitle = 'New Content';
-                ob_start();
-                require_once 'sendemail.php';
-                $output = ob_get_clean();
-                $query = "SELECT * FROM emailsub";
-                $result = mysqli_query($db, $query);
-                echo "ok";
-
-                $sendto = $row4['emailsub_email'];
-
-                $query4 = "INSERT INTO mailqueue (sendstatus, sendto, sendtitle,sendbody) 
-                    VALUES('0' , '$sendto' , '$emailtitle', '$output')";
-                mysqli_query($db, $query4);
-
-
-
-
-            }
-
-
-
+            // NOTE: a synchronous "content updated" email blast to every subscriber
+            // used to run here. It made every banner image upload hang (on hosts that
+            // throttle/block outbound SMTP it stalls until the send times out), and
+            // notifying all subscribers on an image upload was unintended. Removed.
+            // If subscriber notifications are wanted, trigger them deliberately and
+            // drain them via the existing mailqueue + cron, not inline on upload.
 
         } else {
             array_push($errors2, "Error While Uploading");
@@ -106,58 +90,43 @@ if (isset($_POST["upload_banner"])) {
     }
 }
 
-if (isset($_GET['orderup'])) {
+/*
+ * Banner reorder — move a banner up or down one position.
+ *
+ * The old version just did `banner_order ± 1` on the single banner, which left
+ * the neighbour untouched and produced DUPLICATE order values. With ties, the
+ * public page's `ORDER BY banner_order` breaks the tie arbitrarily, so the
+ * rearrangement appeared to do nothing. We now swap the banner with its
+ * neighbour and re-write the whole list as a clean, unique 0..n sequence.
+ */
+if (isset($_GET['orderup']) || isset($_GET['orderdown'])) {
 
-    // debug_to_console("test");
+    $banner_id = (int) $_GET['banner_id'];
+    $direction = isset($_GET['orderup']) ? 'up' : 'down';
 
-    $order = $_GET['orderup'];
-    $banner_id = $_GET['banner_id'];
-    $order2 = $order - 1;
-    // $query = "UPDATE banner SET banner_order= $order WHERE banner_id=$banner_id-1";
-    // debug_to_console($query);
-    // $update = mysqli_query($db, $query);
-    // if ($update) {
-    //     echo "Record updated successfully";
-
-    // } else {
-    //     echo "Error updating record: " . mysqli_error($db);
-    // }
-    $query = "UPDATE banner SET banner_order= $order2 WHERE banner_id=$banner_id";
- 
-    $update = mysqli_query($db, $query);
-    if ($update) {
-        array_push($errors2, "Banner Position Saved");
-
-    } else {
-        echo "Error updating record: " . mysqli_error($db);
+    // Current order of every banner (stable tie-break on banner_id)
+    $ids = [];
+    $res = mysqli_query($db, "SELECT banner_id FROM banner ORDER BY banner_order ASC, banner_id ASC");
+    while ($r = mysqli_fetch_assoc($res)) {
+        $ids[] = (int) $r['banner_id'];
     }
-}
 
-if (isset($_GET['orderdown'])) {
-
-    // debug_to_console("test");
-
-    $order = $_GET['orderdown'];
-    $banner_id = $_GET['banner_id'];
-    $order2 = $order + 1;
-    // $query = "UPDATE banner SET banner_order= $order WHERE banner_id=$banner_id-1";
-    // debug_to_console($query);
-    // $update = mysqli_query($db, $query);
-    // if ($update) {
-    //     echo "Record updated successfully";
-
-    // } else {
-    //     echo "Error updating record: " . mysqli_error($db);
-    // }
-    $query = "UPDATE banner SET banner_order= $order2 WHERE banner_id=$banner_id";
-    //debug_to_console($query);
-    $update = mysqli_query($db, $query);
-    if ($update) {
-        array_push($errors2, "Banner Position Saved");
-
-    } else {
-        echo "Error updating record: " . mysqli_error($db);
+    $pos = array_search($banner_id, $ids, true);
+    if ($pos !== false) {
+        $swapWith = ($direction === 'up') ? $pos - 1 : $pos + 1;
+        if ($swapWith >= 0 && $swapWith < count($ids)) {
+            $tmp            = $ids[$pos];
+            $ids[$pos]      = $ids[$swapWith];
+            $ids[$swapWith] = $tmp;
+        }
     }
+
+    // Persist as a clean, gap-free, unique sequence
+    foreach ($ids as $i => $bid) {
+        mysqli_query($db, "UPDATE banner SET banner_order = $i WHERE banner_id = $bid");
+    }
+
+    array_push($errors2, "Banner Position Saved");
 }
 
 

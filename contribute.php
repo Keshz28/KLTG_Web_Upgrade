@@ -1,4 +1,11 @@
-<?php include('admin/functions.php'); ?>
+<?php
+/* ============================================================================
+ *                              contribute.php
+ *
+ *   Public page — 'Contribute' (invites user submissions).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('admin/functions.php'); ?>
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,4 +1,49 @@
-<?php include('admin/functions.php'); ?>
+<?php
+/* ============================================================================
+ *                                index.php
+ *
+ *   Public HOMEPAGE. Hero + featured sections; content from the indexpage table.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
+include('admin/functions.php');
+
+$query  = "SELECT * FROM indexpage";
+$result = mysqli_query($db, $query);
+while ($row = mysqli_fetch_assoc($result)) {
+  $hero_title    = $row['hero_title'];
+  $hero_title2   = $row['hero_title2'];
+  $hero_subtitle = $row['hero_subtitle'];
+  $tile1_title   = $row['tile1_title'];
+  $tile1_subtitle= $row['tile1_subtitle'];
+  $tile1_photo1  = $row['tile1_photo1'];
+  $tile1_photo2  = $row['tile1_photo2'];
+  $tile1_photo3  = $row['tile1_photo3'];
+  $tile1_photo4  = $row['tile1_photo4'];
+  $tile1_title1  = $row['tile1_title1'];
+  $tile1_title2  = $row['tile1_title2'];
+  $tile1_title3  = $row['tile1_title3'];
+  $tile1_title4  = $row['tile1_title4'];
+  $tile2_title   = $row['tile2_title'];
+  $tile2_subtitle= $row['tile2_subtitle'];
+  $tile2_photo1  = $row['tile2_photo1'];
+  $tile2_photo2  = $row['tile2_photo2'];
+  $tile2_photo3  = $row['tile2_photo3'];
+  $tile2_photo4  = $row['tile2_photo4'];
+  $tile2_photo5  = $row['tile2_photo5'];
+  $tile2_photo6  = $row['tile2_photo6'];
+  $tile2_title1  = $row['tile2_title1'];
+  $tile2_title2  = $row['tile2_title2'];
+  $tile2_title3  = $row['tile2_title3'];
+  $tile2_title4  = $row['tile2_title4'];
+  $tile2_title5  = $row['tile2_title5'];
+  $tile2_title6  = $row['tile2_title6'];
+  $tile3_title   = $row['tile3_title'];
+  $tile3_subtitle= $row['tile3_subtitle'];
+  $tile4_title   = $row['tile4_title'];
+  $tile4_subtitle= $row['tile4_subtitle'];
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -39,14 +84,46 @@
     border-radius: 14px;
   }
 
+  /* Fixed viewport — stays put, clips the moving track */
   #hero.home-ad-carousel .carousel-inner {
+    position: relative;
     overflow: hidden;
+    width: 100%;
     border-radius: 14px;
     box-shadow: 0 18px 44px rgba(0, 0, 0, .45);
+    cursor: grab;
+  }
+
+  /* The sliding track — this is what moves */
+  #hero.home-ad-carousel .carousel-track {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    transition: transform .5s ease;
+    will-change: transform;
+  }
+
+  #hero.home-ad-carousel .carousel-track.dragging {
+    transition: none;
+  }
+
+  #hero.home-ad-carousel .carousel-inner.grabbing {
+    cursor: grabbing;
   }
 
   #hero.home-ad-carousel .carousel-item {
+    flex: 0 0 100%;
+    width: 100%;
+    display: block !important;
     background: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  #hero.home-ad-carousel .carousel-item img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
   }
 
   #hero.home-ad-carousel .hero-ad-link,
@@ -72,46 +149,50 @@
     width: 100%;
   }
 
-  #hero.home-ad-carousel .carousel-control-prev,
-  #hero.home-ad-carousel .carousel-control-next {
-    left: auto;
-    right: auto;
-    width: 36px;
-    height: 36px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(14, 162, 189, .88);
-    border-radius: 50%;
-    opacity: .92;
+  /* Progress-bar slide navigation */
+  #hero.home-ad-carousel .banner-progress-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 5px;
+    padding: 0 10px 8px;
+    z-index: 10;
   }
 
-  #hero.home-ad-carousel .carousel-control-prev {
-    left: 12px;
+  #hero.home-ad-carousel .banner-progress-track {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, .28);
+    border-radius: 3px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background .2s;
   }
 
-  #hero.home-ad-carousel .carousel-control-next {
-    right: 12px;
+  #hero.home-ad-carousel .banner-progress-track:hover {
+    background: rgba(255, 255, 255, .55);
   }
 
-  #hero.home-ad-carousel .carousel-indicators {
-    position: static;
-    margin: 10px 0 0;
-    gap: 7px;
+  #hero.home-ad-carousel .banner-progress-fill {
+    height: 100%;
+    width: 0;
+    background: #fff;
+    border-radius: 3px;
   }
 
-  #hero.home-ad-carousel .carousel-indicators li {
-    width: 9px;
-    height: 9px;
-    margin: 0;
-    background-color: rgba(255, 255, 255, .85);
-    border: 0;
-    border-radius: 50%;
-    opacity: .65;
+  #hero.home-ad-carousel .banner-progress-fill.active-fill {
+    animation: bannerFill 5s linear forwards;
   }
 
-  #hero.home-ad-carousel .carousel-indicators li.active {
-    opacity: 1;
-    background-color: #fff;
+  #hero.home-ad-carousel .banner-progress-fill.done-fill {
+    width: 100%;
+  }
+
+  @keyframes bannerFill {
+    from { width: 0; }
+    to   { width: 100%; }
   }
 
   #hero-animated.home-video-hero {
@@ -274,12 +355,6 @@
       min-height: 100px;
     }
 
-    #hero.home-ad-carousel .carousel-control-prev,
-    #hero.home-ad-carousel .carousel-control-next {
-      width: 30px;
-      height: 30px;
-    }
-
     #hero-animated.home-video-hero {
       height: 100vh !important;
       min-height: 600px !important;
@@ -356,163 +431,259 @@
     }
   }
 
+  /* ===== Home: one section per screen (gentle snap) ===== */
+  html {
+    scroll-snap-type: y proximity;
+    scroll-padding-top: 80px;
+  }
+
+  #index #featured-services.home-highlights,
+  #index #services.excl-recos,
+  #index #portfolio,
+  #index #recent-blog-posts {
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* ===== Home: unified section titles (Carter One / #1520A6) ===== */
+  #index .section-header h2,
+  #index .home-highlights__header h2 {
+    font-family: "Carter One", cursive;
+    color: #1520A6;
+    font-weight: 400;
+  }
+
+  /* ===== KL Highlights — big image left + interactive cards right ===== */
   .featured-services.home-highlights {
     padding: 0;
     background: #fff;
     overflow: hidden;
   }
 
+  /* fit the whole section in the visible area below the fixed navbar */
+  #index #featured-services.home-highlights {
+    min-height: calc(100vh - 84px);
+  }
+
   .home-highlights__layout {
     display: grid;
-    grid-template-columns: 45.5% 54.5%;
-    min-height: 650px;
+    grid-template-columns: 50% 50%;
+    width: 100%;
+    min-height: calc(100vh - 84px);
   }
 
+  /* LEFT — single static feature image */
   .home-highlights__feature {
-    min-height: 650px;
+    position: relative;
     margin: 0;
     overflow: hidden;
+    background: #0d1117;
   }
 
-  .home-highlights__feature img,
-  .home-highlights__card img {
+  .home-highlights__feature img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .home-highlights__feature img {
     object-position: center;
   }
 
+  /* RIGHT — header + interactive image cards */
   .home-highlights__content {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 38px clamp(34px, 6vw, 105px) 44px;
+    justify-content: center;
+    padding: 44px clamp(34px, 5vw, 72px) 0;
     background: #fff;
   }
 
   .home-highlights__header {
     width: 100%;
-    max-width: 760px;
-    margin-bottom: 28px;
+    max-width: 640px;
+    margin: 0 auto 26px;
     text-align: center;
   }
 
   .home-highlights__header h2 {
     margin: 0 0 12px;
-    color: #e60012;
-    font-family: "Caveat", "Comic Sans MS", cursive;
     font-size: clamp(44px, 4vw, 60px);
-    font-weight: 700;
-    line-height: .9;
+    line-height: 1;
     letter-spacing: 0;
   }
 
   .home-highlights__header p {
-    max-width: 760px;
+    max-width: 640px;
     margin: 0 auto;
     color: #050505;
     font-family: var(--font-secondary);
-    font-size: clamp(18px, 1.45vw, 23px);
-    font-weight: 700;
-    line-height: 1.12;
-    letter-spacing: 0;
+    font-size: clamp(16px, 1.25vw, 20px);
+    font-weight: 600;
+    line-height: 1.25;
   }
 
   .home-highlights__cards {
-    display: grid;
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1 1 auto;
     width: 100%;
-    max-width: 760px;
+    max-width: 640px;
+    min-height: 0;
+    margin: 0 auto;
   }
 
   .home-highlights__card {
     position: relative;
-    display: block;
-    height: 128px;
+    display: flex;
+    align-items: flex-end;
+    flex: 1 1 0;
+    min-height: 120px;
     overflow: hidden;
-    background: #1a1f24;
+    text-decoration: none;
     color: #fff;
-  }
-
-  .home-highlights__card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, .18);
-    transition: background .25s ease;
+    background: #0d1117;
   }
 
   .home-highlights__card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     transform: scale(1.01);
-    transition: transform .35s ease;
+    transition: transform .55s ease;
   }
 
-  .home-highlights__card span {
+  /* dark/blue gradient for legibility */
+  .home-highlights__card::before {
+    content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, .05) 0%, rgba(0, 0, 0, .58) 100%);
+    transition: background .4s ease;
+  }
+
+  /* #1520A6 accent bar that sweeps in on hover */
+  .home-highlights__card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 100%;
+    height: 5px;
+    background: #1520A6;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .45s ease;
+  }
+
+  .home-highlights__card-body {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 10px 18px;
-    color: #fff;
-    font-family: "Comic Sans MS", "Trebuchet MS", var(--font-secondary);
-    font-size: clamp(18px, 1.95vw, 25px);
-    font-weight: 800;
+    gap: 14px;
+    width: 100%;
+    padding: 18px 24px;
+  }
+
+  .home-highlights__card-num {
+    font-family: "Carter One", cursive;
+    font-size: clamp(20px, 1.6vw, 28px);
+    color: rgba(255, 255, 255, .82);
+    transition: color .3s ease;
+  }
+
+  .home-highlights__card-title {
+    flex: 1;
+    font-family: var(--font-secondary);
+    font-size: clamp(20px, 1.8vw, 28px);
+    font-weight: 700;
     line-height: 1.1;
-    text-align: center;
-    text-shadow: 0 2px 7px rgba(0, 0, 0, .65);
-    letter-spacing: 0;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .55);
+    transform: translateX(0);
+    transition: transform .35s ease;
+  }
+
+  .home-highlights__card-arrow {
+    font-size: 24px;
+    line-height: 1;
+    color: #fff;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity .35s ease, transform .35s ease;
   }
 
   .home-highlights__card:hover img,
-  .home-highlights__card:focus img {
-    transform: scale(1.055);
+  .home-highlights__card:focus-visible img {
+    transform: scale(1.08);
+  }
+
+  .home-highlights__card:hover::before,
+  .home-highlights__card:focus-visible::before {
+    background: linear-gradient(180deg, rgba(21, 32, 166, .18) 0%, rgba(0, 0, 0, .68) 100%);
   }
 
   .home-highlights__card:hover::after,
-  .home-highlights__card:focus::after {
-    background: rgba(0, 0, 0, .28);
+  .home-highlights__card:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .home-highlights__card:hover .home-highlights__card-title,
+  .home-highlights__card:focus-visible .home-highlights__card-title {
+    transform: translateX(6px);
+  }
+
+  .home-highlights__card:hover .home-highlights__card-arrow,
+  .home-highlights__card:focus-visible .home-highlights__card-arrow {
+    opacity: 1;
+    transform: translateX(0);
   }
 
   .home-highlights__card:focus-visible {
-    outline: 3px solid var(--color-primary);
-    outline-offset: 4px;
+    outline: 3px solid #1520A6;
+    outline-offset: 3px;
   }
 
   @media (max-width: 991px) {
+    html {
+      scroll-snap-type: none;
+    }
+
+    #index #featured-services.home-highlights,
+    #index #services.excl-recos,
+    #index #portfolio,
+    #index #recent-blog-posts {
+      min-height: 0;
+      scroll-snap-align: none;
+    }
+
     .home-highlights__layout {
       grid-template-columns: 1fr;
       min-height: 0;
     }
 
     .home-highlights__feature {
-      min-height: 0;
       aspect-ratio: 16 / 10;
     }
 
     .home-highlights__content {
       padding: 34px 18px 40px;
     }
+
+    .home-highlights__card {
+      min-height: 110px;
+    }
   }
 
   @media (max-width: 575px) {
     .home-highlights__feature {
       aspect-ratio: 4 / 3;
-    }
-
-    .home-highlights__content {
-      align-items: flex-start;
-    }
-
-    .home-highlights__header {
-      max-width: 350px;
-      margin-bottom: 22px;
     }
 
     .home-highlights__header h2 {
@@ -523,17 +694,12 @@
       font-size: 16px;
     }
 
-    .home-highlights__cards {
-      gap: 14px;
-      max-width: 350px;
+    .home-highlights__card-title {
+      font-size: 20px;
     }
 
-    .home-highlights__card {
-      height: 98px;
-    }
-
-    .home-highlights__card span {
-      font-size: 18px;
+    .home-highlights__card-body {
+      padding: 14px 18px;
     }
   }
 </style>
@@ -549,7 +715,7 @@
 	Dataran Merdeka, Petaling Street, travel guide app, travel guide, KLCC, KL Tower, Batu Caves, Google Play Store, Apple App Store, KL The Guide, Kuala Lumpur city">
   <meta name="robots" content="index, follow">
 
-  <link rel="canonical" href="https://kltheguide.com.my/">
+  <link rel="canonical" href="https://www.kltheguide.com.my/" />
 
   <meta itemprop="name" content="KL The Guide">
   <meta itemprop="description" content="KL The Guide provides comprehensive information about Kuala Lumpur, including top attractions, travel tips, and local insights.">
@@ -565,7 +731,7 @@
     <noscript>
         <link rel="stylesheet" href="assets/css/style.css">
     </noscript>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Carter+One&display=swap" rel="stylesheet">
 
 
   <!-- Open Graph / Facebook -->
@@ -806,9 +972,37 @@
 
     <!-- ======= Video Hero (sits under transparent navbar) ======= -->
     <section id="hero-animated" class="home-video-hero d-flex align-items-center justify-content-center w-100">
-      <video class="home-video-hero__video" autoplay muted loop playsinline poster="assets/img/kltgseohp.jpeg" aria-hidden="true">
+      <video class="home-video-hero__video" id="hero-video" autoplay muted loop playsinline poster="assets/img/kltgseohp.jpeg" aria-hidden="true">
         <source src="asset-backups/KLOverview.mp4" type="video/mp4">
       </video>
+      <!-- Animated WebP fallback for hosts that block .mp4 (e.g. InfinityFree) -->
+      <img id="hero-webp" src="asset-backups/KLOverview3.webp" aria-hidden="true"
+           style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
+      <script>
+        (function(){
+          var v = document.getElementById('hero-video');
+          var w = document.getElementById('hero-webp');
+          var swapped = false;
+          function showWebp(){
+            if (swapped) return;
+            swapped = true;
+            v.style.display = 'none';
+            w.style.display = 'block';
+          }
+          // 1. The <source> itself failed to load (e.g. host blocks .mp4)
+          var src = v.querySelector('source');
+          if (src) src.addEventListener('error', showWebp);
+          // 2. The <video> element errored or stalled
+          v.addEventListener('error', showWebp);
+          v.addEventListener('stalled', showWebp);
+          // 3. Most reliable check: if real playback never starts, fall back.
+          //    'timeupdate'/'playing' only fire when the video is actually running.
+          var started = false;
+          v.addEventListener('timeupdate', function(){ started = true; });
+          v.addEventListener('playing', function(){ started = true; });
+          setTimeout(function(){ if (!started) showWebp(); }, 3000);
+        })();
+      </script>
       <div class="container-fluid position-relative">
         <div class="row justify-content-center">
           <div class="col-12 col-xl-10">
@@ -840,10 +1034,10 @@
       </div>
 
       <!-- ======= Banner Carousel (overlay inside hero video) ======= -->
-      <section id="hero" class="hero home-ad-carousel carousel lazy carousel-fade" data-bs-ride="carousel" data-bs-interval="5000"
-        touch="true">
+      <section id="hero" class="hero home-ad-carousel lazy">
 
         <div class="carousel-inner">
+        <div class="carousel-track">
         <?php
         $query = "SELECT * FROM banner WHERE status='1' OR status='2' ORDER BY banner_order ASC ";
         $result = mysqli_query($db, $query);
@@ -882,17 +1076,9 @@
           $counter++;
         }
         ?>
-
-          <a class="carousel-control-prev" href="#hero" role="button" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-          </a>
-
-          <a class="carousel-control-next" href="#hero" role="button" data-bs-slide="next">
-            <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-          </a>
         </div>
-        <!-- Indicators BELOW -->
-        <ol class="carousel-indicators"></ol>
+        </div>
+        <div class="banner-progress-nav" id="bannerProgressNav"></div>
       </section>
       <!-- End Banner Carousel -->
     </section>
@@ -923,11 +1109,34 @@
         $home_highlights_travel_tips_image = 'highlights/' . urldecode($tile1_photo3);
       }
       ?>
+      <?php
+      $home_highlights_items = [
+        [
+          'img'   => $home_highlights_glance_image,
+          'title' => urldecode($tile1_title1),
+          'href'  => 'kl-glance.php',
+          'alt'   => 'Kuala Lumpur skyline at sunset',
+        ],
+        [
+          'img'   => $home_highlights_getting_around_image,
+          'title' => urldecode($tile1_title2),
+          'href'  => 'getting-around-kl.php',
+          'alt'   => 'Rapid KL train in Kuala Lumpur',
+        ],
+        [
+          'img'   => $home_highlights_travel_tips_image,
+          'title' => urldecode($tile1_title3),
+          'href'  => 'travel-tips.php',
+          'alt'   => 'Aerial view of Kuala Lumpur city centre',
+        ],
+      ];
+      ?>
       <div class="home-highlights__layout">
         <figure class="home-highlights__feature">
           <img src="assets/img/<?php echo htmlspecialchars($home_highlights_main_image, ENT_QUOTES); ?>"
             alt="Kuala Lumpur skyline with Petronas Twin Towers" loading="lazy" decoding="async">
         </figure>
+
         <div class="home-highlights__content">
           <div class="home-highlights__header">
             <h2 id="homeHighlightsTitle"><?php echo htmlspecialchars(urldecode($tile1_title), ENT_QUOTES); ?></h2>
@@ -935,26 +1144,19 @@
           </div>
 
           <div class="home-highlights__cards">
-            <a class="home-highlights__card" href="kl-glance.php"
-              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title1), ENT_QUOTES); ?>">
-              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_glance_image, ENT_QUOTES); ?>"
-                alt="Kuala Lumpur skyline at sunset" loading="lazy" decoding="async">
-              <span><?php echo htmlspecialchars(urldecode($tile1_title1), ENT_QUOTES); ?></span>
-            </a>
-
-            <a class="home-highlights__card" href="highlights.php#tab-2"
-              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title2), ENT_QUOTES); ?>">
-              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_getting_around_image, ENT_QUOTES); ?>"
-                alt="Rapid KL train in Kuala Lumpur" loading="lazy" decoding="async">
-              <span><?php echo htmlspecialchars(urldecode($tile1_title2), ENT_QUOTES); ?></span>
-            </a>
-
-            <a class="home-highlights__card" href="travel-tips.php"
-              aria-label="Open <?php echo htmlspecialchars(urldecode($tile1_title3), ENT_QUOTES); ?>">
-              <img src="assets/img/<?php echo htmlspecialchars($home_highlights_travel_tips_image, ENT_QUOTES); ?>"
-                alt="Aerial view of Kuala Lumpur city centre" loading="lazy" decoding="async">
-              <span><?php echo htmlspecialchars(urldecode($tile1_title3), ENT_QUOTES); ?></span>
-            </a>
+            <?php foreach ($home_highlights_items as $i => $hl): ?>
+              <a class="home-highlights__card"
+                href="<?php echo htmlspecialchars($hl['href'], ENT_QUOTES); ?>"
+                aria-label="Open <?php echo htmlspecialchars($hl['title'], ENT_QUOTES); ?>">
+                <img src="assets/img/<?php echo htmlspecialchars($hl['img'], ENT_QUOTES); ?>"
+                  alt="<?php echo htmlspecialchars($hl['alt'], ENT_QUOTES); ?>" loading="lazy" decoding="async">
+                <span class="home-highlights__card-body">
+                  <span class="home-highlights__card-num"><?php printf('%02d', $i + 1); ?></span>
+                  <span class="home-highlights__card-title"><?php echo htmlspecialchars($hl['title'], ENT_QUOTES); ?></span>
+                  <span class="home-highlights__card-arrow" aria-hidden="true">&rarr;</span>
+                </span>
+              </a>
+            <?php endforeach; ?>
           </div>
         </div>
       </div>
@@ -964,7 +1166,7 @@
 
 
     <!-- ======= Services Section ======= -->
-    <section id="services" class="services">
+    <section id="services" class="services excl-recos">
       <div class="container" data-aos="fade-up">
 
         <div class="section-header">
@@ -976,149 +1178,117 @@
           </p>
         </div>
 
-        <div class="row gy-5 d-flex justify-content-center ">
+      </div><!-- /container -->
 
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="explorekl.php#explorekl" class="stretched-link">
+      <div class="recos-carousel">
+        <div class="recos-accordion" id="recosAccordion"
+             role="region" aria-label="Exclusive recommendations">
 
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo1 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Explore KL">
-                </div>
-                <div class="details position-relative">
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title1 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
+          <div class="recos-panel is-active" data-index="0">
+            <a href="explorekl.php#explorekl" aria-label="<?php echo strip_tags($tile2_title1) ?>">
+              <img src="assets/img/recommendation/ExploringKL.jpg"
+                alt="Explore KL" loading="eager" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title1 ?></span>
+            </a>
+          </div>
 
-                  <!-- <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure
-                      perferendis.</p> -->
-                </div>
-              </a>
+          <div class="recos-panel" data-index="1">
+            <a href="where-to-shop.php" aria-label="<?php echo strip_tags($tile2_title2) ?>">
+              <img src="assets/img/recommendation/ShopLikeLocal.jpg"
+                alt="Shop Like Locals" loading="lazy" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title2 ?></span>
+            </a>
+          </div>
 
-            </div>
-          </div><!-- End Service Item -->
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="where-to-shop.php" class="stretched-link">
+          <div class="recos-panel" data-index="2">
+            <a href="accommodation.php#placetostay" aria-label="<?php echo strip_tags($tile2_title3) ?>">
+              <img src="assets/img/recommendation/PlaceToStay.jpg"
+                alt="Places To Stay" loading="lazy" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title3 ?></span>
+            </a>
+          </div>
 
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo2 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Shop Like Locals">
-                </div>
-                <div class="details position-relative">
+          <div class="recos-panel" data-index="3">
+            <a href="spa.php" aria-label="<?php echo strip_tags($tile2_title4) ?>">
+              <img src="assets/img/recommendation/SpaTime.jpg"
+                alt="Spa Time" loading="lazy" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title4 ?></span>
+            </a>
+          </div>
 
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title2 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
-                  <!-- <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure
-                      perferendis.</p> -->
-                </div>
-              </a>
+          <div class="recos-panel" data-index="4">
+            <a href="medical-tourism.php#medicaltourism" aria-label="<?php echo strip_tags($tile2_title5) ?>">
+              <img src="assets/img/recommendation/MedicalTourism.jpg"
+                alt="Medical Tourism" loading="lazy" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title5 ?></span>
+            </a>
+          </div>
 
-            </div>
-          </div><!-- End Service Item -->
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="accommodation.php#placetostay" class="stretched-link">
+          <div class="recos-panel" data-index="5">
+            <a href="beyondkl.php#beyondkl" aria-label="<?php echo strip_tags($tile2_title6) ?>">
+              <img src="assets/img/recommendation/BeyondKL.jpg"
+                alt="Beyond KL" loading="lazy" draggable="false">
+              <span class="recos-panel__label"><?php echo $tile2_title6 ?></span>
+            </a>
+          </div>
 
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo3 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Place To Stay">
-                </div>
-                <div class="details position-relative">
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title3 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
-                  <!-- <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure
-                      perferendis.</p> -->
-                </div>
-              </a>
+        </div><!-- /recos-accordion -->
 
-            </div>
-          </div><!-- End Service Item -->
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="spa.php" class="stretched-link">
+        <div class="recos-bars" id="recosBars" role="tablist" aria-label="Slide indicators"></div>
+      </div><!-- /recos-carousel -->
 
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo4 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Spa Time">
-                </div>
-                <div class="details position-relative">
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title4 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
-                  <!-- <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure
-                      perferendis.</p> -->
-                </div>
-              </a>
-
-            </div>
-          </div><!-- End Service Item -->
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="medical-tourism.php#medicaltourism" class="stretched-link">
-
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo5 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Medical Tourism">
-                </div>
-                <div class="details position-relative">
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title5 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
-                  <!-- </a> -->
-                  <!-- <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores iure
-                      perferendis.</p> -->
-                </div>
-              </a>
-
-            </div>
-          </div><!-- End Service Item -->
-          <div class="d-flex col-xl-4 col-md-6 justify-content-center" data-aos="zoom-in" data-aos-delay="200">
-            <div class="service-item">
-              <a href="beyondkl.php#beyondkl" class="stretched-link">
-
-                <div class="img">
-                  <img src="assets/img/recommendation/<?php echo $tile2_photo6 ?>" class="img-fluid object-fit-cover"
-                    alt="Kuala Lumpur Guide - Beyond KL">
-                </div>
-                <div class="details position-relative">
-                  <div class="d-flex align-items-center justify-content-center">
-                    <h3><?php echo $tile2_title6 ?></h3>
-                    <div class="icon2">
-                      <i class="bi bi-box-arrow-right"></i>
-                    </div>
-                  </div>
-                  <!-- </a> -->
-
-                </div>
-              </a>
-
-            </div>
-          </div><!-- End Service Item -->
-
-
-        </div>
-
-      </div>
     </section><!-- End Services Section -->
+
+    <script>
+      (function () {
+        var accordion = document.getElementById('recosAccordion');
+        var barsWrap  = document.getElementById('recosBars');
+        if (!accordion || !barsWrap) return;
+
+        var panels  = Array.prototype.slice.call(accordion.querySelectorAll('.recos-panel'));
+        var reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var DELAY   = 4000;
+        var timer   = null;
+        var current = 0;
+
+        panels.forEach(function (_, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'recos-bar' + (i === 0 ? ' is-active' : '');
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+          b.addEventListener('click', function () { stop(); goTo(i); start(); });
+          barsWrap.appendChild(b);
+        });
+        var bars = Array.prototype.slice.call(barsWrap.children);
+
+        function goTo(idx) {
+          current = ((idx % panels.length) + panels.length) % panels.length;
+          panels.forEach(function (p, i) { p.classList.toggle('is-active', i === current); });
+          bars.forEach(function (b, i)   { b.classList.toggle('is-active', i === current); });
+        }
+
+        function next()  { goTo(current + 1); }
+        function start() { if (reduce || timer) return; timer = setInterval(next, DELAY); }
+        function stop()  { clearInterval(timer); timer = null; }
+
+        // Hover (or keyboard focus) expands a panel; a click follows the
+        // panel's link straight to its page.
+        panels.forEach(function (panel, i) {
+          panel.addEventListener('mouseenter', function () { stop(); goTo(i); });
+          panel.addEventListener('focusin', function () { stop(); goTo(i); });
+        });
+
+        accordion.addEventListener('mouseenter', stop);
+        accordion.addEventListener('mouseleave', start);
+        document.addEventListener('visibilitychange', function () {
+          document.hidden ? stop() : start();
+        });
+
+        goTo(0);
+        start();
+      })();
+    </script>
 
 
 
@@ -1230,29 +1400,6 @@
 
     </section><!-- End Recent Blog Posts Section -->
 
-    <!-- Start Instagram Section -->
-    <section class="insta-feed">
-
-      <div class="section-header">
-        <h2>Instagram</h2>
-      </div>
-
-      <div class="profile-info">
-        <img src="assets/img/kltginstapp.png" alt="Profile Picture" class="profile-pic">
-        <div class="profile-details">
-          <h2 class="profile-name">@kltheguide</h2>
-          <p class="profile-bio">Your ultimate travel guide to Kuala Lumpur, Malaysia 🇲🇾. Food, Sightseeing, Shopping
-            <br> #KLTheGuide in your postings to get featured!
-          </p>
-          <div class="profile-actions">
-            <a href="https://www.instagram.com/kltheguide" target="_blank" class="follow-btn">Follow</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="insta-container" id="instafeed-container"></div>
-      <div class="profile-info" id="profile-info"></div>
-    </section>
 
     <div class="row d-flex justify-content-center btmbanner mt-4">
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3696733888071014"
@@ -1300,30 +1447,173 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script src="assets/js/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/stevenschobert/instafeed.js@2.0.0rc1/src/instafeed.min.js"></script>
 
   <script>
     var myCarousel = document.getElementById('hero');
 
-    myCarousel.addEventListener('slide.bs.carousel', event => {
-      // do something...
-      var activeslide = document.getElementsByClassName('carousel-item active');
+    // Transform-based banner slider (auto-advance + click bars + drag)
+    (function () {
+      var INTERVAL   = 5000; // matches the 5s progress-bar fill animation
+      var inner      = myCarousel.querySelector('.carousel-inner');   // fixed viewport
+      var slideTrack = myCarousel.querySelector('.carousel-track');   // the part that moves
+      var slides     = Array.prototype.slice.call(myCarousel.querySelectorAll('.carousel-item'));
+      var nav        = document.getElementById('bannerProgressNav');
+      var current    = 0;
+      var timer      = null;
+      var paused     = false;
 
-      let banner_filename = activeslide[0].dataset.filename;
-      let banner_name = activeslide[0].dataset.name;
-      var xhttp = new XMLHttpRequest();
+      if (!inner || !slideTrack || slides.length === 0) return;
 
+      // Build progress bars
+      slides.forEach(function (_, i) {
+        var track = document.createElement('div');
+        track.className = 'banner-progress-track';
+        var fill = document.createElement('div');
+        fill.className = 'banner-progress-fill';
+        track.appendChild(fill);
+        track.addEventListener('click', function () { goTo(i); });
+        nav.appendChild(track);
+      });
 
-      // xhttp.onreadystatechange = function () {
-      //   if (this.readyState == 4 && this.status == 200) {
-      //    console.log(this.responseText);
-      //   }
-      // };
-      xhttp.open("POST", "banner.php", true);
-      xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      xhttp.send("banner=banner&banner_filename=" + banner_filename + "&banner_name=" + banner_name + "&clicks=0");
-    })
+      var fills = Array.prototype.slice.call(nav.querySelectorAll('.banner-progress-fill'));
 
+      function width() { return inner.offsetWidth; }
+
+      function updateBars(idx) {
+        fills.forEach(function (fill, i) {
+          fill.classList.remove('active-fill', 'done-fill');
+          fill.style.animationPlayState = '';
+          if (i < idx) {
+            fill.classList.add('done-fill');
+          } else if (i === idx) {
+            void fill.offsetWidth; // reflow to restart animation
+            fill.classList.add('active-fill');
+            if (paused) fill.style.animationPlayState = 'paused';
+          }
+        });
+      }
+
+      function trackView(idx) {
+        var slide = slides[idx];
+        var fn = slide.dataset.filename;
+        var nm = slide.dataset.name;
+        if (!fn || !nm) return;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'banner.php', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.send('banner=banner&banner_filename=' + fn + '&banner_name=' + nm + '&clicks=0');
+      }
+
+      function move(px) {
+        slideTrack.style.transform = 'translateX(' + px + 'px)';
+      }
+
+      function goTo(idx) {
+        if (idx < 0) idx = 0;
+        if (idx > slides.length - 1) idx = slides.length - 1;
+        current = idx;
+        slideTrack.classList.remove('dragging'); // re-enable smooth transition
+        move(-idx * width());
+        updateBars(idx);
+        trackView(idx);
+        resetTimer();
+      }
+
+      function resetTimer() {
+        clearInterval(timer);
+        if (paused || slides.length < 2) return;
+        timer = setInterval(function () {
+          goTo((current + 1) % slides.length);
+        }, INTERVAL);
+      }
+
+      // Initial position
+      move(0);
+      updateBars(0);
+      resetTimer();
+
+      // Keep alignment correct on resize
+      window.addEventListener('resize', function () {
+        slideTrack.classList.add('dragging'); // no animation while snapping
+        move(-current * width());
+        requestAnimationFrame(function () { slideTrack.classList.remove('dragging'); });
+      });
+
+      // Hover pause / resume
+      myCarousel.addEventListener('mouseenter', function () {
+        paused = true;
+        clearInterval(timer);
+        fills.forEach(function (f) {
+          if (f.classList.contains('active-fill')) f.style.animationPlayState = 'paused';
+        });
+      });
+
+      myCarousel.addEventListener('mouseleave', function () {
+        paused = false;
+        fills.forEach(function (f) {
+          if (f.classList.contains('active-fill')) f.style.animationPlayState = 'running';
+        });
+        resetTimer();
+      });
+
+      // ---- Mouse / touch drag ----
+      var dragging = false;
+      var startX   = 0;
+      var baseX    = 0;
+      var moved    = 0;
+
+      function dragStart(pageX) {
+        dragging = true;
+        startX   = pageX;
+        baseX    = -current * width();
+        moved    = 0;
+        slideTrack.classList.add('dragging');
+        inner.classList.add('grabbing');
+        clearInterval(timer);
+      }
+
+      function dragMove(pageX) {
+        if (!dragging) return;
+        moved = pageX - startX;
+        move(baseX + moved);
+      }
+
+      function dragEnd() {
+        if (!dragging) return;
+        dragging = false;
+        slideTrack.classList.remove('dragging');
+        inner.classList.remove('grabbing');
+        var threshold = width() * 0.15;
+        if (moved < -threshold)      goTo(Math.min(current + 1, slides.length - 1));
+        else if (moved > threshold)  goTo(Math.max(current - 1, 0));
+        else                         goTo(current);
+      }
+
+      // Mouse
+      inner.addEventListener('mousedown', function (e) {
+        dragStart(e.pageX);
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', function (e) { dragMove(e.pageX); });
+      document.addEventListener('mouseup', dragEnd);
+
+      // Touch
+      inner.addEventListener('touchstart', function (e) {
+        dragStart(e.touches[0].pageX);
+      }, { passive: true });
+      inner.addEventListener('touchmove', function (e) {
+        dragMove(e.touches[0].pageX);
+      }, { passive: true });
+      inner.addEventListener('touchend', dragEnd);
+
+      // Suppress banner link click if it was actually a drag
+      inner.addEventListener('click', function (e) {
+        if (Math.abs(moved) > 6) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+    })();
 
     function banner_clicks(banner_filename, banner_name) {
       console.log("Banner clicked: " + banner_filename + ", " + banner_name);
@@ -1359,22 +1649,6 @@
     }, 100); // slight delay to ensure the list is rendered
 
 
-
-    var userFeed = new Instafeed({
-      get: 'user',
-      userId: '1951282339',
-      target: "instafeed-container",
-      limit: 8,
-      resolution: 'standard_resolution', // Change to standard_resolution for higher quality images
-      accessToken: 'IGQWROTENqTVd2OExabl9hajhFQmlxQ0pyazZAydmNBdWEzaGdZAVXh3bUdJR0ktU0U2NlgxRlNjYUdtakZAzWFRienVudlUwbFg2YkFLUk0zbk9ISDNJSzJsb1hIa3hGVGpUX0lEdVh2RU1TRzlEYzIxaGdqWVhyZADAZD', // Replace with your Instagram access token
-      template: '<a class="instafeed-item" href="{{link}}" target="_blank"><img src="{{image}}" alt="{{caption}}"/><div class="caption"><p>{{caption}}</p><p>❤️ {{likes}}</p></div></a>',
-      filter: function(image) {
-        // Check if the post is not a video
-        return image.type !== 'video';
-      }
-    });
-
-    userFeed.run();
 
     // Updated form submission handler with duplicate click prevention
     document.addEventListener('DOMContentLoaded', () => {
@@ -1424,7 +1698,11 @@
           }
 
           if (data.ok) {
-            alert('🎉 Subscription successful!');
+            if (data.status === 'duplicate') {
+              alert('✅ This email is already subscribed!');
+            } else {
+              alert('📧 Almost there! Please check your inbox and click the confirmation link to complete your subscription.');
+            }
             form.reset(); // Reset form fields
             // Optionally, you could display a success message in the UI instead of an alert
             // document.getElementById('subscription-message').textContent = 'Thank you for subscribing!';

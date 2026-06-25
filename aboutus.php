@@ -1,4 +1,11 @@
-<?php include('admin/functions.php');?>
+<!-- ============================================================================
+                                aboutus.php
+
+     Public page — About Us / Bluedale Publishing story.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +13,7 @@
 <head>
   <title>KL The Guide - About Us</title>
   
-  <link rel="canonical" href="https://kltheguide.com.my/aboutus.php/" />
+  <link rel="canonical" href="https://www.kltheguide.com.my/aboutus.php" />
 
   <meta name="description" content="Bluedale Publishing is dedicated to helping people make the most of their open-ended travel experiences, so we feel a deep sense of responsibility and privilege when we help someone create their own stories.">
   <meta name="keywords" content="About Us, Bluedale Publishing, Bluedale, BGOC, travel, tourism, Malaysia, 
@@ -40,24 +47,18 @@
 
   <main id="aboutus">
 
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="container">
-
-        <div class="d-flex justify-content-between align-items-center">
-          <h2>About Us</h2>
-          <ol>
-            <li><a href="index.php">Home</a></li>
-            <li>About Us</li>
-          </ol>
-        </div>
-
-      </div>
-    </div><!-- End Breadcrumbs -->
-
-  
-
     <!-- ======= About Section ======= -->
+    <style>
+      .about h3 {
+        font-weight: 700;
+        font-size: clamp(1.75rem, 3.5vw, 2.4rem);
+        color: var(--color-secondary);
+        line-height: 1.25;
+      }
+      #about {
+        padding-top: 140px;
+      }
+    </style>
     <section id="about" class="about">
       <div class="container" data-aos="fade-up">
         <div class="row g-4 g-lg-5" data-aos="fade-up" data-aos-delay="200">
@@ -70,12 +71,12 @@
           </div>
 
           <div class="col-lg-7">
-            <h3 class="pt-0 pt-lg-5"><strong>KL The Guide</strong> – Your Gateway to Kuala Lumpur’s Best Experiences
+            <h3 class="pt-0 pt-lg-5">KL The Guide - Your Gateway to Kuala Lumpur's Best Experiences
             </h3>
 
-            <p>KL The Guide, published by Bluedale Publishing, is Kuala Lumpur’s most widely distributed travel information guide, 
-              trusted by millions of travellers and locals alike. Available in print, digital, and online formats, 
-              it serves as a non-expiring travel companion that highlights the best of KL across food, accommodation, 
+            <p>KL The Guide, published by Bluedale Publishing, is Kuala Lumpur's most widely distributed travel information guide,
+              trusted by millions of travellers and locals alike. Available in print, digital, and online formats,
+              it serves as a non-expiring travel companion that highlights the best of KL across food, accommodation,
               shopping, outdoor activities, nightlife, family fun, and cultural experiences.</p>
 
 
@@ -113,8 +114,8 @@
 
             <p>Available for free on both <a href="https://play.google.com/store/apps/details?id=my.com.kltheguide" target="blank">Google Play Store</a> 
               and the <a href="https://apps.apple.com/my/app/kl-the-guide/id1541581263" target="blank">Apple App Store</a>, KL The Guide is designed to 
-              make every journey through Malaysia’s capital city seamless and memorable. Whether you’re an international traveller or a local explorer, 
-              our app puts everything you need at your fingertips. From must-see landmarks and hidden gems, to the city’s best eats, cultural treasures, 
+              make every journey through Malaysia's capital city seamless and memorable. Whether you're an international traveller or a local explorer,
+              our app puts everything you need at your fingertips. From must-see landmarks and hidden gems, to the city's best eats, cultural treasures,
               and stylish cafés.</p>
 
 
@@ -125,7 +126,7 @@
               <p>Start your Kuala Lumpur adventure today! Download the app and let the city surprise you with its colours, flavours, 
                 and stories waiting to be explored.</p>
 
-              <p><strong>Culture, Cuisine, and City Life – All in One Guide.</strong></p>
+              <p><strong>Culture, Cuisine, and City Life - All in One Guide.</strong></p>
 
 
 
@@ -179,118 +180,359 @@
     <!-- End Testimonials Section -->
 
 
-    <!-- ======= F.A.Q Section ======= -->
-    <section id="faq" class="faq my-2">
-      <div class="container-fluid" data-aos="fade-up">
+    <!-- ======= Dual Panel: FAQ + Bluedale ======= -->
+    <style>
+      .dual-panels { padding: 70px 0; background: #f8fbfc; }
 
-        <div class="row gy-4">
+      .dp-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+      @media (max-width: 768px) { .dp-row { grid-template-columns: 1fr; } }
 
-          <div class="col-lg-7 d-flex flex-column justify-content-center align-items-stretch  order-2 order-lg-1">
+      .dp-panel {
+        background: #fff;
+        border-radius: 20px;
+        border: 2px solid #e8f4f8;
+        overflow: hidden;
+        transition: box-shadow .35s, border-color .35s, opacity .35s, transform .35s;
+        display: flex;
+        flex-direction: column;
+      }
+      .dp-panel:hover { border-color: rgba(14,162,189,.45); }
+      .dp-panel.dp-open {
+        box-shadow: 0 16px 50px rgba(14,162,189,.18);
+        border-color: #0ea2bd;
+        transform: translateY(-4px);
+      }
+      .dp-panel.dp-inactive { opacity: .45; transform: scale(.99); }
 
-            <div class="content px-xl-5">
-              <h3>Frequently Asked <strong>Questions</strong></h3>
-              <!-- <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Duis aute irure dolor in reprehenderit
-              </p> -->
+      .dp-header {
+        padding: 32px 32px 28px;
+        cursor: pointer;
+        user-select: none;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .dp-tag {
+        display: inline-block;
+        background: rgba(14,162,189,.1);
+        color: #0ea2bd;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 5px 16px;
+        border-radius: 50px;
+        margin-bottom: 16px;
+      }
+      .dp-title {
+        font-size: clamp(1.25rem, 2vw, 1.7rem);
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 10px;
+        line-height: 1.3;
+      }
+      .dp-title span { color: #0ea2bd; }
+      .dp-subtitle {
+        color: #718096;
+        font-size: 0.91rem;
+        line-height: 1.65;
+        margin: 0 0 20px;
+      }
+      .dp-expand-hint {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #a0aec0;
+        font-size: 0.83rem;
+        font-weight: 600;
+        transition: color .25s;
+        margin-top: auto;
+      }
+      .dp-expand-hint i { transition: transform .35s; font-size: 1rem; }
+      .dp-panel.dp-open .dp-expand-hint { color: #0ea2bd; }
+      .dp-panel.dp-open .dp-expand-hint i { transform: rotate(180deg); }
+
+      .dp-body {
+        height: 0;
+        overflow: hidden;
+        transition: height .4s ease;
+      }
+      .dp-body-inner {
+        padding: 0 32px 32px;
+        border-top: 1.5px solid #e8f4f8;
+      }
+
+      /* FAQ items */
+      .dp-faq-item { border-bottom: 1px solid #f0f4f8; }
+      .dp-faq-item:last-child { border-bottom: none; }
+      .dp-faq-btn {
+        width: 100%;
+        background: none;
+        border: none;
+        padding: 15px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .dp-faq-num {
+        flex-shrink: 0;
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: rgba(14,162,189,.1);
+        color: #0ea2bd;
+        font-size: 0.7rem;
+        font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        margin-top: 2px;
+        transition: background .25s, color .25s;
+      }
+      .dp-faq-item.dp-faq-open .dp-faq-num { background: #0ea2bd; color: #fff; }
+      .dp-faq-q {
+        flex: 1;
+        font-size: 0.91rem;
+        font-weight: 600;
+        color: #2d3748;
+        line-height: 1.45;
+      }
+      .dp-faq-chev {
+        flex-shrink: 0;
+        color: #0ea2bd;
+        font-size: 0.95rem;
+        margin-top: 4px;
+        transition: transform .3s;
+      }
+      .dp-faq-item.dp-faq-open .dp-faq-chev { transform: rotate(180deg); }
+      .dp-faq-answer { height: 0; overflow: hidden; transition: height .3s ease; padding-left: 41px; }
+      .dp-faq-answer-inner { padding: 0 0 13px; color: #718096; font-size: 0.87rem; line-height: 1.7; }
+      .dp-faq-answer-inner a { color: #0ea2bd; font-weight: 600; text-decoration: none; }
+      .dp-faq-answer-inner a:hover { text-decoration: underline; }
+
+      /* Bluedale info rows */
+      .dp-bd-row {
+        display: flex; gap: 15px; align-items: flex-start;
+        padding: 18px 0; border-bottom: 1px solid #f0f4f8;
+      }
+      .dp-bd-row:last-of-type { border-bottom: none; padding-bottom: 4px; }
+      .dp-bd-icon {
+        flex-shrink: 0;
+        width: 42px; height: 42px; border-radius: 12px;
+        background: rgba(14,162,189,.1); color: #0ea2bd; font-size: 1.2rem;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .dp-bd-text h4 { font-size: 0.95rem; font-weight: 700; color: #2d3748; margin: 0 0 5px; }
+      .dp-bd-text p  { font-size: 0.87rem; color: #718096; line-height: 1.7; margin: 0; }
+
+      .dp-bd-cta {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 16px; flex-wrap: wrap;
+        background: linear-gradient(135deg, #0ea2bd 0%, #0881a0 100%);
+        border-radius: 14px; padding: 20px 22px; margin-top: 18px;
+      }
+      .dp-bd-cta p { color: rgba(255,255,255,.9); font-size: 0.88rem; line-height: 1.55; margin: 0; flex: 1; }
+      .dp-bd-cta a {
+        flex-shrink: 0;
+        display: inline-flex; align-items: center; gap: 7px;
+        background: #fff; color: #0ea2bd;
+        font-weight: 700; font-size: 0.88rem;
+        padding: 10px 22px; border-radius: 50px;
+        text-decoration: none; white-space: nowrap;
+        transition: background .25s, color .25s, transform .2s;
+      }
+      .dp-bd-cta a:hover { background: rgba(255,255,255,.15); color: #fff; transform: translateY(-2px); }
+
+      @media (max-width: 576px) {
+        .dp-header { padding: 22px 20px 18px; }
+        .dp-body-inner { padding: 0 20px 24px; }
+        .dp-bd-cta { flex-direction: column; text-align: center; }
+      }
+    </style>
+
+    <section id="info-panels" class="dual-panels">
+      <div class="container" data-aos="fade-up">
+        <div class="dp-row">
+
+          <!-- ====== FAQ Panel ====== -->
+          <div class="dp-panel" id="dpFaq">
+            <div class="dp-header" onclick="dpToggle('dpFaq')">
+              <span class="dp-tag">Got Questions?</span>
+              <h2 class="dp-title">Frequently Asked <span>Questions</span></h2>
+              <p class="dp-subtitle">Everything you need to know about KL The Guide and exploring Kuala Lumpur.</p>
+              <div class="dp-expand-hint"><span>Click to explore</span><i class="bi bi-chevron-down"></i></div>
             </div>
+            <div class="dp-body" id="dpFaqBody">
+              <div class="dp-body-inner">
 
-            <div class="accordion accordion-flush px-xl-5" id="faqlist">
-
-              <div class="accordion-item" data-aos="fade-up" data-aos-delay="200">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#faq-content-1">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    How do I book a flight/hotel/car rental on your website?
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">01</span>
+                    <span class="dp-faq-q">Can I book a flight, hotel, or car rental on your website?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
                   </button>
-                </h3>
-                <div id="faq-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    You are not able to place any bookings on our website. KL The Guide only provides travel
-                    information and guides in Kuala Lumpur.
-                  </div>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>KL The Guide is a travel information platform, not a booking engine. We don't handle reservations directly — but we do point you to the best places to stay, eat, shop, and explore across Kuala Lumpur.</p>
+                  </div></div>
                 </div>
-              </div><!-- # Faq item-->
 
-              <div class="accordion-item" data-aos="fade-up" data-aos-delay="300">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#faq-content-2">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    What are the top tourist attractions in Kuala Lumpur?
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">02</span>
+                    <span class="dp-faq-q">What are the top tourist attractions in Kuala Lumpur?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
                   </button>
-                </h3>
-                <div id="faq-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    You are able to look at our eBook library to explore many different places in KL in all our KL The
-                    Guide eBook editions.
-                  </div>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>From KLCC and Batu Caves to Merdeka 118 and Thean Hou Temple, KL is packed with iconic spots. Head to our <a href="explorekl.php#explorekl">Explore KL</a> page for a curated guide to the city's must-see landmarks, historical sites, and hidden gems.</p>
+                  </div></div>
                 </div>
-              </div><!-- # Faq item-->
 
-              <div class="accordion-item" data-aos="fade-up" data-aos-delay="400">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#faq-content-3">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    What are the popular shopping areas or markets in Kuala Lumpur?
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">03</span>
+                    <span class="dp-faq-q">What are the popular shopping areas or markets in Kuala Lumpur?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
                   </button>
-                </h3>
-                <div id="faq-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    Bukit Bintang is where the upscale shopping centres are located, where you can find various
-                    international luxury brands for a shopping spree in KL.
-                    <br>
-                    For markets, Petaling Street is one of the well-known markets where you may get fantastic
-                    discounts. Check out more local markets on the KL The Guide website.
-
-                  </div>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>Bukit Bintang is the hub for upscale malls and international brands, while Petaling Street is the go-to for vibrant street markets and great bargains. Discover the full shopping scene on our <a href="where-to-shop.php">Where to Shop</a> page.</p>
+                  </div></div>
                 </div>
-              </div><!-- # Faq item-->
 
-              <div class="accordion-item" data-aos="fade-up" data-aos-delay="500">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#faq-content-4">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    Can you recommend any good restaurants or local dishes in KL?
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">04</span>
+                    <span class="dp-faq-q">Can you recommend good restaurants or local dishes in KL?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
                   </button>
-                </h3>
-                <div id="faq-content-4" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    Of course! Do check out our KL The Guide website for some of the best recommendations, or flip
-                    through one of our KL The Guide eBooks for more options.
-                  </div>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>Absolutely! KL's food scene is world-class — from Nasi Lemak and Char Kway Teow to fine-dining rooftops. Check out the <a href="explorekl.php#tab-4">What To Eat</a> section in Explore KL for our curated picks.</p>
+                  </div></div>
                 </div>
-              </div><!-- # Faq item-->
 
-              <div class="accordion-item" data-aos="fade-up" data-aos-delay="600">
-                <h3 class="accordion-header">
-                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#faq-content-5">
-                    <i class="bi bi-question-circle question-icon"></i>
-                    Are there any recommendations for activities in KL that are family-friendly?
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">05</span>
+                    <span class="dp-faq-q">Are there family-friendly activities in KL?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
                   </button>
-                </h3>
-                <div id="faq-content-5" class="accordion-collapse collapse" data-bs-parent="#faqlist">
-                  <div class="accordion-body">
-                    Yes there are! Open any of our KL The Guide eBooks and flip to ‘KL For Kids’ page, and you will find
-                    many family-friendly activities and places to visit in Kuala Lumpur.
-                  </div>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>Plenty! KL has something for every age — theme parks, interactive museums, nature parks, and more. Browse our <a href="explorekl.php#tab-6">KL 4 Kids</a> section for a hand-picked list of family-friendly activities and attractions.</p>
+                  </div></div>
                 </div>
-              </div><!-- # Faq item-->
 
+                <div class="dp-faq-item">
+                  <button class="dp-faq-btn" onclick="dpFaqToggle(this)">
+                    <span class="dp-faq-num">06</span>
+                    <span class="dp-faq-q">Does KL The Guide have a mobile app?</span>
+                    <i class="bi bi-chevron-down dp-faq-chev"></i>
+                  </button>
+                  <div class="dp-faq-answer"><div class="dp-faq-answer-inner">
+                    <p>Yes! The KL The Guide app is available for free on <a href="https://play.google.com/store/apps/details?id=my.com.kltheguide" target="_blank">Google Play Store</a> and the <a href="https://apps.apple.com/my/app/kl-the-guide/id1541581263" target="_blank">Apple App Store</a>. Your complete KL companion, right in your pocket.</p>
+                  </div></div>
+                </div>
+
+              </div>
             </div>
-
           </div>
 
-          <div class="col-lg-5 faq2 align-items-stretch order-1 order-lg-2 img">&nbsp;</div>
-        </div>
+          <!-- ====== Bluedale Panel ====== -->
+          <div class="dp-panel" id="dpBluedale">
+            <div class="dp-header" onclick="dpToggle('dpBluedale')">
+              <span class="dp-tag">Our Parent Company</span>
+              <h2 class="dp-title">About <span>Bluedale Group of Companies</span></h2>
+              <p class="dp-subtitle">KL The Guide is proudly part of Bluedale Group — a Malaysian-based conglomerate spanning media, publishing, digital services, and recruitment.</p>
+              <div class="dp-expand-hint"><span>Click to explore</span><i class="bi bi-chevron-down"></i></div>
+            </div>
+            <div class="dp-body" id="dpBluedaleBody">
+              <div class="dp-body-inner">
 
+                <div class="dp-bd-row">
+                  <div class="dp-bd-icon"><i class="bi bi-buildings"></i></div>
+                  <div class="dp-bd-text">
+                    <h4>Who We Are</h4>
+                    <p>Bluedale Group of Companies is a growing Malaysian conglomerate connecting people, businesses, and experiences through innovative media and digital platforms. Our brands serve millions across Malaysia and beyond.</p>
+                  </div>
+                </div>
+
+                <div class="dp-bd-row">
+                  <div class="dp-bd-icon"><i class="bi bi-lightbulb"></i></div>
+                  <div class="dp-bd-text">
+                    <h4>What We Do</h4>
+                    <p>From travel publishing and digital advertising to community-driven platforms, Bluedale Group creates meaningful content that informs, inspires, and engages. KL The Guide is one of our flagship brands reaching over 16 million people.</p>
+                  </div>
+                </div>
+
+                <div class="dp-bd-row">
+                  <div class="dp-bd-icon"><i class="bi bi-globe-asia-australia"></i></div>
+                  <div class="dp-bd-text">
+                    <h4>Our Vision</h4>
+                    <p>We build homegrown Malaysian brands that make a global impact. Through creativity, technology, and a passion for storytelling, we shape how Malaysia is seen and experienced by the world.</p>
+                  </div>
+                </div>
+
+                <div class="dp-bd-cta">
+                  <p><strong>We're Hiring!</strong> Are you passionate about media, travel, or digital content? Explore open roles and grow your career with Bluedale.</p>
+                  <a href="https://bluedale.com.my/" target="_blank" rel="noopener noreferrer"><i class="bi bi-briefcase"></i> View Opportunities</a>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </section><!-- End F.A.Q Section -->
+    </section><!-- End Dual Panel Section -->
+
+
+    <script>
+      function dpToggle(panelId) {
+        var panel = document.getElementById(panelId);
+        var body  = panel.querySelector('.dp-body');
+        var isOpen = panel.classList.contains('dp-open');
+
+        if (isOpen) {
+          body.style.height = body.scrollHeight + 'px';
+          panel.classList.remove('dp-open');
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { body.style.height = '0px'; });
+          });
+        } else {
+          panel.classList.add('dp-open');
+          body.style.height = body.scrollHeight + 'px';
+          body.addEventListener('transitionend', function onEnd() {
+            body.style.height = 'auto';
+            body.removeEventListener('transitionend', onEnd);
+          }, { once: true });
+        }
+
+        var allPanels = document.querySelectorAll('.dp-panel');
+        var active    = document.querySelector('.dp-panel.dp-open');
+        allPanels.forEach(function(p) {
+          p.classList.toggle('dp-inactive', !!(active && !p.classList.contains('dp-open')));
+        });
+      }
+
+      function dpFaqToggle(btn) {
+        var item   = btn.closest('.dp-faq-item');
+        var answer = item.querySelector('.dp-faq-answer');
+        var inner  = item.querySelector('.dp-faq-answer-inner');
+        var isOpen = item.classList.contains('dp-faq-open');
+
+        document.querySelectorAll('.dp-faq-item.dp-faq-open').forEach(function(el) {
+          el.classList.remove('dp-faq-open');
+          el.querySelector('.dp-faq-answer').style.height = '0px';
+        });
+
+        if (!isOpen) {
+          item.classList.add('dp-faq-open');
+          answer.style.height = inner.offsetHeight + 'px';
+        }
+      }
+    </script>
 
 
     <div class="row d-flex justify-content-center btmbanner mt-4">

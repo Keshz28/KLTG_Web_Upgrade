@@ -1,4 +1,14 @@
 <?php
+/* ============================================================================
+ *                              functions.php
+ *
+ *   THE CENTRAL HUB for the whole site. Loads Composer autoload + .env, starts
+ *   the session, opens the MySQL connection ($db), wires PHPMailer + WebPush, and
+ *   handles incoming POST actions (email/push queue drain, banner tracking).
+ *   Every public AND admin page depends on this file.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 include 'vendor/autoload.php';
 
 use Dotenv\Dotenv;
@@ -17,6 +27,29 @@ if (class_exists('Dotenv\\Dotenv')) {
 
 session_start();
 
+// Generate CSRF token once per session
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// Prevent bfcache on admin pages so the session check always runs on navigation
+if (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: Sat, 01 Jan 2000 00:00:00 GMT');
+
+    // Session timeout: 30 minutes of inactivity
+    if (isset($_SESSION['username'])) {
+        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+            session_unset();
+            session_destroy();
+            header('Location: login.php?timeout=1');
+            exit;
+        }
+        $_SESSION['last_activity'] = time();
+    }
+}
+
 // ---- IMPROVED DB CONNECTION ----
 mysqli_report(MYSQLI_REPORT_OFF);
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -30,10 +63,55 @@ function envv($k, $d = null)
     return ($v !== false && $v !== '') ? $v : $d;
 }
 
+/**
+ * Map a category-tile label to a Bootstrap Icons class. Keyword-based and
+ * case-insensitive so small CMS label tweaks still match; falls back to a
+ * neutral compass. Used by the polished tile menus on explorekl / beyondkl /
+ * accommodation / medical-tourism. Returns just the icon class (e.g. "bi-tree").
+ */
+function tileIcon($label)
+{
+    $l = strtolower(trim((string) $label));
+    // Order matters: more specific keywords first (e.g. "budget" before "hotel").
+    $map = [
+        'what to do'  => 'bi-stars',
+        'historical'  => 'bi-bank',
+        'worship'     => 'bi-building',
+        'eat'         => 'bi-egg-fried',
+        'night'       => 'bi-moon-stars',
+        'kids'        => 'bi-balloon-heart',
+        'sightsee'    => 'bi-binoculars',
+        'park'        => 'bi-tree',
+        'island'      => 'bi-water',
+        'hill'        => 'bi-thermometer-sun',
+        'waterfall'   => 'bi-droplet',
+        'hik'         => 'bi-signpost-2',
+        'extreme'     => 'bi-bicycle',
+        'sport'       => 'bi-bicycle',
+        'budget'      => 'bi-cash-coin',
+        'backpack'    => 'bi-house-door',
+        'lodge'       => 'bi-house-door',
+        'top places'  => 'bi-star-fill',
+        'stay'        => 'bi-star-fill',
+        'hotel'       => 'bi-building-fill',
+        'health'      => 'bi-heart-pulse',
+        'dental'      => 'bi-emoji-smile',
+        'derma'       => 'bi-bandaid',
+        'ophthal'     => 'bi-eye',
+        'eye'         => 'bi-eye',
+        'plastic'     => 'bi-scissors',
+        'surgery'     => 'bi-scissors',
+    ];
+    foreach ($map as $kw => $icon) {
+        if ($l !== '' && strpos($l, $kw) !== false) return $icon;
+    }
+    return 'bi-compass';
+}
+
 // Try to get credentials from environment first
 $db_host = envv('DB_HOST', 'localhost');  // default localhost
 $db_user = envv('DB_USER', 'kltheguidecom_user');
-$db_pass = envv('DB_PASS', 've5L$u6LDRey');
+$db_pass = isset($_ENV['DB_PASS']) ? $_ENV['DB_PASS'] : (getenv('DB_PASS') ?: '');
 $db_name = envv('DB_NAME', 'kltheguidecom_bluedale2_kltg');
 
 
@@ -58,6 +136,15 @@ if (!$db_host || !$db_user || !$db_name) {
         $db_pass = 'YOUR_PRODUCTION_DB_PASSWORD';  // ← CHANGE THIS
         $db_name = 'YOUR_PRODUCTION_DB_NAME';      // ← CHANGE THIS
     }
+}
+
+// Legacy debug helper used by ~124 calls in the edit/delete handlers. The only
+// real definition lives in test2/ (not loaded here), so without this stub those
+// handler branches fatal with "Call to undefined function". A no-op is correct:
+// the original echoed a <script> tag, which would also break the header()
+// redirects that follow these calls.
+if (!function_exists('debug_to_console')) {
+    function debug_to_console($data) { /* no-op */ }
 }
 
 // Attempt connection
@@ -157,9 +244,9 @@ function send_email_html(string $to, string $subject, string $html, ?string $fro
         //$user = 'marketing@bluedale.com.my' ?? 'marketing@bluedale.com.my';
         //$pass = 'BluedaleMarketing#001' ?? 'BluedaleMarketing#001';
         
-        $host = $_ENV['MAIL_HOST4'] ?? 'mail.bluedale.com.my';
-        $user = $_ENV['MAIL_USER4'] ?? 'marketing@bluedale.com.my';
-        $pass = $_ENV['MAIL_PASS4'] ?? 'BluedaleMarketing#001';
+        $host = $_ENV['MAIL_HOST4'] ?? '';
+        $user = $_ENV['MAIL_USER4'] ?? '';
+        $pass = $_ENV['MAIL_PASS4'] ?? '';
         $port = (int)($_ENV['MAIL_PORT1'] ?? 465); // 465=SSL, 587=TLS
 
         if (!$host || !$user || !$pass) {
@@ -436,13 +523,109 @@ function uploadpdf($formname, $folder, $category)
         return false;
     }
 
-    // 4️⃣ File size limit (20MB)
-    if ($formname['size'] > 20 * 1024 * 1024) {
+    // 4️⃣ File size limit (100MB)
+    if ($formname['size'] > 100 * 1024 * 1024) {
         return false;
     }
 
     // 5️⃣ Move file
     return move_uploaded_file($formname['tmp_name'], $target) ? $name : false;
+}
+
+
+/**
+ * Upload an e-book cover into assets/img/ebook/<category>/.
+ * Unlike uploadimage(), this also accepts a PDF cover (validated by its
+ * %PDF magic header) so a cover can be a pdf, jpg, jpeg, png or webp.
+ * Returns the sanitized stored filename, or false on any failure.
+ */
+function uploadcover($formname, $category)
+{
+    $dir = rtrim("../assets/img/ebook/$category", '/') . '/';
+    ensure_dir($dir);
+
+    $allowed_ext = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+
+    // Sanitize filename
+    $name = preg_replace('/[^a-zA-Z0-9._-]/', '', basename($formname['name']));
+    $target = $dir . $name;
+
+    // 1️⃣ Validate extension
+    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed_ext)) {
+        return false;
+    }
+
+    // 2️⃣ Validate the actual file contents
+    if ($ext === 'pdf') {
+        $fh = fopen($formname['tmp_name'], 'rb');
+        if (!$fh) return false;
+        $header = fread($fh, 4);
+        fclose($fh);
+        if ($header !== '%PDF') return false;
+    } else {
+        if (!getimagesize($formname['tmp_name'])) return false;
+    }
+
+    // 3️⃣ File size limit (20MB)
+    if ($formname['size'] > 20 * 1024 * 1024) {
+        return false;
+    }
+
+    // 4️⃣ Prevent overwrite
+    if (file_exists($target)) {
+        return false;
+    }
+
+    // 5️⃣ Move file
+    return move_uploaded_file($formname['tmp_name'], $target) ? $name : false;
+}
+
+
+/**
+ * Return the e-book categories as [cat_code => ['title'=>..., 'desc'=>...]].
+ * Reads the ebook_category table (managed from the admin dashboard). If that
+ * table is missing or empty (e.g. the migration hasn't been applied yet) it
+ * falls back to the original hard-coded list so the public page never breaks.
+ *
+ * @param mysqli $db
+ * @param bool   $onlyVisible  When true, hidden categories are skipped.
+ */
+function ebook_categories($db, $onlyVisible = false)
+{
+    $cats = [];
+    $sql = "SELECT cat_code, cat_title, cat_desc, cat_visible
+            FROM ebook_category
+            ORDER BY cat_order ASC, cat_id ASC";
+    $res = @mysqli_query($db, $sql);
+
+    if ($res && mysqli_num_rows($res) > 0) {
+        while ($r = mysqli_fetch_assoc($res)) {
+            if ($onlyVisible && (int) $r['cat_visible'] !== 1) continue;
+            $cats[$r['cat_code']] = [
+                'title' => $r['cat_title'],
+                'desc'  => $r['cat_desc'] ?? '',
+            ];
+        }
+        if (!empty($cats)) return $cats;
+    }
+
+    // Fallback: original hard-coded list (used only if the table is absent).
+    return [
+        'kltg' => ['title' => 'KL The Guide', 'desc' => "Unlock the ultimate trip to Kuala Lumpur. Our exclusive KL The Guide eBooks pack everything you need into one place. Detailed itineraries, local secrets and cultural deep dives."],
+        'kv4l' => ['title' => 'Klang Valley 4 Locals', 'desc' => "The Klang Valley 4 Locals eBooks are exclusive guides specially crafted for locals, helping them to uncover the hidden gems and unique experiences within the vibrant Klang Valley region."],
+        'mktg' => ['title' => 'Melaka The Guide', 'desc' => 'Experience the enchanting city of Melaka like never before with Melaka The Guide eBooks!'],
+        'tptg' => ['title' => 'Taiping The Guide', 'desc' => "Discover the charming town of Taiping with Taiping The Guide eBooks."],
+        'uztg' => ['title' => 'Uzbekistan The Guide', 'desc' => 'Embark on a remarkable journey to the enchanting country of Uzbekistan with Uzbekistan The Guide eBook.'],
+        'kntg' => ['title' => 'Keningau The Guide', 'desc' => 'Discover the ultimate travel companion for your upcoming journey to Keningau!'],
+        'twtg' => ['title' => 'Tawau The Guide', 'desc' => "Unlock a treasure trove of invaluable information and expert recommendations with Tawau The Guide eBook!"],
+        'tbtg' => ['title' => 'Tambunan The Guide', 'desc' => 'Immerse yourself in the rich culture, vibrant traditions, and breathtaking landscapes that Tambunan has to offer.'],
+        'hstg' => ['title' => 'Hulu Selangor The Guide', 'desc' => "Immerse yourself in the natural beauty, historical landmarks, and cultural richness of this hidden gem."],
+        'prtg' => ['title' => 'Perak The Guide', 'desc' => "Embark on an extraordinary journey through Perak's wonders with Perak The Guide eBooks."],
+        'sbtg' => ['title' => 'Seremban The Guide', 'desc' => 'Unlock the wonders of Seremban with Seremban The Guide eBook.'],
+        'kstg' => ['title' => 'Kuala Selangor The Guide', 'desc' => 'Discover Kuala Selangor like never before with our comprehensive Kuala Selangor The Guide eBook!'],
+        'klgt' => ['title' => 'Kuala Langat The Guide', 'desc' => "Explore the enchanting town of Kuala Langat with Kuala Langat The Guide."],
+    ];
 }
 
 
@@ -458,6 +641,59 @@ function app_base_url(): string
 function brand_name(): string
 {
     return 'KL The Guide'; // or read from env/config if you have it
+}
+
+// === Login rate limiting (file-based, per IP, max 5 attempts / 15 min) ===
+function login_rate_limit_check(): ?string {
+    $ip   = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $file = sys_get_temp_dir() . '/kltg_login_' . md5($ip) . '.json';
+    if (!file_exists($file)) return null;
+    $data = @json_decode(file_get_contents($file), true);
+    if (!$data) return null;
+    if (time() >= $data['reset_at']) { @unlink($file); return null; }
+    if ($data['attempts'] >= 5) {
+        $wait = max(1, (int) ceil(($data['reset_at'] - time()) / 60));
+        return "Too many failed login attempts. Try again in {$wait} minute(s).";
+    }
+    return null;
+}
+
+function login_rate_limit_fail(): void {
+    $ip   = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $file = sys_get_temp_dir() . '/kltg_login_' . md5($ip) . '.json';
+    $data = ['attempts' => 1, 'reset_at' => time() + 900];
+    if (file_exists($file)) {
+        $prev = @json_decode(file_get_contents($file), true);
+        if ($prev && time() < $prev['reset_at']) {
+            $data = ['attempts' => $prev['attempts'] + 1, 'reset_at' => $prev['reset_at']];
+        }
+    }
+    @file_put_contents($file, json_encode($data), LOCK_EX);
+}
+
+function login_rate_limit_clear(): void {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    @unlink(sys_get_temp_dir() . '/kltg_login_' . md5($ip) . '.json');
+}
+
+// === CSRF helpers ===
+function csrf_token(): string {
+    return $_SESSION['csrf_token'] ?? '';
+}
+
+function csrf_field(): string {
+    $t = htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8');
+    return '<input type="hidden" name="csrf_token" value="' . $t . '">';
+}
+
+function csrf_check(): void {
+    $token     = $_SESSION['csrf_token'] ?? '';
+    $submitted = $_POST['csrf_token'] ?? '';
+    if (!$token || !hash_equals($token, $submitted)) {
+        http_response_code(403);
+        error_log('CSRF check failed: ' . ($_SERVER['REQUEST_URI'] ?? '') . ' from ' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+        die('Request validation failed. Please go back and try again.');
+    }
 }
 
 // === INSERT HERE (security helper) ===
@@ -745,6 +981,14 @@ function sendpushnotification($db, $pushtitle, $pushcontent)
 
 // REGISTER USER
 if (isset($_POST['reg_user'])) {
+    // SECURITY: account creation is admin-only. This handler is reachable from
+    // any page that includes functions.php, so the gate must live here (not just
+    // in register.php's view guard). Reject anyone who is not already logged in.
+    if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+        $_SESSION['msg'] = "You must log in first";
+        header('location: login.php');
+        exit;
+    }
     // receive all input values from the form
     $username = mysqli_real_escape_string($db, $_POST['username']);
     $email = mysqli_real_escape_string($db, $_POST['email']);
@@ -797,32 +1041,43 @@ if (isset($_POST['reg_user'])) {
         $_SESSION['username'] = $username;
         $_SESSION['success'] = "You are now logged in";
         header('location: index.php');
+        exit;
     }
 }
 
 
 // LOGIN USER
 if (isset($_POST['login_user'])) {
-    $username = mysqli_real_escape_string($db, $_POST['username']);
-    $password = mysqli_real_escape_string($db, $_POST['password']);
+    $rl_error = login_rate_limit_check();
+    if ($rl_error) {
+        array_push($errors, $rl_error);
+    } else {
+        $username = mysqli_real_escape_string($db, $_POST['username']);
+        $password = mysqli_real_escape_string($db, $_POST['password']);
 
-    if (empty($username)) {
-        array_push($errors, "Username is required");
-    }
-    if (empty($password)) {
-        array_push($errors, "Password is required");
-    }
+        if (empty($username)) {
+            array_push($errors, "Username is required");
+        }
+        if (empty($password)) {
+            array_push($errors, "Password is required");
+        }
 
-    if (count($errors) == 0) {
-        $password = md5($password);
-        $query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
-        $results = mysqli_query($db, $query);
-        if (mysqli_num_rows($results) == 1) {
-            $_SESSION['username'] = $username;
-            $_SESSION['success'] = "You are now logged in";
-            header('location: index.php');
-        } else {
-            array_push($errors, "Wrong username/password combination");
+        if (count($errors) == 0) {
+            $password = md5($password);
+            $query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+            $results = mysqli_query($db, $query);
+            if (mysqli_num_rows($results) == 1) {
+                login_rate_limit_clear();
+                session_regenerate_id(true);
+                $_SESSION['username'] = $username;
+                $_SESSION['success'] = "You are now logged in";
+                $_SESSION['last_activity'] = time();
+                header('location: index.php');
+                exit;
+            } else {
+                login_rate_limit_fail();
+                array_push($errors, "Wrong username/password combination");
+            }
         }
     }
 }
@@ -878,7 +1133,7 @@ if (isset($_POST['subscribe'])) {
             $content = $row2['content'];
         }
 
-        send_email_html($email, $title, $html, 'KL The Guide');
+        send_email_html($email, $title, $content, 'KL The Guide');
 
 
         echo "<script>
@@ -889,6 +1144,8 @@ if (isset($_POST['subscribe'])) {
 
 //email send
 if (isset($_POST['sendmail'])) {
+    if (!isset($_SESSION['username'])) { http_response_code(403); exit; }
+    csrf_check();
 
     $emailcontent = $_POST['emailcontent'];
     $emailtitle = $_POST['emailtitle'];
@@ -904,10 +1161,23 @@ if (isset($_POST['sendmail'])) {
     }
 }
 if (isset($_POST['sendinternal'])) {
+    if (!isset($_SESSION['username'])) { http_response_code(403); exit; }
+    csrf_check();
 
-
-
-    $file = $_POST['file'];
+    $allowed_email_templates = [
+        'article-061123.php', 'article-120124.php', 'article-271223.php',
+        'article-311023.php', 'article-coco011223.php', 'article-glemarie-140923.php',
+        'article-goldenlounge-171123.php', 'article-kv4l.php', 'article-madamkwan-221123.php',
+        'article.php', 'article151223.php', 'article190124.php', 'article81223.php',
+        'billboard.php',
+    ];
+    $requested = basename($_POST['file'] ?? '');
+    if (!in_array($requested, $allowed_email_templates, true)) {
+        error_log('sendinternal: blocked disallowed template: ' . $requested);
+        http_response_code(400);
+        exit;
+    }
+    $file = __DIR__ . '/email/' . $requested;
     ob_start();
     require_once $file;
 
@@ -944,10 +1214,23 @@ if (isset($_POST['sendinternal'])) {
 
 
 if (isset($_POST['queuemail'])) {
+    if (!isset($_SESSION['username'])) { http_response_code(403); exit; }
+    csrf_check();
 
-
-
-    $file = $_POST['file'];
+    $allowed_email_templates = [
+        'article-061123.php', 'article-120124.php', 'article-271223.php',
+        'article-311023.php', 'article-coco011223.php', 'article-glemarie-140923.php',
+        'article-goldenlounge-171123.php', 'article-kv4l.php', 'article-madamkwan-221123.php',
+        'article.php', 'article151223.php', 'article190124.php', 'article81223.php',
+        'billboard.php',
+    ];
+    $requested = basename($_POST['file'] ?? '');
+    if (!in_array($requested, $allowed_email_templates, true)) {
+        error_log('queuemail: blocked disallowed template: ' . $requested);
+        http_response_code(400);
+        exit;
+    }
+    $file = $requested;
     // ob_start();
     // require_once $file;
 
@@ -994,7 +1277,8 @@ if (isset($_POST['queuemail'])) {
 
 //pushnotification
 if (isset($_POST['sendpushnotification'])) {
-
+    if (!isset($_SESSION['username'])) { http_response_code(403); exit; }
+    csrf_check();
 
     $pushtitle = $_POST['pushtitle'];
     $pushcontent = $_POST['pushcontent'];
@@ -1076,17 +1360,24 @@ if (isset($_POST['sendpushnotification'])) {
 //post user sub data to db
 if (isset($_POST['sub'])) {
 
-    $p256dh = json_decode($_POST["sub"])->keys->p256dh;
-    $auth = json_decode($_POST["sub"])->keys->auth;
-    $endpoint = json_decode($_POST["sub"])->endpoint;
-    var_dump(json_decode($_POST["sub"], true));
+    $subData = json_decode($_POST["sub"]);
+    $p256dh = $subData->keys->p256dh;
+    $auth = $subData->keys->auth;
+    $endpoint = $subData->endpoint;
 
-
-    $query = "INSERT INTO pushsub (endpoint, p256dh, auth) 
-    VALUES('$endpoint', '$p256dh', '$auth')";
-    mysqli_query($db, $query);
+    $stmt = mysqli_prepare($db, "INSERT INTO pushsub (endpoint, p256dh, auth) VALUES (?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "sss", $endpoint, $p256dh, $auth);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
 }
 
+
+// Central CSRF guard: fires once before all pagefunctions.
+// Covers all 26 pagefunctions handlers without touching each file.
+// Only enforced on admin pages with an active session (public POST routes are unaffected).
+if (!empty($_POST) && isset($_SESSION['username']) && strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
+    csrf_check();
+}
 
 include 'pagefunctions/sub.php';
 
@@ -1094,6 +1385,7 @@ include 'pagefunctions/edit-index.php';
 include 'pagefunctions/edit-pageviews.php';
 include 'pagefunctions/edit-blog.php';
 include 'pagefunctions/edit-ebook.php';
+include 'pagefunctions/edit-merchandise.php';
 
 
 include 'pagefunctions/edit-explorekl-wte.php';
@@ -1113,6 +1405,8 @@ include 'pagefunctions/edit-beyondkl-i.php';
 
 include 'pagefunctions/edit-highlights-1.php';
 
+include 'pagefunctions/edit-klglance.php';
+
 include 'pagefunctions/edit-accomodation.php';
 
 include 'pagefunctions/edit-pts.php';
@@ -1121,6 +1415,7 @@ include 'pagefunctions/edit-spa.php';
 
 include 'pagefunctions/edit-mt.php';
 include 'pagefunctions/edit-ev.php';
+include 'pagefunctions/edit-advertisement.php';
 
 
 if (isset($_POST['fetch_events'])) {
@@ -1538,6 +1833,27 @@ if (isset($_POST['appMedicalT_oph'])) {
 }
 
 
+
+
+if (isset($_POST['appMedicalT_ps'])) {
+    $myArray = array();
+    $query = "SELECT medical_tourism_ps_title as title,medical_tourism_ps_location as location , medical_tourism_ps_image as image , medical_tourism_ps_content as content , medical_tourism_ps_locationurl as locationurl , medical_tourism_ps_hours as hours , medical_tourism_ps_hours as hours FROM medical_tourism_ps ORDER BY medical_tourism_ps_order DESC ";
+    $result = mysqli_query($db, $query);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+
+        $myArray[] = [
+            'title' => urldecode($row['title']),
+            'content' => urldecode($row['content']),
+            'image' => 'https://www.kltheguide.com.my/' . 'assets/img/medical_tourism/ps/' . urldecode($row['image']),
+            'location' => urldecode($row['location']),
+            'locationurl' => urldecode($row['locationurl']),
+            'hours' => urldecode($row['hours']),
+            'phone' => urldecode($row['phone']),
+        ];
+    }
+    echo json_encode($myArray);
+}
 
 
 if (isset($_POST['appStay_top'])) {
@@ -2031,7 +2347,6 @@ if (isset($_POST['contribute'])) {
 
         $mail->Body = $html . "<br>";
         $mail->AltBody = $title;
-        print_r($bodytest);
         $mail->send();
 
         $mail->clearAddresses();

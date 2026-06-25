@@ -1,4 +1,13 @@
 <?php
+/* ============================================================================
+ *                            fetch_blogger.php
+ *
+ *   Blogger API proxy. Fetches posts (single or paginated list) from the Google
+ *   Blogger API and caches the JSON to /cache for 5 minutes.
+ *   This powers blog.php and blog-details.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 // fetch_blogger.php
 
 // Google Blogger API
@@ -14,8 +23,13 @@ if (isset($_GET['postid'])) {
     $pageToken = isset($_GET['pageToken']) ? "&pageToken=" . urlencode($_GET['pageToken']) : "";
     $labels    = isset($_GET['labels']) ? "&labels=" . urlencode($_GET['labels']) : "";
 
+    // maxResults — honour the request (capped at 500), default 30
+    $maxResults = isset($_GET['maxResults']) ? (int) $_GET['maxResults'] : 30;
+    if ($maxResults < 1)   $maxResults = 30;
+    if ($maxResults > 500) $maxResults = 500;
+
     // API URL for list
-    $url = "https://www.googleapis.com/blogger/v3/blogs/$blogId/posts?key=$apiKey&fetchImages=true&maxResults=30$pageToken$labels";
+    $url = "https://www.googleapis.com/blogger/v3/blogs/$blogId/posts?key=$apiKey&fetchImages=true&maxResults=$maxResults$pageToken$labels";
 }
 
 // Cache file (store results for 5 minutes)

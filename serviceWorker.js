@@ -1,3 +1,12 @@
+/* ============================================================================
+ *                             serviceWorker.js
+ *
+ *   PWA service worker. Precaches core assets on install and handles web-push
+ *   notification display/clicks. NOTE: no fetch handler — it warms a cache but
+ *   does not serve pages offline.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 const static = "KLTG";
 const assets = [
   "/",
@@ -7,10 +16,8 @@ const assets = [
   "/assets/css/main.css",
   "/assets/css/variables.css",
   "/assets/js/main.js",
-  "/assets/js/blog.js",
   "/assets/js/blog-details.js",
 ]
-const offlineFallbackPage = "inner-page.html";
 
 self.addEventListener("install", installEvent => {
   installEvent.waitUntil(

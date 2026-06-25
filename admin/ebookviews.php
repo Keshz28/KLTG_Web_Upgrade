@@ -1,13 +1,22 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                              ebookviews.php
+ *
+ *   Admin (auth-gated) — e-book view statistics.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 if (!isset($_SESSION['username'])) {
     $_SESSION['msg'] = "You must log in first";
     header('location: login.php');
+    exit;
 }
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['username']);
     header("location: login.php");
+    exit;
 }
 
 
@@ -181,26 +190,27 @@ $totalpageviews = 0;
                                         <tr>
                                             <th scope="col">E-book Name</th>
                                             <th scope="col">Views</th>
-                                            </th>
-
+                                            <th scope="col">Downloads</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
                                         <?php
+                                        $totaldownloads = 0;
 
                                         $query = "SELECT *, ebook_view+ebook_view2   FROM `ebook`  ";
                                         $result = mysqli_query($db, $query);
                                         while ($row = mysqli_fetch_assoc($result)) {
 
-
+                                            $downloads = (int) ($row['ebook_download'] ?? 0);
 
                                             echo '<tr>';
                                             echo '<td ">' . $row['ebook_name'] . '</td>';
                                             echo '<td ">' . $row['ebook_view+ebook_view2'] . '</td>';
-                                            // echo '<td><a href="#" class="" onclick="newmodal(' . $row['banner_id'] . ' );" id="modaledit"><i class="fas fa-pen"></i></a></td>';
+                                            echo '<td ">' . $downloads . '</td>';
                                             echo '</tr>';
                                             $totalpageviews += $row['ebook_view+ebook_view2'];
+                                            $totaldownloads += $downloads;
 
                                         }
 
@@ -214,6 +224,9 @@ $totalpageviews = 0;
                                     <div class=col-4>
                                         <p class="font-weight-bold">Total Views :
                                             <?php echo $totalpageviews; ?>
+                                        </p>
+                                        <p class="font-weight-bold">Total Downloads :
+                                            <?php echo $totaldownloads; ?>
                                         </p>
 
                                     </div>

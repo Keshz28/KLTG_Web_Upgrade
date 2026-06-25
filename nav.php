@@ -1,4 +1,11 @@
 <?php
+/* ============================================================================
+ *                                 nav.php
+ *
+ *   Shared top navigation bar include (public site).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 $query = "SELECT * FROM indexpage ";
 $result = mysqli_query($db, $query);
 
@@ -108,7 +115,7 @@ $travelnews = mysqli_fetch_assoc($result);
 </style>
 
 <!-- ======= Header ======= -->
-<header id="header" class="header fixed-top<?php echo in_array(basename($_SERVER['PHP_SELF']), ['index.php', 'travel-tips.php', 'kl-glance.php', 'getting-around-kl.php']) ? ' header-transparent' : ''; ?>" data-scrollto-offset="0">
+<header id="header" class="header fixed-top<?php echo in_array(basename($_SERVER['PHP_SELF']), ['index.php', 'travel-tips.php', 'kl-glance.php', 'getting-around-kl.php', 'event.php']) ? ' header-transparent' : ''; ?>" data-scrollto-offset="0">
   <div class="container-fluid d-flex align-items-center justify-content-between">
 
     <a href="index.php#index" class="logo d-flex align-items-center scrollto me-auto me-lg-0">
@@ -121,36 +128,21 @@ $travelnews = mysqli_fetch_assoc($result);
       <ul>
 
         <li><a class="nav-link scrollto" href="index.php#index">Home</a></li>
-        <li><a class="nav-link scrollto" href="aboutus.php#aboutus">About Us</a></li>
         <li class="dropdown"><a href="#"><span>Pages</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
           <ul>
-            <!-- <li><a href="highlights.php#tab-1">KL Highlights</a></li> -->
-            <li class="dropdown"><a href="highlights.php"><span>
+            <li class="dropdown"><a href="kl-glance.php"><span>
                   <?php echo $tile1_title ?>
                 </span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
               <ul>
-                <li><a href="highlights.php#tab-1">
+                <li><a href="kl-glance.php">
                     <?php echo $tile1_title1 ?>
                   </a></li>
-                <li><a href="highlights.php#tab-2">
+                <li><a href="getting-around-kl.php">
                     <?php echo $tile1_title2 ?>
                   </a></li>
-                <li><a href="highlights.php#tab-3">
+                <li><a href="travel-tips.php">
                     <?php echo $tile1_title3 ?>
                   </a></li>
-                <?php
-
-                if ($travelnews) {
-
-                  ?>
-                  <li><a href="highlights.php#tab-4">
-                      <?php echo $tile1_title4 ?>
-                    </a></li>
-
-                  <?php
-                }
-                ?>
-
               </ul>
             </li>
             <li class="dropdown"><a href="explorekl.php#explorekl"><span><?php echo $tile2_title1 ?></span> <i
@@ -207,6 +199,7 @@ $travelnews = mysqli_fetch_assoc($result);
         <li><a class="nav-link scrollto" href="map.php#map">Map</a></li>
         <li><a class="nav-link scrollto" href="event.php">Event</a></li>
         <li><a class="nav-link scrollto" href="merchandise.php">Merchandise</a></li>
+        <li><a class="nav-link scrollto" href="aboutus.php#aboutus">About Us</a></li>
       </ul>
       <i class="bi bi-list mobile-nav-toggle d-none"></i>
     </nav><!-- .navbar -->

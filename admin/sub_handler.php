@@ -1,4 +1,11 @@
 <?php
+/* ============================================================================
+ *                             sub_handler.php
+ *
+ *   Backend handler for subscribe-form submissions (guards + error handling).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 // sub_handler.php - Fixed with guards & error handling
 
 // Include your DB connection
@@ -301,6 +308,11 @@ if ($action === 'subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         json_out(['ok' => false, 'error' => 'Invalid email address'], 422);
     }
 
+    $domain = substr(strrchr($email, '@'), 1);
+    if (!checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A')) {
+        json_out(['ok' => false, 'error' => 'Email domain does not appear to be valid. Please use a real email address.'], 422);
+    }
+
     $email   = strtolower($email);
     $country = trim($_POST['country'] ?? '');
     $consent = isset($_POST['consent']) ? 1 : 0;
@@ -456,7 +468,7 @@ if ($tableName === 'emailsub') {
     $recordsFiltered = (int)mysqli_fetch_assoc($cntRes)['c'];
 
     // Get data
-    $sql = "SELECT emailsub_id, emailsub_email, emailsub_country, emailsub_consent, emailsub_date
+    $sql = "SELECT emailsub_id, emailsub_email, emailsub_country, emailsub_consent, emailsub_date, verified
             FROM emailsub
             $where
             ORDER BY emailsub_id DESC
@@ -466,12 +478,13 @@ if ($tableName === 'emailsub') {
     $rows = [];
     while ($r = mysqli_fetch_assoc($res)) {
         $rows[] = [
-            'checkbox' => '<input type="checkbox" name="delete_ids[]" value="' . (int)$r['emailsub_id'] . '">',
-            'id'       => (int)$r['emailsub_id'],
-            'email'    => $r['emailsub_email'],
-            'country'  => $r['emailsub_country'] ?? '',
-            'consent'  => ((int)$r['emailsub_consent'] === 1 ? 'Yes' : 'No'),
-            'date'     => substr($r['emailsub_date'], 0, 19),
+            'checkbox'  => '<input type="checkbox" name="delete_ids[]" value="' . (int)$r['emailsub_id'] . '">',
+            'id'        => (int)$r['emailsub_id'],
+            'email'     => $r['emailsub_email'],
+            'country'   => $r['emailsub_country'] ?? '',
+            'consent'   => ((int)$r['emailsub_consent'] === 1 ? 'Yes' : 'No'),
+            'date'      => substr($r['emailsub_date'], 0, 19),
+            'verified'  => ((int)$r['verified'] === 1 ? '<span style="color:#27ae60;font-weight:bold;">✓ Verified</span>' : '<span style="color:#e67e22;">Pending</span>'),
         ];
     }
 

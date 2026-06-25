@@ -1,4 +1,12 @@
 <?php
+/* ============================================================================
+ *                                banner.php
+ *
+ *   Banner-click tracking proxy. Receives a banner-click POST and forwards it
+ *   to admin/functions.php (via cURL) to record reach/clicks.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 // Validate and sanitize input
 $filename = isset($_POST['banner_filename']) ? trim($_POST['banner_filename']) : '';
 $name = isset($_POST['banner_name']) ? trim($_POST['banner_name']) : '';

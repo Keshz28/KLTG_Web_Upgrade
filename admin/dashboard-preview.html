@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Dashboard Preview — KLTG Admin</title>
+<link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link href="css/sb-admin-2.css" rel="stylesheet">
+<style>
+  /* ── Base overrides ── */
+  body { background: #f0f2f8; font-family: 'Nunito', sans-serif; }
+
+  /* ── Gradient stat cards ── */
+  .stat-card {
+    border: none;
+    border-radius: 16px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.18) !important; }
+  .stat-card .card-body { padding: 1.6rem 1.5rem; }
+  .stat-card .stat-label {
+    font-size: .72rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; opacity: .82; margin-bottom: 6px;
+  }
+  .stat-card .stat-value {
+    font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 4px;
+  }
+  .stat-card .stat-sub { font-size: .78rem; opacity: .78; }
+  .stat-card .stat-icon {
+    position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+    font-size: 3.2rem; opacity: .18;
+  }
+  .card-blue   { background: linear-gradient(135deg, #4e73df 0%, #2553c7 100%); }
+  .card-green  { background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); }
+  .card-orange { background: linear-gradient(135deg, #f6a623 0%, #e07b00 100%); }
+
+  /* ── Section heading ── */
+  .section-label {
+    font-size: .7rem; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: #b7b9cc; margin: 0 0 12px;
+  }
+
+  /* ── Chart cards ── */
+  .chart-card { border: none; border-radius: 16px; }
+  .chart-card .card-header {
+    border-radius: 16px 16px 0 0 !important;
+    background: #fff; border-bottom: 1px solid #f0f0f5;
+    font-weight: 700; color: #3a3b45;
+  }
+
+  /* ── Quick Actions ── */
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .qa-btn {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 18px 8px; border-radius: 14px;
+    background: #fff; border: none; cursor: pointer; text-decoration: none;
+    color: #444; font-size: .72rem; font-weight: 700;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    transition: transform .18s, box-shadow .18s;
+    text-align: center; gap: 10px;
+  }
+  .qa-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,.12); color: #333; text-decoration: none; }
+  .qa-btn .qa-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; color: #fff;
+  }
+  .ic-blue   { background: linear-gradient(135deg,#4e73df,#2553c7); }
+  .ic-green  { background: linear-gradient(135deg,#1cc88a,#13855c); }
+  .ic-purple { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+  .ic-teal   { background: linear-gradient(135deg,#06b6d4,#0e7490); }
+  .ic-orange { background: linear-gradient(135deg,#f6a623,#c27800); }
+  .ic-pink   { background: linear-gradient(135deg,#ec4899,#be185d); }
+
+  /* ── Leaderboard tables ── */
+  .lb-card { border: none; border-radius: 16px; }
+  .lb-card .card-header {
+    background: #fff; border-bottom: 1px solid #f0f0f5;
+    border-radius: 16px 16px 0 0 !important;
+    font-weight: 700; color: #3a3b45;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .lb-card .lb-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; border-bottom: 1px solid #f5f5fb;
+  }
+  .lb-card .lb-row:last-child { border-bottom: none; }
+  .lb-rank {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #f0f2f8; display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 800; color: #6c757d; flex-shrink: 0;
+  }
+  .lb-rank.gold   { background: #fef08a; color: #854d0e; }
+  .lb-rank.silver { background: #e2e8f0; color: #475569; }
+  .lb-rank.bronze { background: #fed7aa; color: #92400e; }
+  .lb-title { flex: 1; font-size: .84rem; font-weight: 600; color: #3a3b45; min-width: 0; }
+  .lb-title span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lb-bar-wrap { width: 110px; flex-shrink: 0; }
+  .lb-bar { height: 6px; border-radius: 3px; background: #eee; overflow: hidden; }
+  .lb-bar-fill { height: 100%; border-radius: 3px; }
+  .bar-blue   { background: linear-gradient(90deg,#4e73df,#2553c7); }
+  .bar-green  { background: linear-gradient(90deg,#1cc88a,#13855c); }
+  .lb-count { font-size: .82rem; font-weight: 800; color: #3a3b45; width: 58px; text-align: right; flex-shrink: 0; }
+
+  /* ── Recent activity feed ── */
+  .feed-card { border: none; border-radius: 16px; }
+  .feed-card .card-header {
+    background: #fff; border-bottom: 1px solid #f0f0f5;
+    border-radius: 16px 16px 0 0 !important;
+    font-weight: 700; color: #3a3b45;
+  }
+  .feed-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #f5f5fb; }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-dot {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff;
+  }
+  .feed-text { font-size: .82rem; color: #555; line-height: 1.4; }
+  .feed-text strong { color: #3a3b45; }
+  .feed-time { font-size: .7rem; color: #b7b9cc; margin-top: 2px; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+  /* ── Count-up animation placeholder ── */
+  .count-up { display: inline-block; }
+</style>
+</head>
+<body id="page-top">
+<div id="wrapper">
+
+  <!-- Sidebar (same as current, not changed) -->
+  <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="min-height:100vh;">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+      <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-laugh-wink"></i></div>
+      <div class="sidebar-brand-text mx-3">KLTG ADMIN</div>
+    </a>
+    <hr class="sidebar-divider my-0">
+    <li class="nav-item active">
+      <a class="nav-link" href="#"><i class="fas fa-fw fa-tachometer-alt"></i><span>Dashboard</span></a>
+    </li>
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">Addons</div>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-fw fa-chart-area"></i><span>Subscribers</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-fw fa-envelope"></i><span>Email Campaign</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-fw fa-chart-bar"></i><span>Page Views</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-fw fa-book"></i><span>Blog Views</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-fw fa-ad"></i><span>Advertisement</span></a></li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages">
+        <i class="fas fa-fw fa-folder"></i><span>Edit Pages</span>
+      </a>
+      <div id="collapsePages" class="collapse" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <a class="collapse-item" href="#">Index</a>
+          <a class="collapse-item" href="#">KL @ A Glance</a>
+          <a class="collapse-item" href="#">Blog</a>
+          <a class="collapse-item" href="#">Explore KL</a>
+        </div>
+      </div>
+    </li>
+    <hr class="sidebar-divider d-none d-md-block">
+    <div class="text-center d-none d-md-inline"><button class="rounded-circle border-0" id="sidebarToggle"></button></div>
+  </ul>
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content">
+
+      <!-- Topnav -->
+      <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+          <i class="fa fa-bars"></i>
+        </button>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#"><i class="fas fa-bell fa-fw"></i><span class="badge badge-danger badge-counter">3+</span></a>
+          </li>
+          <div class="topbar-divider d-none d-sm-block"></div>
+          <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#">
+              <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin</span>
+              <img class="img-profile rounded-circle" src="img/undraw_profile.svg" style="width:32px;height:32px;">
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="container-fluid pb-4">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">Dashboard</h1>
+            <p class="mb-0 text-muted" style="font-size:.83rem;">Welcome back — here's what's happening with KL The Guide.</p>
+          </div>
+          <span class="badge badge-light border px-3 py-2" style="font-size:.78rem;"><i class="fas fa-calendar-alt mr-1 text-primary"></i> <?php echo date('d M Y'); ?> &nbsp;|&nbsp; <span id="liveclock" class="font-weight-bold"></span></span>
+        </div>
+
+        <!-- ── Stat Cards ── -->
+        <div class="row mb-2">
+          <div class="col-xl-4 col-md-4 mb-4">
+            <div class="card stat-card card-blue shadow">
+              <div class="card-body">
+                <div class="stat-label">Total Page Views</div>
+                <div class="stat-value count-up" data-target="492837">492,837</div>
+                <div class="stat-sub"><i class="fas fa-arrow-up mr-1"></i>All pages combined</div>
+              </div>
+              <i class="fas fa-eye stat-icon"></i>
+            </div>
+          </div>
+          <div class="col-xl-4 col-md-4 mb-4">
+            <div class="card stat-card card-green shadow">
+              <div class="card-body">
+                <div class="stat-label">Total Blog Views</div>
+                <div class="stat-value count-up" data-target="185204">185,204</div>
+                <div class="stat-sub"><i class="fas fa-arrow-up mr-1"></i>Across all blog posts</div>
+              </div>
+              <i class="fas fa-comments stat-icon"></i>
+            </div>
+          </div>
+          <div class="col-xl-4 col-md-4 mb-4">
+            <div class="card stat-card card-orange shadow">
+              <div class="card-body">
+                <div class="stat-label">Total E-book Views</div>
+                <div class="stat-value count-up" data-target="42190">42,190</div>
+                <div class="stat-sub"><i class="fas fa-arrow-up mr-1"></i>Across all e-books</div>
+              </div>
+              <i class="fas fa-book stat-icon"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Charts row ── -->
+        <div class="row mb-2">
+          <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card chart-card shadow h-100">
+              <div class="card-header py-3">
+                <span><i class="fas fa-chart-line mr-2 text-primary"></i>Page Views — Last 7 Days</span>
+              </div>
+              <div class="card-body">
+                <div class="chart-area"><canvas id="myAreaChart"></canvas></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card chart-card shadow h-100">
+              <div class="card-header py-3">
+                <span><i class="fas fa-chart-donut mr-2 text-primary"></i>Views Breakdown</span>
+              </div>
+              <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                <div class="chart-pie pt-2 pb-2" style="width:100%;max-width:220px;">
+                  <canvas id="myPieChart"></canvas>
+                </div>
+                <div class="mt-3 text-center small">
+                  <span class="mr-2"><i class="fas fa-circle text-primary"></i> Pages</span>
+                  <span class="mr-2"><i class="fas fa-circle text-success"></i> Blog</span>
+                  <span><i class="fas fa-circle text-warning"></i> E-Book</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Quick Actions ── -->
+        <p class="section-label">Quick Actions</p>
+        <div class="qa-grid mb-4">
+          <a href="edit-index.php" class="qa-btn">
+            <div class="qa-icon ic-blue"><i class="fas fa-home"></i></div>
+            Edit Homepage
+          </a>
+          <a href="edit-klglance.php" class="qa-btn">
+            <div class="qa-icon ic-teal"><i class="fas fa-landmark"></i></div>
+            KL @ A Glance
+          </a>
+          <a href="edit-blog.php" class="qa-btn">
+            <div class="qa-icon ic-green"><i class="fas fa-pen-nib"></i></div>
+            Edit Blog
+          </a>
+          <a href="edit-explorekl.php" class="qa-btn">
+            <div class="qa-icon ic-purple"><i class="fas fa-map-marked-alt"></i></div>
+            Explore KL
+          </a>
+          <a href="sub.php" class="qa-btn">
+            <div class="qa-icon ic-orange"><i class="fas fa-users"></i></div>
+            Subscribers
+          </a>
+          <a href="emailcampaign.php" class="qa-btn">
+            <div class="qa-icon ic-pink"><i class="fas fa-paper-plane"></i></div>
+            Email Campaign
+          </a>
+        </div>
+
+        <!-- ── Leaderboards + Feed ── -->
+        <div class="row">
+
+          <!-- Top Pages -->
+          <div class="col-lg-4 mb-4">
+            <div class="card lb-card shadow">
+              <div class="card-header py-3">
+                <span><i class="fas fa-trophy mr-2 text-warning"></i>Top Pages</span>
+                <a href="pageviews.php" class="btn btn-sm btn-outline-primary">View All</a>
+              </div>
+              <div class="card-body p-0">
+                <?php
+                $pages = [
+                  ['Explore KL', 98210, '#4e73df'],
+                  ['Medical Tourism', 76540, '#4e73df'],
+                  ['Blog', 62300, '#4e73df'],
+                  ['Beyond KL', 54100, '#4e73df'],
+                  ['Where to Shop', 41800, '#4e73df'],
+                  ['Accommodation', 38900, '#4e73df'],
+                  ['Home', 31200, '#4e73df'],
+                ];
+                $maxP = $pages[0][1];
+                $medals = ['gold','silver','bronze'];
+                foreach ($pages as $i => $p): ?>
+                <div class="lb-row">
+                  <div class="lb-rank <?php echo $medals[$i] ?? ''; ?>"><?php echo $i+1; ?></div>
+                  <div class="lb-title"><span><?php echo $p[0]; ?></span></div>
+                  <div class="lb-bar-wrap">
+                    <div class="lb-bar"><div class="lb-bar-fill bar-blue" style="width:<?php echo round($p[1]/$maxP*100); ?>%"></div></div>
+                  </div>
+                  <div class="lb-count"><?php echo number_format($p[1]); ?></div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Blog Posts -->
+          <div class="col-lg-4 mb-4">
+            <div class="card lb-card shadow">
+              <div class="card-header py-3">
+                <span><i class="fas fa-fire mr-2 text-danger"></i>Top Blog Posts</span>
+                <a href="blogviews2.php" class="btn btn-sm btn-outline-primary">View All</a>
+              </div>
+              <div class="card-body p-0">
+                <?php
+                $blogs = [
+                  ['3 Popular Apps for Car Booking in KL', 285440],
+                  ['Bigger Reach, Bigger Impact: KL The Guide Expands', 45973],
+                  ["Embracing Malaysia's Festive Spirit with Avis", 30747],
+                  ['Reach for the Skies: The All-New Petronas Twin Tower', 30652],
+                  ['Discover the Magic of SOMA Plastic Surgery', 30639],
+                  ['Cormar Suites Kuala Lumpur', 29669],
+                  ['Farm in the City: A Must-Visit Village-Themed Petting Zoo', 21323],
+                ];
+                $maxB = $blogs[0][1];
+                foreach ($blogs as $i => $b): ?>
+                <div class="lb-row">
+                  <div class="lb-rank <?php echo $medals[$i] ?? ''; ?>"><?php echo $i+1; ?></div>
+                  <div class="lb-title"><span title="<?php echo htmlspecialchars($b[0]); ?>"><?php echo htmlspecialchars($b[0]); ?></span></div>
+                  <div class="lb-bar-wrap">
+                    <div class="lb-bar"><div class="lb-bar-fill bar-green" style="width:<?php echo round($b[1]/$maxB*100); ?>%"></div></div>
+                  </div>
+                  <div class="lb-count"><?php echo number_format($b[1]); ?></div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="col-lg-4 mb-4">
+            <div class="card feed-card shadow">
+              <div class="card-header py-3">
+                <span><i class="fas fa-history mr-2 text-info"></i>Recent Activity</span>
+              </div>
+              <div class="card-body p-0">
+                <div class="feed-item">
+                  <div class="feed-dot ic-green"><i class="fas fa-plus"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>New blog post</strong> added — "Hidden Gems in KL"</div>
+                    <div class="feed-time">2 hours ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot ic-blue"><i class="fas fa-edit"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>KL @ A Glance</strong> slides reordered</div>
+                    <div class="feed-time">Yesterday, 3:14 PM</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot ic-purple"><i class="fas fa-user-plus"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>14 new subscribers</strong> joined this week</div>
+                    <div class="feed-time">2 days ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot ic-orange"><i class="fas fa-paper-plane"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>Email campaign</strong> sent to 1,240 subscribers</div>
+                    <div class="feed-time">3 days ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot ic-teal"><i class="fas fa-image"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>New landmark</strong> added to KL @ A Glance</div>
+                    <div class="feed-time">4 days ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot ic-pink"><i class="fas fa-ad"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>Advertisement popup</strong> updated</div>
+                    <div class="feed-time">5 days ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="feed-dot" style="background:#6c757d;"><i class="fas fa-pen"></i></div>
+                  <div>
+                    <div class="feed-text"><strong>Explore KL</strong> items reordered</div>
+                    <div class="feed-time">1 week ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.row -->
+
+      </div>
+      <!-- /.container-fluid -->
+    </div>
+
+    <footer class="sticky-footer bg-white">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>Copyright &copy; KL The Guide</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<a class="scroll-to-top rounded" href="#page-top"><i class="fas fa-angle-up"></i></a>
+
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="js/sb-admin-2.min.js"></script>
+<script src="vendor/chart.js/Chart.min.js"></script>
+<script src="js/demo/chart-area-demo.js"></script>
+<script>
+  // Live clock
+  function tick() {
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('liveclock').textContent =
+      h + ':' + (m<10?'0':'')+m + ':' + (s<10?'0':'')+s + ' ' + ampm;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // Count-up animation
+  document.querySelectorAll('.count-up').forEach(function(el) {
+    var target = parseInt(el.getAttribute('data-target'), 10);
+    var start = 0, duration = 1400, step = Math.ceil(target / (duration / 16));
+    var timer = setInterval(function() {
+      start += step;
+      if (start >= target) { start = target; clearInterval(timer); }
+      el.textContent = start.toLocaleString();
+    }, 16);
+  });
+
+  // Pie / donut chart
+  new Chart(document.getElementById('myPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pages', 'Blog', 'E-Book'],
+      datasets: [{ data: [265193, 185204, 42190],
+        backgroundColor: ['#4e73df','#1cc88a','#f6a623'],
+        hoverBackgroundColor: ['#2e59d9','#17a673','#c27800'],
+        hoverBorderColor: 'rgba(234,236,244,1)' }]
+    },
+    options: { maintainAspectRatio: false, legend: { display: false }, cutoutPercentage: 78,
+      tooltips: { backgroundColor:'#fff', bodyFontColor:'#858796', borderColor:'#dddfeb', borderWidth:1, xPadding:12, yPadding:12, displayColors:false } }
+  });
+</script>
+</body>
+</html>

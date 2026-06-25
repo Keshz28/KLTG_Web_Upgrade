@@ -1,3 +1,36 @@
+<!-- ============================================================================
+                                  nav.php
+
+     Admin sidebar navigation menu (partial).
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+<!-- CSRF: the central guard in functions.php rejects any logged-in admin POST
+     without a valid token. nav.php is included on every admin page, so we make
+     the session token available here and auto-attach it to every POST form
+     (and expose it as window.CSRF_TOKEN for AJAX calls like reorder.php). -->
+<script>
+    window.CSRF_TOKEN = <?php echo json_encode(csrf_token()); ?>;
+    (function () {
+        function addToken(form) {
+            if (!form || (form.getAttribute('method') || '').toLowerCase() !== 'post') return;
+            if (form.querySelector('input[name="csrf_token"]')) return;
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'csrf_token';
+            input.value = window.CSRF_TOKEN || '';
+            form.appendChild(input);
+        }
+        function injectAll() {
+            document.querySelectorAll('form').forEach(addToken);
+        }
+        if (document.readyState !== 'loading') { injectAll(); }
+        else { document.addEventListener('DOMContentLoaded', injectAll); }
+        // Safety net for forms added/submitted later.
+        document.addEventListener('submit', function (e) { addToken(e.target); }, true);
+    })();
+</script>
+
 <!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -88,19 +121,14 @@
             <span>Page Views</span></a>
     </li>
     <li class="nav-item" id="blognav">
-        <a class="nav-link" href="blogviews.php">
+        <a class="nav-link" href="blogviews2.php">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>Blog Views</span></a>
     </li>
-    <li class="nav-item" id="blognav">
-        <a class="nav-link" href="blogviews2.php">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Blog Views2</span></a>
-    </li>
-        <li class="nav-item" id="bannernav">
+    <li class="nav-item" id="bannernav">
         <a class="nav-link" href="bannerreach.php">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>Banner Reach</span></a>
+            <span>Ad Popup Reach</span></a>
     </li>
     
     <li class="nav-item" id="ebooknav">
@@ -119,6 +147,12 @@
         <a class="nav-link" href="contest.php">
             <i class="fas fa-fw fa-trophy"></i>
             <span>Voucher Claims Contest</span></a>
+    </li>
+
+    <li class="nav-item" id="advertisementnav">
+        <a class="nav-link" href="edit-advertisement.php">
+            <i class="fas fa-fw fa-ad"></i>
+            <span>Advertisement Popup</span></a>
     </li>
 
 
@@ -140,8 +174,10 @@
                         <a class="collapse-item" href="404.html">404 Page</a>-->
                 <a class="collapse-item" href="edit-index.php">Index</a>
                 <a class="collapse-item" href="edit-highlights.php">Highlights</a>
+                <a class="collapse-item" href="edit-klglance.php">KL @ A Glance</a>
                 <a class="collapse-item" href="edit-blog.php">Blog</a>
                 <a class="collapse-item" href="edit-ebook.php">E-book</a>
+                <a class="collapse-item" href="edit-merchandise.php">Merchandise</a>
                 <a class="collapse-item" href="edit-pageviews.php">Page Views</a>
                 <a class="collapse-item" href="edit-explorekl.php">Explore KL</a>
                 <a class="collapse-item" href="edit-beyondkl.php">Beyond KL</a>

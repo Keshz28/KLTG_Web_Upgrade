@@ -1,0 +1,34 @@
+# ============================================================
+# admin/.htaccess — Admin area security hardening
+# ============================================================
+
+# --- Deny directory listing ---
+Options -Indexes
+
+# --- Block access to sensitive file types inside admin/ ---
+<FilesMatch "\.(log|json|sql|env|bak|sh|py|rb)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# --- HTTP Basic Auth (second authentication layer before the PHP login) ---
+# HOW TO ACTIVATE:
+#   1. SSH/terminal — generate a hashed password entry:
+#        htpasswd -c /home/YOUR_CPANEL_USERNAME/private/.htpasswd adminuser
+#      (On Windows/XAMPP you can use: htpasswd -c C:\path\outside\webroot\.htpasswd adminuser)
+#   2. Uncomment the block below and replace the AuthUserFile path with your real path.
+#   3. Save and test — you'll be prompted for a username/password BEFORE the PHP login page.
+#
+# <RequireAll>
+#     AuthType Basic
+#     AuthName "KLTG Admin"
+#     AuthUserFile /home/YOUR_CPANEL_USERNAME/private/.htpasswd
+#     Require valid-user
+# </RequireAll>
+
+# --- Security headers for admin pages ---
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer"
+</IfModule>

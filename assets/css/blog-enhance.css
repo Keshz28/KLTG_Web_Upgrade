@@ -1,0 +1,234 @@
+/* =========================================================
+   Blog enhancements (KLTG)
+   Loaded on blog.php and blog-details.php only.
+   Uses the design tokens from variables.css.
+   ========================================================= */
+
+/* ---- Reading progress bar (article page) ---- */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(var(--color-secondary-rgb), 0.12);
+  z-index: 1100;
+}
+
+#reading-progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--color-primary);
+  transition: width 0.1s linear;
+}
+
+/* ---- Featured hero post (listing page) ---- */
+/* The breadcrumb bar used to clear the fixed-top header; keep that spacing. */
+#blog.blog {
+  margin-top: 76px;
+}
+
+.featured-hero {
+  margin-bottom: 40px;
+}
+
+.featured-hero .hero-link {
+  display: block;
+  position: relative;
+  height: 360px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(var(--color-black-rgb), 0.1);
+}
+
+.featured-hero .hero-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.featured-hero .hero-link:hover img {
+  transform: scale(1.05);
+}
+
+.featured-hero .hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 30px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.2) 55%, rgba(0, 0, 0, 0) 100%);
+}
+
+.featured-hero .hero-badge {
+  align-self: flex-start;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featured-hero .hero-title {
+  margin: 0 0 10px;
+  color: var(--color-white);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.featured-hero .hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+}
+
+.featured-hero .hero-meta i {
+  margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+  .featured-hero .hero-title { font-size: 22px; }
+  .featured-hero .hero-overlay { padding: 20px; }
+}
+
+/* ---- Related posts (article page) ---- */
+.related-posts {
+  margin-top: 50px;
+}
+
+.related-posts .related-title {
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 30px;
+  color: var(--color-secondary-dark);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.related-posts .related-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: var(--color-primary);
+}
+
+.related-posts .related-card {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-white);
+  box-shadow: 0 4px 16px rgba(var(--color-black-rgb), 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.related-posts .related-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 24px rgba(var(--color-black-rgb), 0.15);
+}
+
+.related-posts .related-img {
+  height: 160px;
+  overflow: hidden;
+}
+
+.related-posts .related-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.related-posts .related-card:hover .related-img img {
+  transform: scale(1.06);
+}
+
+.related-posts .related-body {
+  padding: 16px 18px 20px;
+}
+
+.related-posts .related-body h4 {
+  margin: 0 0 8px;
+  color: var(--color-secondary-dark);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.related-posts .related-body time {
+  color: rgba(var(--color-secondary-rgb), 0.8);
+  font-size: 13px;
+}
+
+/* ---- Card hover polish on the listing grid ---- */
+.blog .posts-list article {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog .posts-list article:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(var(--color-black-rgb), 0.15);
+}
+
+/* ---- Skeleton loaders (listing page) ---- */
+.skeleton-card {
+  height: 100%;
+  padding: 30px;
+  box-shadow: 0 4px 16px rgba(var(--color-black-rgb), 0.1);
+}
+
+.skeleton-card .sk-img {
+  height: 200px;
+  margin: -30px -30px 20px;
+}
+
+.hero-skeleton {
+  height: 360px;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .featured-hero .hero-link,
+  .hero-skeleton { height: 240px; }
+}
+
+.skeleton-block {
+  background: linear-gradient(90deg, #eceff1 25%, #f6f8f9 37%, #eceff1 63%);
+  background-size: 400% 100%;
+  animation: sk-shimmer 1.4s ease infinite;
+  border-radius: 4px;
+}
+
+.skeleton-card .sk-line {
+  height: 14px;
+  margin-bottom: 12px;
+}
+
+.skeleton-card .sk-line.title {
+  height: 22px;
+  width: 80%;
+  margin-bottom: 18px;
+}
+
+.skeleton-card .sk-line.short {
+  width: 50%;
+}
+
+@keyframes sk-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}

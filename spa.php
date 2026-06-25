@@ -1,4 +1,14 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                                  spa.php
+
+     Public page — spa & wellness listings.
+     Uses viewOnMapButton() + kltg_mapcoords.php.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
+require_once __DIR__ . '/view_on_map_helper.php';
+$kltg_coords = include __DIR__ . '/kltg_mapcoords.php';
 
 $query = "SELECT * FROM indexpage ";
 $result = mysqli_query($db, $query);
@@ -47,6 +57,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title4 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/spa.php" />
 
   <meta name="description" content="KL's guide to spas. Find the best spas in Kuala Lumpur, Malaysia. Featuring saunas, massage, and beauty treatments.">
   <meta content="" name="keywords">
@@ -143,11 +154,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['spa_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['spa_title']), urldecode($row['spa_location']), $kltg_coords[trim(urldecode($row['spa_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['spa_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['spa_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['spa_hours']) ?>
                           </p>
                         <?php } ?>
 

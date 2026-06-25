@@ -1,4 +1,7 @@
 <?php
+// Guard: included by functions.php which runs on public pages too.
+if (!isset($_SESSION['username'])) return;
+
 if (isset($_POST['editebookview2'])) {
     $id = $_POST['hiddenid'];
     $number = $_POST['valueupdate'];
@@ -113,15 +116,16 @@ if (isset($_POST['editebook2'])) {
         echo "test2";
 
 
-        $tile1_photo2 = urlencode(uploadimage($_FILES["fileToUpload3b"], "ebook/", $ebook_category));
+        $tile1_photo2 = uploadcover($_FILES["fileToUpload3b"], $ebook_category);
         if ($tile1_photo2) {
             $queryselect = "SELECT * FROM ebook where ebook_id='" . $id . "'";
             $removefile = mysqli_query($db, $queryselect);
             // echo $query;
             while ($row = mysqli_fetch_assoc($removefile)) {
-                //  echo $row['tile1_photo2'];
-                $status = unlink('../assets/img/ebook/' . $ebook_category . '/' . $row['ebook_filename']);
-
+                // Remove the previous cover file (ebook_image, not the PDF).
+                if (!empty($row['ebook_image'])) {
+                    @unlink('../assets/img/ebook/' . $ebook_category . '/' . $row['ebook_image']);
+                }
             }
             if ($querycontent) {
                 $querycontent .= ",";
@@ -212,23 +216,22 @@ if (isset($_POST['addebook2'])) {
         $uploadOk = 0;
     }
     if (
-        $imageFileType2 != "jpg" && $imageFileType2 != "png" && $imageFileType2 != "jpeg"
-        && $imageFileType2 != "gif"
+        !in_array($imageFileType2, ["jpg", "png", "jpeg", "gif", "webp", "pdf"], true)
     ) {
-        array_push($errors2, "only JPG, JPEG, PNG & GIF files are allowed");
-        // echo "Sorry, file not jpg";
+        array_push($errors2, "Cover must be a PDF, JPG, JPEG, PNG, WEBP or GIF file");
+        // echo "Sorry, file not allowed";
 
         $uploadOk = 0;
     }
 
-    if ($_FILES["fileToUpload2"]["size"] > 20000000) {
+    if ($_FILES["fileToUpload2"]["size"] > 100 * 1024 * 1024) {   // 100 MB max for the e-book PDF
         // echo "Sorry, your file is too large.";
         array_push($errors2, "your file is too large");
 
         $uploadOk = 0;
     }
-    if ($_FILES["fileToUpload3"]["size"] > 20000000) {
-        array_push($errors2, "your file is too large");
+    if ($_FILES["fileToUpload3"]["size"] > 10 * 1024 * 1024) {   // 10 MB max for the cover image (covers are small; largest in use ~1.5 MB)
+        array_push($errors2, "your cover image is too large (max 10 MB)");
         $uploadOk = 0;
     }
     // $filename = basename($_FILES["fileToUpload2"]["name"]);
@@ -246,6 +249,11 @@ if (isset($_POST['addebook2'])) {
         // echo "Sorry, file not uploaded.";
 
     } else {
+        // Make sure the category folders exist (newly added categories, etc.)
+        if (function_exists('ensure_dir')) {
+            ensure_dir($target_dir2);
+            ensure_dir($target_dir3);
+        }
         if (move_uploaded_file(($_FILES["fileToUpload2"]["tmp_name"]), $target_file) && move_uploaded_file($_FILES["fileToUpload3"]["tmp_name"], $target_file2)) {
             array_push($errors2, "The file " . htmlspecialchars(basename($_FILES["fileToUpload2"]["name"])) . " has been uploaded.");
             array_push($errors2, "The file " . htmlspecialchars(basename($_FILES["fileToUpload3"]["name"])) . " has been uploaded.");
@@ -269,5 +277,95 @@ if (isset($_POST['addebook2'])) {
 
     }
 
+}
+
+/* ===========================================================================
+ *  E-book CATEGORY management (table: ebook_category)
+ *  Each cat_code is also the folder name under assets/pdf/ebook/<code>/ and
+ *  assets/img/ebook/<code>/.
+ * =========================================================================== */
+
+// --- Add a new category ----------------------------------------------------
+if (isset($_POST['addcategory'])) {
+    // Codes are used as folder names, so keep them to a safe slug.
+    $code = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $_POST['cat_code'] ?? ''));
+    $title = trim($_POST['cat_title'] ?? '');
+    $desc = trim($_POST['cat_desc'] ?? '');
+    $order = (int) ($_POST['cat_order'] ?? 0);
+    $visible = isset($_POST['cat_visible']) ? 1 : 0;
+
+    if ($code === '' || $title === '') {
+        array_push($errors2, "Category needs both a code and a title");
+    } else {
+        $codeE = mysqli_real_escape_string($db, $code);
+        $exists = mysqli_query($db, "SELECT cat_id FROM ebook_category WHERE cat_code='$codeE' LIMIT 1");
+        if ($exists && mysqli_num_rows($exists) > 0) {
+            array_push($errors2, "A category with code '$code' already exists");
+        } else {
+            $titleE = mysqli_real_escape_string($db, $title);
+            $descE = mysqli_real_escape_string($db, $desc);
+            $q = "INSERT INTO ebook_category (cat_code, cat_title, cat_desc, cat_order, cat_visible)
+                  VALUES ('$codeE', '$titleE', '$descE', $order, $visible)";
+            if (mysqli_query($db, $q)) {
+                // Create the matching upload folders so the first e-book upload works.
+                if (function_exists('ensure_dir')) {
+                    ensure_dir('../assets/pdf/ebook/' . $code . '/');
+                    ensure_dir('../assets/img/ebook/' . $code . '/');
+                }
+                array_push($errors2, "Category '$title' added");
+            } else {
+                array_push($errors2, "Error adding category: " . mysqli_error($db));
+            }
+        }
+    }
+}
+
+// --- Edit an existing category (code is fixed; it maps to folders) ----------
+if (isset($_POST['editcategory'])) {
+    $id = (int) ($_POST['cat_id'] ?? 0);
+    $title = trim($_POST['cat_title'] ?? '');
+    $desc = trim($_POST['cat_desc'] ?? '');
+    $order = (int) ($_POST['cat_order'] ?? 0);
+    $visible = isset($_POST['cat_visible']) ? 1 : 0;
+
+    if ($id <= 0 || $title === '') {
+        array_push($errors2, "Category needs a title");
+    } else {
+        $titleE = mysqli_real_escape_string($db, $title);
+        $descE = mysqli_real_escape_string($db, $desc);
+        $q = "UPDATE ebook_category
+              SET cat_title='$titleE', cat_desc='$descE', cat_order=$order, cat_visible=$visible
+              WHERE cat_id=$id LIMIT 1";
+        if (mysqli_query($db, $q)) {
+            array_push($errors2, "Category updated");
+        } else {
+            array_push($errors2, "Error updating category: " . mysqli_error($db));
+        }
+    }
+}
+
+// --- Delete a category (only if it has no e-books) -------------------------
+if (isset($_POST['deletecategory'])) {
+    $id = (int) ($_POST['cat_id'] ?? 0);
+    if ($id > 0) {
+        // Find its code, then refuse if any e-book still uses it.
+        $codeRes = mysqli_query($db, "SELECT cat_code FROM ebook_category WHERE cat_id=$id LIMIT 1");
+        $codeRow = $codeRes ? mysqli_fetch_assoc($codeRes) : null;
+        if (!$codeRow) {
+            array_push($errors2, "Category not found");
+        } else {
+            $codeE = mysqli_real_escape_string($db, $codeRow['cat_code']);
+            $used = mysqli_query($db, "SELECT ebook_id FROM ebook WHERE ebook_category='$codeE' LIMIT 1");
+            if ($used && mysqli_num_rows($used) > 0) {
+                array_push($errors2, "Cannot delete '" . $codeRow['cat_code'] . "': it still has e-books. Move or remove them first.");
+            } else {
+                if (mysqli_query($db, "DELETE FROM ebook_category WHERE cat_id=$id LIMIT 1")) {
+                    array_push($errors2, "Category deleted");
+                } else {
+                    array_push($errors2, "Error deleting category: " . mysqli_error($db));
+                }
+            }
+        }
+    }
 }
 ?>

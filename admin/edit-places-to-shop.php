@@ -1,4 +1,12 @@
 <?php
+/* ============================================================================
+ *                         edit-places-to-shop.php
+ *
+ *   Admin editor — Where to Shop page.
+ *   Pairs with pagefunctions/edit-places-to-shop.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 include('functions.php');
 
 if (!isset($_SESSION['username'])) {
@@ -660,6 +668,9 @@ if (isset($_POST['editpts'])) {
         <?php endif; ?>
     </script>
 
+    <!-- Drag-and-drop row reordering -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="js/dragreorder.js"></script>
 </body>
 
 </html>

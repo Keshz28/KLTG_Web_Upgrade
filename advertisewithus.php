@@ -1,4 +1,11 @@
-<?php include('admin/functions.php'); ?>
+<!-- ============================================================================
+                            advertisewithus.php
+
+     Public page — 'Advertise With Us' info + enquiry.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php'); ?>
 
 <!DOCTYPE html>
 <html lang="en">

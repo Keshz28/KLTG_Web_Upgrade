@@ -1,4 +1,7 @@
 <?php
+// Guard: included by functions.php which runs on public pages too.
+if (!isset($_SESSION['username'])) return;
+
 if (isset($_POST['editblogview2'])) {
     $id = $_POST['hiddenid'];
     $number = $_POST['valueupdate'];

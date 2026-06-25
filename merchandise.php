@@ -1,20 +1,45 @@
-<?php
+<!-- ============================================================================
+                              merchandise.php
+
+     Public page — merchandise / store items.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php
 include('admin/functions.php');
 
-// ── Merchandise Data ─────────────────────────────────────────────────────────
-// Replace these arrays with database queries when the admin panel is ready.
+// â”€â”€ Merchandise Data (admin-managed via admin/edit-merchandise.php) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Categories and products are now stored in the `merchandise_category` and
+// `merchandise` tables and managed from the admin panel.
 
-$categories = [
-    ['id' => 1, 'name' => 'KL The Guide'],
-];
+$categories = [];
+$catRes = mysqli_query($db, "SELECT merchandise_category_id AS id, name FROM merchandise_category ORDER BY merchandise_category_order ASC, merchandise_category_id ASC");
+if ($catRes) {
+    while ($c = mysqli_fetch_assoc($catRes)) {
+        $categories[] = ['id' => (int)$c['id'], 'name' => $c['name']];
+    }
+}
 
-$products = [
-    ['id' => 1, 'name' => 'KLTG1 MERCH', 'cat' => 1, 'img' => 'https://placehold.co/600x600/1a2e44/cce8f4?text=KLTG1'],
-    ['id' => 2, 'name' => 'KLTG2 MERCH', 'cat' => 1, 'img' => 'https://placehold.co/600x600/0077b6/ffffff?text=KLTG2'],
-    ['id' => 3, 'name' => 'KLTG3 MERCH', 'cat' => 1, 'img' => 'https://placehold.co/600x600/00b4d8/1a2e44?text=KLTG3'],
-];
+$products = [];
+$prodRes = mysqli_query($db, "SELECT merchandise_id AS id, name, image, category_id AS cat, price, buy_url FROM merchandise ORDER BY merchandise_order ASC, merchandise_id ASC");
+if ($prodRes) {
+    while ($p = mysqli_fetch_assoc($prodRes)) {
+        // Uploaded images live in assets/img/merchandise/; fall back to a placeholder if blank.
+        $img = $p['image'] !== ''
+            ? 'assets/img/merchandise/' . rawurlencode($p['image'])
+            : 'https://placehold.co/600x600/1a2e44/cce8f4?text=KLTG';
+        $products[] = [
+            'id'      => (int)$p['id'],
+            'name'    => $p['name'],
+            'cat'     => (int)$p['cat'],
+            'img'     => $img,
+            'price'   => $p['price'],
+            'buy_url' => $p['buy_url'],
+        ];
+    }
+}
 
-// ── Filtering ─────────────────────────────────────────────────────────────────
+// â”€â”€ Filtering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 $active_cat = isset($_GET['category']) ? (int)$_GET['category'] : null;
 $search     = trim($_GET['search'] ?? '');
 
@@ -33,20 +58,36 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 <head>
   <title>KL The Guide - Merchandise</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <meta content="Shop KL The Guide merchandise — souvenirs and branded items from Kuala Lumpur." name="description">
+  <meta name="description" content="Shop KL The Guide merchandise - souvenirs and branded items from Kuala Lumpur.">
+  <meta name="keywords" content="KL The Guide merchandise, Kuala Lumpur souvenirs, KL souvenirs, Malaysia gifts, KLTG shop">
+  <link rel="canonical" href="https://www.kltheguide.com.my/merchandise.php" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.kltheguide.com.my/merchandise.php" />
+  <meta property="og:title" content="KL The Guide - Merchandise" />
+  <meta property="og:description" content="Shop KL The Guide merchandise - souvenirs and branded items from Kuala Lumpur." />
+  <meta property="og:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://www.kltheguide.com.my/merchandise.php" />
+  <meta property="twitter:title" content="KL The Guide - Merchandise" />
+  <meta property="twitter:description" content="Shop KL The Guide merchandise - souvenirs and branded items from Kuala Lumpur." />
+  <meta property="twitter:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg" />
 
   <?php include 'header.php'; ?>
 
   <style>
-    /* ── Page base ── */
+    /* â”€â”€ Page base â”€â”€ */
     #merchandise {
       background: #f0f5f9;
       min-height: 100vh;
     }
 
-    /* ════════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        HERO BANNER
-    ════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .merch-hero {
       background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 55%, #0d5286 100%);
       padding: 90px 24px 0;
@@ -172,9 +213,9 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       width: 100%;
     }
 
-    /* ════════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        STICKY FILTER BAR
-    ════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .merch-filter-bar {
       background: #fff;
       box-shadow: 0 2px 16px rgba(0,0,0,.07);
@@ -240,9 +281,9 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       box-shadow: 0 4px 14px rgba(0,119,182,.3);
     }
 
-    /* ════════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        PRODUCT AREA
-    ════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .merch-container {
       max-width: 1280px;
       margin: 0 auto;
@@ -268,9 +309,9 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       font-weight: 800;
     }
 
-    /* ════════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        PRODUCT GRID
-    ════════════════════════════════════════ */
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .merch-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -278,7 +319,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       align-content: start;
     }
 
-    /* ── Card ── */
+    /* â”€â”€ Card â”€â”€ */
     .merch-card {
       background: #fff;
       border-radius: 20px;
@@ -397,7 +438,15 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       line-height: 1.3;
     }
 
-    /* ── Empty state ── */
+    .merch-card-price {
+      font-weight: 800;
+      font-size: .95rem;
+      color: #0077b6;
+      margin: 8px 0 0;
+      letter-spacing: .5px;
+    }
+
+    /* â”€â”€ Empty state â”€â”€ */
     .merch-empty {
       grid-column: 1 / -1;
       text-align: center;
@@ -425,7 +474,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 
     .merch-empty a:hover { text-decoration: underline; }
 
-    /* ── Responsive ── */
+    /* â”€â”€ Responsive â”€â”€ */
     @media (max-width: 768px) {
       .merch-hero { padding: 70px 16px 0; }
 
@@ -454,7 +503,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 
   <main id="merchandise">
 
-    <!-- ── Hero Banner ── -->
+    <!-- â”€â”€ Hero Banner â”€â”€ -->
     <section class="merch-hero">
       <div class="merch-hero-content">
         <p class="merch-hero-eyebrow">Official Store</p>
@@ -473,14 +522,14 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       </div>
     </section>
 
-    <!-- ── Wave divider ── -->
+    <!-- â”€â”€ Wave divider â”€â”€ -->
     <div class="merch-wave-wrap">
       <svg viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0,36 C320,72 720,0 1440,48 L1440,72 L0,72 Z" fill="#f0f5f9"/>
       </svg>
     </div>
 
-    <!-- ── Sticky Filter Bar ── -->
+    <!-- â”€â”€ Sticky Filter Bar â”€â”€ -->
     <div class="merch-filter-bar">
       <div class="merch-filter-inner">
         <span class="merch-filter-label">Filter:</span>
@@ -497,7 +546,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       </div>
     </div>
 
-    <!-- ── Product Grid ── -->
+    <!-- â”€â”€ Product Grid â”€â”€ -->
     <div class="merch-container">
 
       <div class="merch-results-bar">
@@ -520,19 +569,25 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 
         <?php else: ?>
           <?php foreach ($filtered as $p): ?>
+            <?php $hasLink = !empty($p['buy_url']); ?>
             <div class="merch-card">
-              <span class="merch-badge">New</span>
               <div class="merch-card-img-wrap">
                 <img src="<?php echo htmlspecialchars($p['img'], ENT_QUOTES); ?>"
                      alt="<?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?>"
                      loading="lazy">
+                <?php if ($hasLink): ?>
                 <div class="merch-card-overlay">
-                  <button class="merch-overlay-btn">View Product</button>
+                  <a class="merch-overlay-btn" href="<?php echo htmlspecialchars($p['buy_url'], ENT_QUOTES); ?>"
+                     target="_blank" rel="noopener">View Product</a>
                 </div>
+                <?php endif; ?>
               </div>
               <div class="merch-card-body">
                 <p class="merch-card-cat"><?php echo htmlspecialchars($cat_map[$p['cat']] ?? 'KL The Guide', ENT_QUOTES); ?></p>
                 <p class="merch-card-name"><?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?></p>
+                <?php if ($p['price'] !== ''): ?>
+                  <p class="merch-card-price"><?php echo htmlspecialchars($p['price'], ENT_QUOTES); ?></p>
+                <?php endif; ?>
               </div>
             </div>
           <?php endforeach; ?>
@@ -556,3 +611,4 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 </body>
 
 </html>
+

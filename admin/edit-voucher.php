@@ -1,4 +1,11 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                             edit-voucher.php
+ *
+ *   Admin editor — vouchers.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 // Ensure the user is logged in
 if (!isset($_SESSION['username'])) {

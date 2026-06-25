@@ -1,4 +1,11 @@
 <?php
+/* ============================================================================
+ *                                 test.php
+ *
+ *   Admin scratch/test page. NOT a test suite.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 include('functions.php');
 // debug_to_console("test");
 echo $_ENV['DB_USER2'];

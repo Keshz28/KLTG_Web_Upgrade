@@ -1,3 +1,10 @@
+<!-- ============================================================================
+                                 topnav.php
+
+     Admin top-bar partial (HTML only), included into admin pages.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
    <!-- Topbar -->
    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
@@ -99,6 +106,78 @@
     </li>
 
 </ul>
+
+<script>
+(function () {
+    var token = "<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>";
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('form').forEach(function (form) {
+            if (!form.querySelector('input[name="csrf_token"]')) {
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'csrf_token';
+                inp.value = token;
+                form.appendChild(inp);
+            }
+        });
+    });
+})();
+</script>
+
+<!-- ── Idle timeout: 30 min inactivity → redirect to login ─────────────── -->
+<div id="idle-warning" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;
+     background:#c0392b;color:#fff;text-align:center;padding:14px 20px;
+     font-size:15px;font-family:sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.4);">
+    You will be logged out in <strong id="idle-countdown">60</strong> seconds due to inactivity.&nbsp;
+    <button onclick="resetIdleTimer()"
+            style="margin-left:12px;padding:5px 16px;background:#fff;color:#c0392b;
+                   border:none;border-radius:4px;cursor:pointer;font-weight:bold;">
+        Stay logged in
+    </button>
+</div>
+
+<script>
+(function () {
+    var IDLE_MS  = 30 * 60 * 1000;   // 30 minutes total
+    var WARN_MS  =  1 * 60 * 1000;   // warning shown 1 minute before logout
+    var idleTimer, warnTimer, countdownInterval;
+
+    var banner    = document.getElementById('idle-warning');
+    var countdown = document.getElementById('idle-countdown');
+
+    function showWarning() {
+        var secs = 60;
+        countdown.textContent = secs;
+        banner.style.display = 'block';
+        countdownInterval = setInterval(function () {
+            secs--;
+            countdown.textContent = secs;
+            if (secs <= 0) clearInterval(countdownInterval);
+        }, 1000);
+    }
+
+    function hideWarning() {
+        banner.style.display = 'none';
+        clearInterval(countdownInterval);
+    }
+
+    window.resetIdleTimer = function () {
+        clearTimeout(idleTimer);
+        clearTimeout(warnTimer);
+        hideWarning();
+        warnTimer = setTimeout(showWarning, IDLE_MS - WARN_MS);
+        idleTimer = setTimeout(function () {
+            window.location.href = 'login.php?timeout=1';
+        }, IDLE_MS);
+    };
+
+    ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'].forEach(function (evt) {
+        document.addEventListener(evt, resetIdleTimer, true);
+    });
+
+    resetIdleTimer(); // start the clock
+})();
+</script>
 
 </nav>
 <!-- End of Topbar -->

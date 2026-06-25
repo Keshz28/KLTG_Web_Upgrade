@@ -1,13 +1,22 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                             bannerreach.php
+ *
+ *   Admin (auth-gated) — banner reach/click analytics. Data fed by root banner.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 if (!isset($_SESSION['username'])) {
     $_SESSION['msg'] = "You must log in first";
     header('location: login.php');
+    exit;
 }
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['username']);
     header("location: login.php");
+    exit;
 }
 
 
@@ -52,68 +61,30 @@ $totalvalue = 0;
 <?php
 
 if (!isset($_GET["startdate"]) && !isset($_GET["enddate"]) && !isset($_GET["banner"])) {
-    $t = date("Y-m-d", strtotime("-7 day"));
+    // Default: monthly view — last 12 months, updates automatically each new month
+    $dates2 = [];
+    for ($i = 11; $i >= 0; $i--) {
+        $dates2[] = date('Y-m', strtotime("-$i month"));
+    }
 
-    $query = "SELECT banner_name , COUNT(*), DATE_FORMAT(date, '%Y-%m-%d') as dateent2 FROM `banner_reach` WHERE DATE_FORMAT(date, '%Y-%m-%d') > '2023-10-18'  GROUP BY banner_name, DATE_FORMAT(date, '%Y-%m-%d') ORDER BY `banner_reach`.`date` DESC;";
+    $query = "SELECT DATE_FORMAT(date, '%Y-%m') as month_label, COUNT(*) as cnt
+              FROM banner_reach
+              GROUP BY month_label
+              ORDER BY month_label ASC";
     $result = mysqli_query($db, $query);
-    $diff = strtotime("now") - strtotime($t);
-    $numdays = abs(round($diff / 86400));
-    // echo $numdays;
-    for ($x = 0; $x <= $numdays; $x++) {
-        $stringday = "+" . $x . "day";
-        $dates2[] = date('Y-m-d', strtotime($t . $stringday));
 
-    }
-
-    // $dates2 = array_reverse($dates2, TRUE);
-
-    while ($row = mysqli_fetch_assoc($result)) {
-
-        // $myArray[($row['banner_name'])][$row['dateent2']] = intval($row['COUNT(*)']);
-
-        // echo $row['banner_name'];
-$totalvalue += $row['COUNT(*)'];
-        foreach ($dates2 as $date) {
-            // echo "date 1 ". $date . gettype($date);
-            // echo "date 2". $row['dateent2'] . gettype($row['dateent2']);
-            $comparedate1 = date('Y-m-d', strtotime($date));
-            $comparedate2 = date('Y-m-d', strtotime($row['dateent2']));
-            // echo $comparedate1;
-            // echo $comparedate2;
-
-
-            // $myArray[$row['banner_name']][$date] = 0;
-
-            if ($comparedate1 == $comparedate2) {
-                // echo "same";
-
-
-                //     echo $row['banner_name'];
-                $myArray[$row['banner_name']][$date] = intval($row['COUNT(*)']);
-                // echo $myArray[$row['banner_name']][$date];
-
-            } else {
-                // echo "no";
-                // echo "nsame2";
-
-                // echo $row['banner_name'];
-                // $myArray[$row['banner_name']][$date] = 0;
-                // echo $myArray[$row['banner_name']][$date];
-
-                // $myArray[($row['banner_name'])][$row['dateent2']] = intval($row['COUNT(*)']);
-
-            }
-            if (!isset($myArray[$row['banner_name']][$date])) {
-                $myArray[$row['banner_name']][$date] = 0;
-
-            }
-
+    $monthData = [];
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $monthData[$row['month_label']] = (int)$row['cnt'];
+            $totalvalue += (int)$row['cnt'];
         }
-
     }
 
-    // var_dump($myArray);
-
+    $myArray = ['Advertisement Popup' => []];
+    foreach ($dates2 as $m) {
+        $myArray['Advertisement Popup'][$m] = $monthData[$m] ?? 0;
+    }
 
 } else {
     $startdate = $_GET["startdate"];
@@ -197,7 +168,7 @@ $totalvalue += $row['COUNT(*)'];
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>KLTG ADMIN - Banner Reach</title>
+    <title>KLTG ADMIN - Ad Popup Reach</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -228,7 +199,7 @@ $totalvalue += $row['COUNT(*)'];
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Banner Reach</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Ad Popup Reach</h1>
                         <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                                 class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
                     </div>
@@ -248,7 +219,7 @@ $totalvalue += $row['COUNT(*)'];
                                 <!-- Card Header - Dropdown -->
                                 <div
                                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Banner Reach View</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">Ad Popup Click Reach</h6>
                                     <form action="#" method="get">
                                         <label for="banner">Banner:</label>
                                         <select name="banner" id="banner">
@@ -404,56 +375,24 @@ $totalvalue += $row['COUNT(*)'];
             // Area Chart Example
             var ctx = document.getElementById("myAreaChart");
             var myLineChart = new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-
-                    labels:
-
-                        <?php echo json_encode($dates2) ?>
-                    ,
+                    labels: <?php echo json_encode($dates2) ?>,
                     datasets: [
-
-
                         <?php
                         foreach ($myArray as $key2 => $values) {
-
-                            // foreach ($values as $key => $value) {
-                            //     print "    $key => $value\n";
-                            // }
-                            $r = rand(1, 255);
-                            $g = rand(1, 255);
-                            $b = rand(1, 255);
-
+                            $arrayvalue = [];
+                            foreach ($values as $value) {
+                                $arrayvalue[] = $value;
+                            }
                             ?>
-                                                                 {
-                                label: "<?php echo $key2 ?>",
-                                lineTension: 0.1,
-                                backgroundColor: "rgba(8, 15, 223, 0.00)",
-                                borderColor: "rgba(<?php echo $r ?>, <?php echo $g ?>, <?php echo $b ?>, 1)",
-                                pointRadius: 3,
-                                pointBackgroundColor: "rgba(<?php echo $r ?>, <?php echo $g ?>, <?php echo $b ?>, 1)",
-                                pointBorderColor: "rgba(<?php echo $r ?>, <?php echo $g ?>, <?php echo $b ?>, 1)",
-                                pointHoverRadius: 3,
-                                pointHoverBackgroundColor: "rgba(<?php echo $r ?>, <?php echo $g ?>, <?php echo $b ?>, 1)",
-                                pointHoverBorderColor: "rgba(<?php echo $r ?>, <?php echo $g ?>, <?php echo $b ?>, 1)",
-                                pointHitRadius: 10,
-                                pointBorderWidth: 2,
-                                data:
-
-                                    <?php
-                                    $arrayvalue = [];
-                                    foreach ($values as $key => $value) {
-                                        $arrayvalue[] = $value;
-                                    }
-                                    echo json_encode($arrayvalue);
-
-                                    ?>
-
-
-                                ,
+                            {
+                                label: "<?php echo htmlspecialchars($key2, ENT_QUOTES); ?>",
+                                backgroundColor: "rgba(78, 115, 223, 0.75)",
+                                borderColor: "rgba(78, 115, 223, 1)",
+                                borderWidth: 1,
+                                data: <?php echo json_encode($arrayvalue); ?>,
                             },
-
-
                         <?php } ?>
                     ],
                 },

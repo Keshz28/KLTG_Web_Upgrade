@@ -1,4 +1,11 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                                 sub.php
+ *
+ *   Admin — subscriber management page (with flash messages).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -15,11 +22,13 @@ if (isset($_SESSION['flash_message'])) {
 if (!isset($_SESSION['username'])) {
     $_SESSION['msg'] = "You must log in first";
     header('location: login.php');
+    exit;
 }
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['username']);
     header("location: login.php");
+    exit;
 }
 
 ?>
@@ -139,13 +148,13 @@ if (isset($_GET['logout'])) {
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th style="width:5%;"><input type="checkbox" id="selectAll"></th>
-                                            <th scope="col" style="width:5%;">#</th>
-                                            <th scope="col" style="width:20%;">Email</th>
-                                            <th scope="col" style="width:25%;">Country</th>
-                                            <th scope="col" style="width:20%;">Monthly Subs</th>
-                                            <th scope="col" style="width:30%;">Date</th>
-
+                                            <th style="width:4%;"><input type="checkbox" id="selectAll"></th>
+                                            <th scope="col" style="width:4%;">#</th>
+                                            <th scope="col" style="width:22%;">Email</th>
+                                            <th scope="col" style="width:18%;">Country</th>
+                                            <th scope="col" style="width:14%;">Monthly Subs</th>
+                                            <th scope="col" style="width:20%;">Date</th>
+                                            <th scope="col" style="width:18%;">Verified</th>
                                         </tr>
                                     </thead>
 
@@ -234,32 +243,60 @@ if (isset($_GET['logout'])) {
                         </form>
                     </div>
 
-                    <form id="subscribe-form">
-  <input type="email" id="email" name="email" required placeholder="Enter your email" />
-  <button type="submit">Subscribe</button>
-</form>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Add Subscriber</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small">A verification email will be sent to the address. The subscriber becomes active only after clicking the confirmation link.</p>
+                            <form id="admin-subscribe-form" class="form-inline">
+                                <input type="email" id="admin-sub-email" name="email" required placeholder="Enter email address" class="form-control mr-2" style="width:280px;">
+                                <button type="submit" class="btn btn-primary">Send Verification</button>
+                            </form>
+                            <div id="admin-sub-msg" class="mt-2"></div>
+                        </div>
+                    </div>
 
 <script>
-document.getElementById('subscribe-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  const body  = new URLSearchParams({ email });
+(function () {
+    document.getElementById(‘admin-subscribe-form’).addEventListener(‘submit’, async function (e) {
+        e.preventDefault();
+        const btn = this.querySelector(‘button[type="submit"]’);
+        const msgEl = document.getElementById(‘admin-sub-msg’);
+        const email = document.getElementById(‘admin-sub-email’).value.trim();
 
-  const res  = await fetch('sub_handler.php?action=subscribe', {
-    method: 'POST',
-    headers: { 'Accept': 'application/json' },
-    body
-  });
+        btn.disabled = true;
+        btn.textContent = ‘Sending...’;
+        msgEl.textContent = ‘’;
 
-  const data = await safeJson(res);
-  if (data.ok) {
-    alert(data.sent
-      ? 'Subscribed! Check your inbox for the welcome email.'
-      : 'Subscribed! We’ll send your welcome email shortly.');
-  } else {
-    alert(data.error || 'Subscription failed.');
-  }
-});
+        try {
+            const res = await fetch(‘sub_handler.php?action=subscribe’, {
+                method: ‘POST’,
+                headers: { ‘Accept’: ‘application/json’ },
+                body: new URLSearchParams({ email })
+            });
+            const text = await res.text();
+            let data = {};
+            try { data = JSON.parse(text); } catch (_) { data = { ok: false, error: text }; }
+
+            if (data.ok) {
+                if (data.status === ‘duplicate’) {
+                    msgEl.innerHTML = ‘<span style="color:#27ae60;">&#10003; This email is already verified and subscribed.</span>’;
+                } else {
+                    msgEl.innerHTML = ‘<span style="color:#2980b9;">&#9993; Verification email sent. Subscriber will be activated once they confirm.</span>’;
+                    document.getElementById(‘admin-sub-email’).value = ‘’;
+                }
+            } else {
+                msgEl.innerHTML = ‘<span style="color:#c0392b;">&#10005; ‘ + (data.error || ‘Subscription failed.’) + ‘</span>’;
+            }
+        } catch (err) {
+            msgEl.innerHTML = ‘<span style="color:#c0392b;">&#10005; Network error. Please try again.</span>’;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = ‘Send Verification’;
+        }
+    });
+}());
 </script>
 
 
@@ -716,7 +753,8 @@ document.getElementById('subscribe-form').addEventListener('submit', async (e) =
                 { data: "email" },
                 { data: "country" },
                 { data: "consent" },
-                { data: "date" }
+                { data: "date" },
+                { data: "verified", orderable: false }
             ]
         });
 

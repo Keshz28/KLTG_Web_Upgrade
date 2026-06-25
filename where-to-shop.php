@@ -1,5 +1,14 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                             where-to-shop.php
 
+     Public page — shopping listings.
+     Uses viewOnMapButton() + kltg_mapcoords.php.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
+require_once __DIR__ . '/view_on_map_helper.php';
+$kltg_coords = include __DIR__ . '/kltg_mapcoords.php';
 
 $query = "SELECT * FROM indexpage ";
 $result = mysqli_query($db, $query);
@@ -48,6 +57,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title2 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/where-to-shop.php" />
 
   <meta name="description"
     content="Explore the best stores and local boutiques in KL, find out all there is to know about shopping, including shopping hotspots, shopping malls, shopping districts, shopping on your smartphone and more.">
@@ -146,11 +156,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['place_shop_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['place_shop_title']), urldecode($row['place_shop_location']), $kltg_coords[trim(urldecode($row['place_shop_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['place_shop_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['place_shop_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['place_shop_hours']) ?>
                           </p>
                         <?php } ?>
 

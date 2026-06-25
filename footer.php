@@ -1,10 +1,118 @@
+<?php
+/* ============================================================================
+ *                                footer.php
+ *
+ *   Shared site footer include.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
+// Load active advertisement for popup
+$_kltg_ad = null;
+if (isset($db)) {
+    $_kltg_ad_result = @mysqli_query($db, "SELECT id, image, link_url FROM advertisement WHERE is_active = 1 LIMIT 1");
+    if ($_kltg_ad_result && mysqli_num_rows($_kltg_ad_result) > 0) {
+        $_kltg_ad = mysqli_fetch_assoc($_kltg_ad_result);
+    }
+}
+?>
+
+<?php if ($_kltg_ad && !empty($_kltg_ad['image'])): ?>
+<!-- Advertisement Popup -->
+<div id="kltg-ad-overlay" aria-modal="true" role="dialog" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;">
+    <div id="kltg-ad-box" style="
+        position: relative;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+        max-width: 520px;
+        width: 90%;
+        overflow: hidden;">
+        <!-- Close bar -->
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #222;
+            color: #fff;">
+            <span style="font-size: 12px; letter-spacing: 0.5px; opacity: 0.8;">Advertisement</span>
+            <button id="kltg-ad-close" aria-label="Close advertisement" style="
+                background: none;
+                color: #fff;
+                border: none;
+                font-size: 22px;
+                line-height: 1;
+                cursor: pointer;
+                padding: 0 2px;">
+                &times;
+            </button>
+        </div>
+        <!-- Ad image -->
+        <a id="kltg-ad-link" href="<?php echo htmlspecialchars($_kltg_ad['link_url'], ENT_QUOTES); ?>" target="_blank" rel="noopener noreferrer" style="display:block;">
+            <img src="assets/img/advertisement/<?php echo htmlspecialchars($_kltg_ad['image'], ENT_QUOTES); ?>"
+                 alt="Advertisement"
+                 style="width:100%; display:block;">
+        </a>
+    </div>
+</div>
+<script>
+(function () {
+    var storageKey = 'kltg_ad_shown_<?php echo (int)$_kltg_ad['id']; ?>';
+    if (!sessionStorage.getItem(storageKey)) {
+        setTimeout(function () {
+            var overlay = document.getElementById('kltg-ad-overlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+                sessionStorage.setItem(storageKey, '1');
+            }
+        }, 1500);
+    }
+
+    function closeAd() {
+        var overlay = document.getElementById('kltg-ad-overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var closeBtn = document.getElementById('kltg-ad-close');
+        var overlay  = document.getElementById('kltg-ad-overlay');
+        var adLink   = document.getElementById('kltg-ad-link');
+
+        if (closeBtn) closeBtn.addEventListener('click', closeAd);
+        if (overlay)  overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeAd();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeAd();
+        });
+
+        // Track ad clicks (fire-and-forget, opens in new tab so page stays)
+        if (adLink) {
+            adLink.addEventListener('click', function () {
+                navigator.sendBeacon
+                    ? navigator.sendBeacon('admin/track_ad_click.php')
+                    : fetch('admin/track_ad_click.php', { method: 'POST' });
+            });
+        }
+    });
+}());
+</script>
+<?php endif; ?>
+
 <footer id="footer" class="footer">
 
     <div class="footer-content">
         <div class="container">
             <div class="row">
 
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="footer-info">
                         <h3>KL The Guide</h3>
                         <p>
@@ -13,62 +121,18 @@
                             <strong>Phone:</strong>+6012-220 0622<br>
                             <strong>Email:</strong> <a class="text-reset"
                                 href="mailto:enquiry@bluedale.com.my">enquiry@bluedale.com.my</a><br>
-                            <a class="text-reset"
-                                href="ebooklibrary.kltheguide.com.my" target="_blank">e-Book Library</a><br>
                         </p>
                     </div>
                 </div>
 
-                <div class="col-lg-6 col-md-12 col-sm-12 footer-links">
+                <div class="col-lg-4 col-md-6 col-sm-6 footer-links">
                     <h4>Other Guides</h4>
-                    <div class="row">
-                        <div class="col-4 footer-links">
-
-                            <ul>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://www.klangvalley4locals.com.my/">Klang Valley 4 Locals</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://keningautheguide.com.my/">Keningau The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://www.tambunantheguide.com.my/">Tambunan The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://serembantheguide.com.my/">Seremban The Guide</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-4 footer-links">
-
-                            <ul>
-                                <li><i class="bi bi-chevron-right"></i> <a href="http://melakatheguide.com.my/">Melaka
-                                        The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://www.uzbekistantheguide.com/">Uzbekistan The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="https://www.peraktheguide.com.my/">Perak The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="https://kualaselangortheguide.com.my/">Kuala Selangor The Guide</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-4 footer-links">
-
-                            <ul>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://www.taipingtheguide.com.my/">Taiping The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a href="http://www.tawautheguide.com.my">Tawau
-                                        The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="https://www.huluselangortheguide.com.my/">Hulu Selangor The Guide</a></li>
-                                <li><i class="bi bi-chevron-right"></i> <a
-                                        href="http://kualalangattheguide.com.my/">Kuala Langat The Guide</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-
+                    <ul>
+                        <li><i class="bi bi-chevron-right"></i> <a href="http://www.klangvalley4locals.com.my/">Klang Valley 4 Locals</a></li>
+                    </ul>
                 </div>
 
-
-
-                <div class="col-lg-3 col-md-6 footer-newsletter">
+                <div class="col-lg-4 col-md-6 footer-newsletter">
                     <h4>Our Newsletter</h4>
                     <p>Enter your email to subscribe for any news or updates from KL The Guide</p>
                     <form id="subscribe-form">
@@ -118,6 +182,10 @@
     </div>
 
 </footer><!-- End Footer -->
+
+<!-- KL Travel Concierge Chatbot -->
+<link rel="stylesheet" href="assets/css/chatbot.css">
+<script src="assets/js/chatbot.js" defer></script>
 
 <script>
 document.querySelector('#subscribe-form').addEventListener('submit', async (e) => {

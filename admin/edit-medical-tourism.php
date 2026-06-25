@@ -1,14 +1,23 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                         edit-medical-tourism.php
+ *
+ *   Admin editor — Medical Tourism page.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 
 if (!isset($_SESSION['username'])) {
     $_SESSION['msg'] = "You must log in first";
     header('location: login.php');
+    exit;
 }
 if (isset($_GET['logout'])) {
     session_destroy();
     unset($_SESSION['username']);
     header("location: login.php");
+    exit;
 }
 
 
@@ -1278,6 +1287,9 @@ if (isset($_GET['logout'])) {
         echo '<script>$("#modalshowaddnavmt").modal("show");</script>';
     }
     ?>
+    <!-- Drag-and-drop row reordering -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="js/dragreorder.js"></script>
 </body>
 
 </html>

@@ -1,3 +1,10 @@
+<!-- ============================================================================
+                              welcomeemail.php
+
+     HTML welcome-email TEMPLATE for new subscribers. Not a page.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 

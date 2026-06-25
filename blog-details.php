@@ -1,4 +1,12 @@
-<?php include('admin/functions.php'); ?>
+<!-- ============================================================================
+                              blog-details.php
+
+     Public page — single blog article.
+     Rendered client-side by assets/js/blog-details.js (data via fetch_blogger.php).
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php'); ?>
 
 <?php
 
@@ -69,6 +77,7 @@ if (is_numeric($postid)) {
 
 <head>
   <title>KL The Guide - <?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?></title>
+  <link rel="canonical" href="<?php echo htmlspecialchars($urlmeta, ENT_QUOTES, 'UTF-8'); ?>" />
 
   <meta content="<?php echo htmlspecialchars($title, ENT_QUOTES, 'UTF-8'); ?>" name="description">
 
@@ -88,6 +97,7 @@ if (is_numeric($postid)) {
 
   <link rel="alternate" type="application/rss+xml" href="https://www.kltheguide.com.my/blog-list.xml" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/blog-enhance.css">
 
   <?php echo '<script type="application/ld+json">' . json_encode($schema) . '</script>'; ?>
 
@@ -96,6 +106,9 @@ if (is_numeric($postid)) {
 
 
 <body>
+
+  <!-- Reading progress bar -->
+  <div id="reading-progress"><span></span></div>
 
   <!-- ======= Header ======= -->
   <?php include 'nav.php'; ?>
@@ -217,6 +230,12 @@ if (is_numeric($postid)) {
 
       </div>
     </section><!-- End Blog Details Section -->
+
+    <!-- ======= Related Posts ======= -->
+    <section id="related-posts" class="related-posts container" style="display:none">
+      <h3 class="related-title">You might also like</h3>
+      <div class="row gy-4" id="relatedlist"></div>
+    </section><!-- End Related Posts -->
 
   </main><!-- End #main -->
 

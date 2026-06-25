@@ -1,3 +1,10 @@
+<!-- ============================================================================
+                               sendemail.php
+
+     HTML email TEMPLATE for campaigns (inline cid:logoimg logo). Not a page.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 

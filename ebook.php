@@ -1,11 +1,46 @@
-<?php include('admin/functions.php');
+<?php
+/* ============================================================================
+ *                                ebook.php
+ *
+ *   Public page — e-book listing. Links to ebook-details.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('admin/functions.php');
+
+// Categories are managed from the admin dashboard (ebook_category table).
+// ebook_categories() falls back to the original hard-coded list if the table
+// hasn't been created yet, so this page never breaks.
+$categories = ebook_categories($db, true);
+
+// kltg shows only the two most recent published years
+// (publication year is derived from ebook_datetime — there is no ebook_year_published column)
+$kltgQuery = "SELECT e.* FROM ebook e
+              JOIN (
+                  SELECT DISTINCT YEAR(ebook_datetime) AS yr FROM ebook
+                  WHERE ebook_category = 'kltg'
+                  ORDER BY yr DESC LIMIT 2
+              ) AS y ON YEAR(e.ebook_datetime) = y.yr
+              WHERE e.ebook_category = 'kltg'
+              ORDER BY e.ebook_id DESC";
+
+$ebooks = [];
+foreach ($categories as $cat => $info) {
+    $q = ($cat === 'kltg')
+        ? $kltgQuery
+        : "SELECT * FROM ebook WHERE ebook_category='$cat' ORDER BY ebook_id DESC";
+    $result = mysqli_query($db, $q);
+    $ebooks[$cat] = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $ebooks[$cat][] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <title>KL The Guide - E-book</title>
-  <link rel="canonical" href="https://kltheguide.com.my/ebook.php/" />
+  <link rel="canonical" href="https://www.kltheguide.com.my/ebook.php" />
 
   <meta name="description"
     content="The fastest guide to Kuala Lumpur. A guide to the essentials of Kuala Lumpur that helps you hit the ground running on your trip. A practical e-book of things to do and see in Kuala Lumpur, Malaysia.">
@@ -27,1121 +62,279 @@
     content="The fastest guide to Kuala Lumpur. A guide to the essentials of Kuala Lumpur that helps you hit the ground running on your trip. A practical e-book of things to do and see in Kuala Lumpur, Malaysia." />
   <meta property="twitter:image" content="assets/img/kltgseoebook.jpeg" />
 
+  <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
 
   <?php include 'header.php'; ?>
 
+  <style>
+    #ebook .section-header h2 {
+      font-family: 'Carter One', cursive;
+      color: #1520A6;
+      font-weight: 700;
+      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      line-height: 1.15;
+    }
 
+    /* ── Tab navigation ── */
+    #ebookTabs {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      padding-bottom: 6px;
+    }
+    #ebookTabs .nav-link {
+      white-space: nowrap;
+      border-radius: 50px;
+      padding: 7px 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #555;
+      background: #f1f3f5;
+      border: 1.5px solid transparent;
+      transition: all .2s;
+    }
+    #ebookTabs .nav-link:hover:not(.active) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: #fff;
+    }
+    #ebookTabs .nav-link.active {
+      background: var(--color-primary);
+      color: #fff;
+    }
 
+    /* ── Ebook card ── */
+    .ebook-card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
+      transition: transform .25s, box-shadow .25s;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .ebook-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+    }
+    .ebook-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    /* PDF cover: render the first page in the same slot as an image cover */
+    .ebook-cover-pdf {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: #f1f3f5;
+      overflow: hidden;
+    }
+    .ebook-cover-pdf embed {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+      pointer-events: none; /* let clicks fall through to the card */
+    }
+    .ebook-card-body {
+      padding: 14px 16px 16px;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .ebook-card-body h5 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 0;
+      color: #222;
+    }
+    .ebook-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .ebook-actions a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 16px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-read {
+      background: var(--color-primary);
+      color: #fff !important;
+    }
+    .btn-read:hover { opacity: .85; }
+    .btn-dl {
+      border: 1.5px solid var(--color-primary);
+      color: var(--color-primary) !important;
+      padding: 5px 12px;
+    }
+    .btn-dl:hover {
+      background: var(--color-primary);
+      color: #fff !important;
+    }
+
+    /* ── Category description ── */
+    .category-desc {
+      color: #666;
+      max-width: 700px;
+      margin: 0 auto 28px;
+      text-align: center;
+      line-height: 1.75;
+      font-size: 0.95rem;
+    }
+
+    /* ── Empty state ── */
+    .ebook-empty {
+      text-align: center;
+      padding: 48px 0;
+      color: #aaa;
+    }
+    .ebook-empty i { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+  </style>
 </head>
 
 <body>
 
-  <!-- ======= Header ======= -->
   <?php include 'nav.php'; ?>
 
   <main id="ebook">
 
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="container">
-
-        <div class="d-flex justify-content-between align-items-center">
-          <h2>E-book</h2>
-          <ol>
-            <li><a href="index.php">Home</a></li>
-            <li>E-Book</li>
-
-          </ol>
-        </div>
-
-      </div>
-    </div><!-- End Breadcrumbs -->
-
-
-
-
-    <!-- ======= KLTG Section ======= -->
-    <section id="team" class="team">
+    <section class="team" style="margin-top:76px;">
       <div class="container" data-aos="fade-up">
 
         <div class="section-header">
           <h2>KL The Guide</h2>
-          <p>Check out our extensive library of KL The Guide eBook, exclusively created to plan for your upcoming trip
-            to KL. Our eBooks provide everything you need to organize your ideal trip to KL, whether you’re looking for
-            detailed itineraries, insider tips, or in-depth cultural insights.</p>
+          <p>Browse our growing library of travel eBooks. Pick a destination below to get started.</p>
         </div>
 
-        <div class="row gy-5">
-          <div class="clients-slider swiper gy-5">
-            <div class="swiper-wrapper align-items-center">
-
-              <?php
-              $query = "SELECT e.*
-                FROM ebook e
-                JOIN (
-                    SELECT DISTINCT ebook_year_published
-                    FROM ebook
-                    WHERE ebook_category = 'kltg'
-                    ORDER BY ebook_year_published DESC
-                    LIMIT 2
-                ) AS y ON e.ebook_year_published = y.ebook_year_published
-                WHERE e.ebook_category = 'kltg'
-                ORDER BY e.ebook_id DESC; ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member ">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-                </div>
-
-                <?php
-              }
-              ?>
-            </div>
-
-            <div class="swiper-scrollbar"></div>
-
-          </div>
+        <!-- Category pill tabs -->
+        <div class="mb-4">
+          <ul class="nav nav-pills" id="ebookTabs" role="tablist">
+            <?php $first = true; foreach ($categories as $cat => $info): ?>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link <?= $first ? 'active' : '' ?>"
+                      id="tab-<?= $cat ?>"
+                      data-bs-toggle="pill"
+                      data-bs-target="#pane-<?= $cat ?>"
+                      type="button" role="tab"
+                      aria-controls="pane-<?= $cat ?>"
+                      aria-selected="<?= $first ? 'true' : 'false' ?>">
+                <?= htmlspecialchars($info['title']) ?>
+              </button>
+            </li>
+            <?php $first = false; endforeach; ?>
+          </ul>
         </div>
 
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= KV4L Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Klang Valley 4 Locals</h2>
-          <p>The Klang Valley 4 Locals eBooks are exclusive guides that are specially crafted for locals, helping them
-            to uncover the hidden gems and unique experiences within the vibrant Klang Valley region. Whether you’re a
-            local looking to discover the facets of Klang Valley or a visitor seeking an authentic local experience, the
-            Klang Valley 4 Locals eBooks are your ultimate guide.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='kv4l' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- ======= MKTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Melaka The Guide</h2>
-          <p>Experience the enchanting city of Melaka like never before with Melaka The Guide eBooks! Our meticulously
-            crafted guides offer the best recommendations and insights for those seeking to explore the rich history and
-            cultural wonders of the beautiful historical city. </p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='mktg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-
-    <!-- ======= TPTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Taiping The Guide</h2>
-          <p>Discover the charming town of Taiping with Taiping The Guide eBooks. Let Taiping The Guide eBooks be your
-            companion as your embark on a remarkable journey through Taiping’s storied past and vibrant present</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='tptg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- ======= UZTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Uzbekistan The Guide</h2>
-          <p>Embark on a remarkable journey to the enchanting country of Uzbekistan with Uzbekistan The Guide eBook.
-            With just a tap of your finger, our comprehensive eBook allows you to plan and explore this beautiful
-            country with ease.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='uztg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= KNTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Keningau The Guide</h2>
-          <p>Discover the ultimate travel companion for your upcoming journey to Keningau! Check our Keningau The Guide
-            eBook, a comprehensive travel guide to help you plan and make the most of your visit to this captivating
-            destination.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='kntg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= TWTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Tawau The Guide</h2>
-          <p>With one click, unlock a treasure trove of invaluable information and expert recommendations with Tawau The
-            Guide eBook! Whether you’re a first-time visitor or a seasoned traveler, let ‘Tawau The Guide’ be your
-            trusted companion, providing you with all the tools you need to create unforgettable memories in the
-            mesmerizing Tawau town.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='twtg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= TBTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Tambunan The Guide</h2>
-          <p>Immerse yourself in the rich culture, vibrant traditions, and breathtaking landscapes that Tambunan has to
-            offer. From must-see attractions and hidden gems to local dining spots and off-the-beaten-path adventures,
-            Tambunan The Guide eBook has it all!</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='tbtg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= HSTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Hulu Selangor The Guide</h2>
-          <p>Immerse yourself in the natural beauty, historical landmarks, and cultural richness of this hidden gem. Our
-            meticulously curated eBooks provide the best guides and recommendations for those looking to explore Hulu
-            Selangor’s unique offerings. </p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='hstg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- ======= PRTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Perak The Guide</h2>
-          <p>Embark on an extraordinary journey through Perak’s wonders with Perak The Guide eBooks, your ultimate
-            companion for an unforgettable experience at this beautiful state. </p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center  ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='prtg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-    <!-- ======= SBTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Seremban The Guide</h2>
-          <p>Unlock the wonders of Seremban with Seremban The Guide eBook. Discover this charming city and everything
-            that Seremban have to offer, right at your fingertips. Experience Seremban like a local with Seremban The
-            Guide eBook, your virtual companion to this captivating city.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='sbtg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- ======= KSTG Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Kuala Selangor The Guide</h2>
-          <p>Discover Kuala Selangor like never before with our comprehensive Kuala Selangor The Guide eBook! Our eBook
-            simplifies your trip planning process, making it a breeze to organize your next unforgettable journey with
-            just a click away.</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='kstg' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- ======= KLGT Section ======= -->
-    <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Kuala Langat The Guide</h2>
-          <p>Explore the enchanting town of Kuala Langat with Kuala Langat The Guide. Inside our eBook, you’ll find
-            everything you need to know to make the most of your trip in Kuala Langat!</p>
-        </div>
-
-        <div class="row gy-5">
-          <div class="clients-slider swiper">
-            <div class="swiper-wrapper align-items-center ">
-
-              <?php
-              $query = "SELECT * FROM ebook WHERE ebook_category='klgt' ORDER BY ebook_id DESC ";
-              $result = mysqli_query($db, $query);
-              while ($row = mysqli_fetch_assoc($result)) {
-                ?>
-                <div class="swiper-slide">
-                  <br>
-
-                  <div class="team-member">
-                    <div class="member-img mx-auto">
-                      <img src="assets/img/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_image'] ?>"
-                        class="img-fluid" alt="<?php echo $row['ebook_name'] ?>" loading="lazy">
-                    </div>
-                    <div class="member-info">
-
-                      <div class="social">
-                        <?php if (!$row['ebook_url']) { ?>
-                          <?php if ($row['ebook_filename']) { ?>
-
-                            <a href="ebook-details.php?id=<?php echo $row['ebook_id'] ?>"><i class="bi bi-book"></i></a>
-                          <?php } else ?>
-                        <?php } else { ?>
-                          <a href="<?php echo $row['ebook_url'] ?>"><i class="bi bi-book"></i></a>
-                        <?php } ?>
-                        <?php if ($row['ebook_filename']) { ?>
-
-                          <a href="assets/pdf/ebook/<?php echo $row['ebook_category'] ?>/<?php echo $row['ebook_filename'] ?>"
-                            download><i class="bi bi-download"></i></a>
-                        <?php } ?>
-
-
-                      </div>
-
-                      <h4>
-                        <?php echo $row['ebook_name'] ?>
-                      </h4>
-                    </div>
-                  </div>
-                  <br>
-
-                </div>
-                <?php
-              }
-              ?>
-            </div>
-            <div class="swiper-scrollbar"></div>
-          </div>
-        </div>
-
-
-
-      </div>
-    </section><!-- End Team Section -->
-
-
-    <!-- End Team Section -->
-
-
-    <!-- ======= Pricing Section ======= -->
-    <!-- <section id="pricing" class="pricing">
-        <div class="container" data-aos="fade-up">
-
-          <div class="section-header">
-            <h2>Our Pricing</h2>
-            <p>Architecto nobis eos vel nam quidem vitae temporibus voluptates qui hic deserunt iusto omnis nam voluptas
-              asperiores sequi tenetur dolores incidunt enim voluptatem magnam cumque fuga.</p>
-          </div>
-
-          <div class="row gy-4"> -->
-
-    <!-- <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="200">
-            <div class="pricing-item">
-
-              <div class="pricing-header">
-                <h3>Free Plan</h3>
-                <h4><sup>$</sup>0<span> / month</span></h4>
+        <!-- Tab panels -->
+        <div class="tab-content" id="ebookTabsContent">
+          <?php $first = true; foreach ($categories as $cat => $info): ?>
+          <div class="tab-pane fade <?= $first ? 'show active' : '' ?>"
+               id="pane-<?= $cat ?>"
+               role="tabpanel"
+               aria-labelledby="tab-<?= $cat ?>">
+
+            <p class="category-desc"><?= htmlspecialchars($info['desc']) ?></p>
+
+            <?php if (empty($ebooks[$cat])): ?>
+              <div class="ebook-empty">
+                <i class="bi bi-book"></i>
+                No eBooks available yet — check back soon!
               </div>
-
-              <ul>
-                <li><i class="bi bi-dot"></i> <span>Quam adipiscing vitae proin</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nec feugiat nisl pretium</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nulla at volutpat diam uteera</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Pharetra massa massa ultricies</span></li>
-                <li class="na"><i class="bi bi-x"></i> <span>Massa ultricies mi quis hendrerit</span></li>
-              </ul>
-
-              <div class="text-center mt-auto">
-                <a href="#" class="buy-btn">Buy Now</a>
-              </div>
-
-            </div>
-          </div> -->
-    <!-- End Pricing Item -->
-
-    <!-- <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="400">
-            <div class="pricing-item featured">
-
-              <div class="pricing-header">
-                <h3>Business Plan</h3>
-                <h4><sup>$</sup>29<span> / month</span></h4>
-              </div>
-
-              <ul>
-                <li><i class="bi bi-dot"></i> <span>Quam adipiscing vitae proin</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nec feugiat nisl pretium</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nulla at volutpat diam uteera</spa>
-                </li>
-                <li><i class="bi bi-dot"></i> <span>Pharetra massa massa ultricies</spa>
-                </li>
-                <li><i class="bi bi-dot"></i> <span>Massa ultricies mi quis hendrerit</span></li>
-              </ul>
-
-              <div class="text-center mt-auto">
-                <a href="#" class="buy-btn">Buy Now</a>
-              </div>
-
-            </div>
-          </div> -->
-    <!-- End Pricing Item -->
-
-    <!-- <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="600">
-            <div class="pricing-item">
-
-              <div class="pricing-header">
-                <h3>Developer Plan</h3>
-                <h4><sup>$</sup>49<span> / month</span></h4>
-              </div>
-
-              <ul>
-                <li><i class="bi bi-dot"></i> <span>Quam adipiscing vitae proin</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nec feugiat nisl pretium</span></li>
-                <li><i class="bi bi-dot"></i> <span>Nulla at volutpat diam uteera</span></li>
-                <li><i class="bi bi-dot"></i> <span>Pharetra massa massa ultricies</span></li>
-                <li><i class="bi bi-dot"></i> <span>Massa ultricies mi quis hendrerit</span></li>
-              </ul>
-
-              <div class="text-center mt-auto">
-                <a href="#" class="buy-btn">Buy Now</a>
-              </div>
-
-            </div>
-          </div> -->
-    <!-- End Pricing Item -->
-
-    <!-- </div>
-
-      </div>
-    </section> -->
-    <!-- End Pricing Section -->
-
-
-    <!-- ======= Team Section ======= -->
-    <!-- <section id="team" class="team">
-      <div class="container" data-aos="fade-up">
-
-        <div class="section-header">
-          <h2>Our Team</h2>
-          <p>Architecto nobis eos vel nam quidem vitae temporibus voluptates qui hic deserunt iusto omnis nam voluptas
-            asperiores sequi tenetur dolores incidunt enim voluptatem magnam cumque fuga.</p>
-        </div>
-
-        <div class="row gy-5"> -->
-
-    <!-- <div class="col-xl-4 col-md-6 d-flex" data-aos="zoom-in" data-aos-delay="200">
-            <div class="team-member">
-              <div class="member-img">
-                <img src="assets/img/team/team-1.jpg" class="img-fluid" alt="">
-              </div>
-              <div class="member-info">
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
+            <?php else: ?>
+              <div class="row gy-4 gx-3 justify-content-center">
+                <?php foreach ($ebooks[$cat] as $row): ?>
+                <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6">
+                  <div class="ebook-card">
+                    <?php
+                    $coverPath = 'assets/img/ebook/' . rawurlencode($row['ebook_category']) . '/' . rawurlencode($row['ebook_image']);
+                    $coverIsPdf = strtolower(pathinfo($row['ebook_image'], PATHINFO_EXTENSION)) === 'pdf';
+                    ?>
+                    <?php if ($coverIsPdf): ?>
+                      <div class="ebook-cover-pdf">
+                        <embed src="<?= htmlspecialchars($coverPath) ?>#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                               type="application/pdf">
+                      </div>
+                    <?php else: ?>
+                      <img src="<?= htmlspecialchars($coverPath) ?>"
+                           alt="<?= htmlspecialchars($row['ebook_name']) ?>"
+                           loading="lazy">
+                    <?php endif; ?>
+                    <div class="ebook-card-body">
+                      <h5><?= htmlspecialchars($row['ebook_name']) ?></h5>
+                      <div class="ebook-actions">
+                        <?php if (!$row['ebook_url']): ?>
+                          <?php if ($row['ebook_filename']): ?>
+                            <a href="ebook-details.php?id=<?= $row['ebook_id'] ?>" class="btn-read">
+                              <i class="bi bi-book"></i> Read
+                            </a>
+                          <?php endif; ?>
+                        <?php else: ?>
+                          <a href="<?= htmlspecialchars($row['ebook_url']) ?>" class="btn-read">
+                            <i class="bi bi-book"></i> Read
+                          </a>
+                        <?php endif; ?>
+                        <?php if ($row['ebook_filename']): ?>
+                          <a href="assets/pdf/ebook/<?= htmlspecialchars($row['ebook_category']) ?>/<?= htmlspecialchars($row['ebook_filename']) ?>"
+                             download class="btn-dl" title="Download"
+                             onclick="trackEbookDownload(<?= (int)$row['ebook_id'] ?>)">
+                            <i class="bi bi-download"></i>
+                          </a>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h4>Walter White</h4>
-                <span>Chief Executive Officer</span>
+                <?php endforeach; ?>
               </div>
-            </div>
-          </div> -->
-    <!-- End Team Member -->
-    <!-- 
+            <?php endif; ?>
 
+          </div>
+          <?php $first = false; endforeach; ?>
         </div>
 
       </div>
-    </section> -->
-    <!-- End Team Section -->
+    </section>
 
+  </main>
 
-  </main><!-- End #main -->
-
-  <!-- ======= Footer ======= -->
   <?php include 'footer.php'; ?>
-  <!-- End Footer -->
 
-  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
-      class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+  </a>
 
   <div id="preloader"></div>
 
-  <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
   <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-
-  <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
+  <script>
+    // Records an e-book download without delaying the file download itself.
+    // sendBeacon fires reliably even as the browser starts the download.
+    function trackEbookDownload(id) {
+      try {
+        var data = new FormData();
+        data.append('id', id);
+        navigator.sendBeacon('ebook-track-download.php', data);
+      } catch (e) { /* tracking is best-effort; never block the download */ }
+    }
+  </script>
 
 </body>
 

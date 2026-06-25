@@ -1,4 +1,14 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                            medical-tourism.php
+
+     Public page — medical tourism listings.
+     Uses viewOnMapButton() + kltg_mapcoords.php.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
+require_once __DIR__ . '/view_on_map_helper.php';
+$kltg_coords = include __DIR__ . '/kltg_mapcoords.php';
 
 $query = "SELECT * FROM indexpage ";
 $result = mysqli_query($db, $query);
@@ -47,6 +57,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title5 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/medical-tourism.php" />
 
   <meta name="description"
     content="This page contains the medical tourism locations located throughout Kuala Lumpur, Malaysia">
@@ -87,7 +98,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     <br>
 
     <!-- ======= Features Section ======= -->
-    <section id="features" class="features">
+    <section id="features" class="features tiles-section">
 
       <div class="container" data-aos="fade-up">
 
@@ -95,35 +106,35 @@ while ($row = mysqli_fetch_assoc($result)) {
           <li class="nav-item col text-center text-break">
             <a class="nav-link " id="tab-1-link" href="#tab-1" data-bs-toggle="tab" data-bs-target="#tab-1">
               <img src="assets/img/medical_tourism/1.jpg" class="img-fluid" alt="">
-              <h4>Healthcare</h4>
+              <h4><i class="bi <?php echo tileIcon('Healthcare') ?> tile-icon"></i> Healthcare</h4>
             </a>
           </li>
 
           <li class="nav-item col text-center text-break">
             <a class="nav-link " id="tab-2-link" data-bs-toggle="tab" href="#tab-2" data-bs-target="#tab-2">
               <img src="assets/img/medical_tourism/DENTAL-3-01.jpg" class="img-fluid" alt="">
-              <h4>Dental</h4>
+              <h4><i class="bi <?php echo tileIcon('Dental') ?> tile-icon"></i> Dental</h4>
             </a>
           </li>
 
           <li class="nav-item col text-center text-break">
             <a class="nav-link " id="tab-3-link" data-bs-toggle="tab" href="#tab-3" data-bs-target="#tab-3">
               <img src="assets/img/medical_tourism/DERMATOLOGIST-01.jpg" class="img-fluid" alt="">
-              <h4>Dermatologist</h4>
+              <h4><i class="bi <?php echo tileIcon('Dermatologist') ?> tile-icon"></i> Dermatologist</h4>
             </a>
           </li>
 
           <li class="nav-item col text-center text-break">
             <a class="nav-link " id="tab-4-link" data-bs-toggle="tab" href="#tab-4" data-bs-target="#tab-4">
               <img src="assets/img/medical_tourism/OPHTHALMOLOGIST-2-01.jpg" class="img-fluid" alt="">
-              <h4>Ophthalmologist</h4>
+              <h4><i class="bi <?php echo tileIcon('Ophthalmologist') ?> tile-icon"></i> Ophthalmologist</h4>
             </a>
           </li>
 
           <li class="nav-item col text-center text-break">
             <a class="nav-link " id="tab-5-link" data-bs-toggle="tab" href="#tab-5" data-bs-target="#tab-5">
               <img src="assets/img/medical_tourism/PLASTISURGERY-02.jpeg" class="img-fluid" alt="">
-              <h4>Plastic Surgery</h4>
+              <h4><i class="bi <?php echo tileIcon('Plastic Surgery') ?> tile-icon"></i> Plastic Surgery</h4>
             </a>
           </li>
         </ul>
@@ -191,11 +202,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_hc_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_hc_title']), urldecode($row['medical_tourism_hc_location']), $kltg_coords[trim(urldecode($row['medical_tourism_hc_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_hc_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['medical_tourism_hc_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['medical_tourism_hc_hours']) ?>
                           </p>
                         <?php } ?>
 
@@ -300,11 +312,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_dtl_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_dtl_title']), urldecode($row['medical_tourism_dtl_location']), $kltg_coords[trim(urldecode($row['medical_tourism_dtl_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_dtl_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['medical_tourism_dtl_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['medical_tourism_dtl_hours']) ?>
                           </p>
                         <?php } ?>
 
@@ -409,11 +422,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_der_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_der_title']), urldecode($row['medical_tourism_der_location']), $kltg_coords[trim(urldecode($row['medical_tourism_der_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_der_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['medical_tourism_der_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['medical_tourism_der_hours']) ?>
                           </p>
                         <?php } ?>
 
@@ -519,11 +533,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_oph_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_oph_title']), urldecode($row['medical_tourism_oph_location']), $kltg_coords[trim(urldecode($row['medical_tourism_oph_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_oph_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['medical_tourism_oph_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['medical_tourism_oph_hours']) ?>
                           </p>
                         <?php } ?>
 
@@ -629,11 +644,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_ps_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_ps_title']), urldecode($row['medical_tourism_ps_location']), $kltg_coords[trim(urldecode($row['medical_tourism_ps_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_ps_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['medical_tourism_ps_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['medical_tourism_ps_hours']) ?>
                           </p>
                         <?php } ?>
 

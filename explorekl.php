@@ -1,4 +1,12 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                               explorekl.php
+
+     Public page — 'Explore KL' attractions.
+     Has its own inline View-on-Map button.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
 
 
 $query = "SELECT * FROM indexpage ";
@@ -42,12 +50,50 @@ while ($row = mysqli_fetch_assoc($result)) {
   $tile4_title = $row['tile4_title'];
   $tile4_subtitle = $row['tile4_subtitle'];
 }
+
+/**
+ * Renders a "View on Map" button that deep-links to map.php, focusing the
+ * location. Pass the card's title AND address (already decoded, as displayed).
+ * The map search query is built as "<title>, <address>, Kuala Lumpur, Malaysia"
+ * because the well-known place name pins far more reliably than a bare street
+ * address (e.g. "No. 10, Jalan Hang Kasturi" alone won't find Pasar Seni).
+ * Returns '' when there's nothing usable to search.
+ */
+function viewOnMapButton($title, $address = '')
+{
+  $title = trim((string) $title);
+  $addr  = trim((string) $address);
+
+  // Some rows have a URL pasted into the address field — never search on that.
+  if ($addr !== '' && preg_match('~^https?://~i', $addr)) {
+    $addr = '';
+  }
+
+  $parts = array_filter([$title, $addr], static fn($p) => $p !== '');
+  if (!$parts) {
+    return '';
+  }
+
+  $query = implode(', ', $parts);
+  // Anchor the search to KL/Malaysia, but only add what's not already there.
+  if (stripos($query, 'lumpur') === false) {
+    $query .= ', Kuala Lumpur';
+  }
+  if (stripos($query, 'malaysia') === false) {
+    $query .= ', Malaysia';
+  }
+
+  return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
+    . 'href="map.php?q=' . urlencode($query) . '">'
+    . '<i class="bi bi-pin-map"></i> View on Map</a>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title1 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/explorekl.php" />
 
   <meta name="description"
     content="This page contains the menu for navigating to the various sights, activities and locations throughout Kuala Lumpur">
@@ -89,7 +135,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 
     <!-- ======= Features Section ======= -->
-    <section id="explorekl" class="features">
+    <section id="explorekl" class="features tiles-section">
 
       <div class="container" data-aos="fade-up">
 
@@ -108,6 +154,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   data-bs-toggle="tab" data-bs-target="#tab-<?php echo $row['id'] ?>" style="">
                   <img src="assets/img/explorekl/<?php echo $row['filename'] ?>" class="img-fluid" alt="">
                   <h4 class="text-center align-middle">
+                    <i class="bi <?php echo tileIcon($row['name']) ?> tile-icon"></i>
                     <?php echo $row['name'] ?>
                   </h4>
                 </a>
@@ -176,7 +223,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   <!-- Single Card -->
                   <div class="col-md-6"> <!-- Each card takes half the width on medium screens and up -->
                     <div class="card h-100 border-0 shadow-sm rounded-3">
-                      <img src="assets/img/explorekl/wtd/<?php echo urldecode($row['explorekl_wtd_image']) ?>"
+                      <img src="assets/img/explorekl/wtd/<?php echo rawurlencode(urldecode($row['explorekl_wtd_image'])) ?>"
                         alt="<?php echo urldecode($row['explorekl_wtd_title']) ?>"
                         class="card-img-top img-fluid rounded-top-4" loading="lazy">
                       <div class="card-body d-flex flex-column">
@@ -190,6 +237,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['explorekl_wtd_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_wtd_title']), urldecode($row['explorekl_wtd_location'])); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_wtd_hours']) { ?>
@@ -290,7 +338,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   <!-- Single Card -->
                   <div class="col-md-6"> <!-- Each card takes half the width on medium screens and up -->
                     <div class="card h-100 border-0 shadow-sm rounded-3">
-                      <img src="assets/img/explorekl/hs/<?php echo $row['explorekl_hs_image'] ?>"
+                      <img src="assets/img/explorekl/hs/<?php echo rawurlencode(urldecode($row['explorekl_hs_image'])) ?>"
                         alt="<?php echo urldecode($row['explorekl_hs_title']) ?>"
                         class="card-img-top img-fluid rounded-top-4" loading="lazy">
                       <div class="card-body d-flex flex-column">
@@ -304,6 +352,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['explorekl_hs_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_hs_title']), urldecode($row['explorekl_hs_location'])); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_hs_hours']) { ?>
@@ -406,13 +455,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                             echo '  <div class="card h-100 rounded-4">';
                             echo '    <div class="row h-100">';
                             echo '      <div class="col-6">';
-                            echo '        <img class="card-img rounded-4" src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy" >';
+                            echo '        <img class="card-img rounded-4" src="assets/img/explorekl/pwor/' . rawurlencode(urldecode($row['explorekl_pwor_image'])) . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy" >';
                             echo '      </div>';
                             echo '      <div class="col-6 " >';
                             echo '        <div class="card-body h-100">';
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -456,13 +506,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                             echo '  <div class="card h-100 rounded-4">';
                             echo '    <div class="row  h-100">';
                             echo '      <div class="col-6">';
-                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . rawurlencode(urldecode($row['explorekl_pwor_image'])) . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
                             echo '      </div>';
                             echo '      <div class="col-6 " >';
                             echo '        <div class="card-body h-100 ">';
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -504,13 +555,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                             echo '  <div class="card h-100 rounded-4">';
                             echo '    <div class="row h-100">';
                             echo '      <div class="col-6">';
-                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . rawurlencode(urldecode($row['explorekl_pwor_image'])) . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
                             echo '      </div>';
                             echo '      <div class="col-6 " >';
                             echo '        <div class="card-body h-100 ">';
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -553,13 +605,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                             echo '  <div class="card h-100 rounded-4">';
                             echo '    <div class="row h-100">';
                             echo '      <div class="col-6">';
-                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . $row['explorekl_pwor_image'] . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
+                            echo '        <img class="card-img rounded-4 " src="assets/img/explorekl/pwor/' . rawurlencode(urldecode($row['explorekl_pwor_image'])) . '" alt="' . $row['explorekl_pwor_title'] . '" loading="lazy">';
                             echo '      </div>';
                             echo '      <div class="col-6" >';
                             echo '        <div class="card-body h-100 ">';
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -663,7 +716,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/wte/sf/<?php echo $row['explorekl_wte_sf_image'] ?>"
+                                  <img src="assets/img/explorekl/wte/sf/<?php echo rawurlencode(urldecode($row['explorekl_wte_sf_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_sf_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -681,6 +734,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_wte_sf_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_wte_sf_title']), urldecode($row['explorekl_wte_sf_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_wte_sf_hours']) { ?>
@@ -749,13 +803,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                             echo '  <div class="card h-100 rounded-4">';
                             echo '    <div class="row  h-100">';
                             echo '      <div class="col-6  h-100">';
-                            echo '        <img class="card-img rounded-4" src="assets/img/explorekl/wte/c/' . $row['explorekl_wte_c_image'] . '" alt="Card image cap">';
+                            echo '        <img class="card-img rounded-4" src="assets/img/explorekl/wte/c/' . rawurlencode(urldecode($row['explorekl_wte_c_image'])) . '" alt="Card image cap">';
                             echo '      </div>';
                             echo '      <div class="col-6  h-100">';
                             echo '        <div class="card-body h-100">';
                             echo '          <h5 class="card-title">' . $row['explorekl_wte_c_title'] . '</h5>';
                             if ($row['explorekl_wte_c_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-fill" style="color: black;"></i> <a href="' . $row['explorekl_wte_c_locationurl'] . '">' . $row['explorekl_wte_c_location'] . '</a></p>';
+                              echo viewOnMapButton($row['explorekl_wte_c_title'], $row['explorekl_wte_c_location']);
                             }
                             if ($row['explorekl_wte_c_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . $row['explorekl_wte_c_hours'] . '</p>';
@@ -828,7 +883,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                       <div class="row h-100">
                                         <div class="col-6 ">
                                           <img class="card-img rounded-4"
-                                            src="assets/img/explorekl/wte/r/<?php echo $row['explorekl_wte_r_image'] ?>"
+                                            src="assets/img/explorekl/wte/r/<?php echo rawurlencode(urldecode($row['explorekl_wte_r_image'])) ?>"
                                             alt="<?php echo $row['explorekl_wte_r_title'] ?>" loading="lazy">
                                         </div>
                                         <div class="col-6">
@@ -842,6 +897,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                                   <?php echo $row['explorekl_wte_r_location'] ?>
                                                 </a>
                                               </p>
+                                              <?php echo viewOnMapButton($row['explorekl_wte_r_title'], $row['explorekl_wte_r_location']); ?>
                                             <?php } ?>
 
                                             <?php if ($row['explorekl_wte_r_hours']) { ?>
@@ -974,7 +1030,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/nl/<?php echo $row['explorekl_nl_image'] ?>"
+                                  <img src="assets/img/explorekl/nl/<?php echo rawurlencode(urldecode($row['explorekl_nl_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_nl_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -992,6 +1048,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1112,7 +1169,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/nl/<?php echo $row['explorekl_nl_image'] ?>"
+                                  <img src="assets/img/explorekl/nl/<?php echo rawurlencode(urldecode($row['explorekl_nl_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_nl_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -1130,6 +1187,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1234,7 +1292,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/nl/<?php echo $row['explorekl_nl_image'] ?>"
+                                  <img src="assets/img/explorekl/nl/<?php echo rawurlencode(urldecode($row['explorekl_nl_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_nl_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -1252,6 +1310,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1365,7 +1424,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   <!-- Single Card -->
                   <div class="col-md-6"> <!-- Each card takes half the width on medium screens and up -->
                     <div class="card h-100 border-0 shadow-sm rounded-3">
-                      <img src="assets/img/explorekl/kl4k/<?php echo $row['explorekl_kl4k_image'] ?>"
+                      <img src="assets/img/explorekl/kl4k/<?php echo rawurlencode(urldecode($row['explorekl_kl4k_image'])) ?>"
                         alt="<?php echo urldecode($row['explorekl_kl4k_title']) ?>"
                         class="card-img-top img-fluid rounded-top-4" loading="lazy">
                       <div class="card-body d-flex flex-column">
@@ -1394,6 +1453,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['explorekl_kl4k_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_kl4k_title']), urldecode($row['explorekl_kl4k_location'])); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_kl4k_hours']) { ?>
@@ -1515,7 +1575,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  <img src="assets/img/explorekl/ss/<?php echo rawurlencode(urldecode($row['explorekl_ss_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_ss_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -1533,6 +1593,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1624,7 +1685,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  <img src="assets/img/explorekl/ss/<?php echo rawurlencode(urldecode($row['explorekl_ss_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_ss_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -1642,6 +1703,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1733,7 +1795,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <!-- Single Item -->
                               <div class="col-md-6"> <!-- Each item takes half the width on medium screens and up -->
                                 <div class="card h-100 border-0 shadow-sm rounded-3">
-                                  <img src="assets/img/explorekl/ss/<?php echo $row['explorekl_ss_image'] ?>"
+                                  <img src="assets/img/explorekl/ss/<?php echo rawurlencode(urldecode($row['explorekl_ss_image'])) ?>"
                                     alt="<?php echo urldecode($row['explorekl_ss_title']) ?>"
                                     class="card-img-top img-fluid rounded-top-4" loading="lazy">
 
@@ -1751,6 +1813,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1855,7 +1918,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   <!-- Single Card -->
                   <div class="col-md-6"> <!-- Each card takes half the width on medium screens and up -->
                     <div class="card h-100 border-0 shadow-sm rounded-3">
-                      <img src="assets/img/explorekl/p/<?php echo $row['explorekl_p_image'] ?>"
+                      <img src="assets/img/explorekl/p/<?php echo rawurlencode(urldecode($row['explorekl_p_image'])) ?>"
                         alt="<?php echo urldecode($row['explorekl_p_title']) ?>"
                         class="card-img-top img-fluid rounded-top-4" loading="lazy">
                       <div class="card-body d-flex flex-column">
@@ -1869,6 +1932,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['explorekl_p_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_p_title']), urldecode($row['explorekl_p_location'])); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_p_hours']) { ?>

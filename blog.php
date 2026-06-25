@@ -1,4 +1,12 @@
 <?php
+/* ============================================================================
+ *                                 blog.php
+ *
+ *   Public page — blog listing.
+ *   Rendered by assets/js/blog2.js, which fetches from fetch_blogger.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 include('admin/functions.php');
 
 $query = "SELECT SUM(blog_view) FROM blog ";
@@ -18,7 +26,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <title>KL The Guide - Blog</title>
-  <link rel="canonical" href="https://kltheguide.com.my/blog.php/" />
+  <link rel="canonical" href="https://www.kltheguide.com.my/blog.php" />
 
   <meta
     content="Stay ahead of the curve and be up to date with the freshest content form our blog. Discover insightful articles, helpful guides and many more to keep you informed and inspired. Don’t miss out on the latest happenings – explore our blog and stay connected!"
@@ -47,6 +55,7 @@ while ($row = mysqli_fetch_assoc($result)) {
   <meta property="twitter:image" content="assets/img/kltgseoblog.jpeg" />
   <link rel="alternate" type="application/rss+xml" href="https://www.kltheguide.com.my/blog-list.xml" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/blog-enhance.css">
 
   <?php include 'header.php'; ?>
 
@@ -59,28 +68,33 @@ while ($row = mysqli_fetch_assoc($result)) {
 
   <main id="blog">
 
-    <!-- ======= Breadcrumbs ======= -->
-    <div class="breadcrumbs">
-      <div class="container">
-
-        <div class="d-flex justify-content-between align-items-center">
-          <h2>Blog</h2>
-          <ol>
-            <li><a href="index.php">Home</a></li>
-            <li>Blog</li>
-          </ol>
-        </div>
-
-      </div>
-    </div><!-- End Breadcrumbs -->
-
     <!-- ======= Blog Section ======= -->
     <section id="blog" class="blog">
       <div class="container">
 
+        <!-- Featured hero post (rendered by blog2.js on the unfiltered first page) -->
+        <div class="featured-hero" id="featured-hero" style="display:none"></div>
+
         <div class="row g-5">
 
           <div class="col-lg-8">
+
+            <!-- Search Panel -->
+            <div class="blog-search-panel mb-4">
+              <div class="input-group shadow-sm">
+                <input type="text" id="blog-search-input" class="form-control form-control-lg"
+                  placeholder="Search posts by title or content..." aria-label="Search blog posts" maxlength="200">
+                <button class="btn btn-primary px-4" id="blog-search-btn" type="button">
+                  <i class="bi bi-search me-1"></i>Search
+                </button>
+              </div>
+              <div id="blog-search-status" class="d-none mt-2 d-flex align-items-center gap-2">
+                <span class="text-muted small" id="blog-search-label"></span>
+                <button class="btn btn-sm btn-link text-danger p-0" id="blog-search-clear">
+                  <i class="bi bi-x-circle-fill"></i> Clear search
+                </button>
+              </div>
+            </div>
 
             <div class="row gy-4 posts-list" id="postlist">
 
@@ -227,6 +241,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     });
 
     initblog3();
+    initSearchPanel();
 
     gettags();
     recentpost();

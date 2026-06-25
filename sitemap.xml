@@ -7,64 +7,100 @@
 
   <url>
     <loc>https://www.kltheguide.com.my/</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.00</priority>
   </url>
 
   <url>
-    <loc>https://www.kltheguide.com.my/aboutus.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
-    <priority>0.80</priority>
-  </url>
-  <url>
-    <loc>https://www.kltheguide.com.my/highlights.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
-    <priority>0.80</priority>
-  </url>
-  <url>
     <loc>https://www.kltheguide.com.my/explorekl.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/kl-glance.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/map.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/event.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/blog.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/accommodation.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.kltheguide.com.my/beyondkl.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.kltheguide.com.my/medical-tourism.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.kltheguide.com.my/where-to-shop.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.kltheguide.com.my/spa.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://www.kltheguide.com.my/accommodation.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <loc>https://www.kltheguide.com.my/travel-tips.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.kltheguide.com.my/getting-around-kl.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
     <loc>https://www.kltheguide.com.my/ebook.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://www.kltheguide.com.my/blog.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
-    <priority>0.80</priority>
+    <loc>https://www.kltheguide.com.my/merchandise.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
   </url>
   <url>
-    <loc>https://www.kltheguide.com.my/map.php</loc>
-    <lastmod>2023-07-07T13:12:39+00:00</lastmod>
-    <priority>0.80</priority>
+    <loc>https://www.kltheguide.com.my/aboutus.php</loc>
+    <lastmod>2026-06-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.60</priority>
   </url>
 
   <url>

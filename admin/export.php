@@ -1,6 +1,18 @@
 <?php
+/* ============================================================================
+ *                                export.php
+ *
+ *   Admin — exports data to a downloadable CSV.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 // Include database connection file
 include('functions.php');
+
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
 
 // Check if the export button is clicked
 if(isset($_POST['export'])) {

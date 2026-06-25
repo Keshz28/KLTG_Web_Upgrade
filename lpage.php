@@ -1,4 +1,12 @@
 <?php
+/* ============================================================================
+ *                                lpage.php
+ *
+ *   Standalone landing-page contact form (assets/css/lpage.css).
+ *   Admin side: admin/landing-page.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 include('admin/functions.php');
 ?>
 <!DOCTYPE html>

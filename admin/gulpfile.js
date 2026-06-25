@@ -1,3 +1,11 @@
+/* ============================================================================
+ *                               gulpfile.js
+ *
+ *   Gulp build for the admin SB Admin 2 theme: compiles scss/ -> css/ and
+ *   vendors assets. Run with:  cd admin && npx gulp
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 "use strict";
 
 // Load plugins

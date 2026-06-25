@@ -1,4 +1,14 @@
-<?php include('admin/functions.php');
+<!-- ============================================================================
+                             accommodation.php
+
+     Public page — accommodation listings (CMS-driven).
+     Uses viewOnMapButton() + kltg_mapcoords.php for exact map pins.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
+﻿<?php include('admin/functions.php');
+require_once __DIR__ . '/view_on_map_helper.php';
+$kltg_coords = include __DIR__ . '/kltg_mapcoords.php';
 
 $query = "SELECT * FROM indexpage ";
 $result = mysqli_query($db, $query);
@@ -47,6 +57,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <head>
   <title>KL The Guide - <?php echo $tile2_title3 ?></title>
+  <link rel="canonical" href="https://www.kltheguide.com.my/accommodation.php" />
 
   <meta name="description"
     content="The perfect guide for finding places to stay in Kuala Lumpur, a city that never sleeps. Browse listings of the best hotels, resorts, hostels and apartments in the capital of Malaysia.">
@@ -87,7 +98,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 
     <!-- ======= Features Section ======= -->
-    <section id="features" class="features">
+    <section id="features" class="features tiles-section">
 
       <div class="container" data-aos="fade-up">
 
@@ -107,6 +118,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                   data-bs-toggle="tab" data-bs-target="#tab-<?php echo $row['id'] ?>" style="">
                   <img src="assets/img/accommodation/<?php echo $row['filename'] ?>" class="img-fluid" alt="">
                   <h4 class="text-center align-middle">
+                    <i class="bi <?php echo tileIcon($row['name']) ?> tile-icon"></i>
                     <?php echo $row['name'] ?>
                   </h4>
                 </a>
@@ -190,11 +202,12 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['accommodation_top_location']) ?>
                             </a>
                           </p>
+                          <?php echo viewOnMapButton(urldecode($row['accommodation_top_title']), urldecode($row['accommodation_top_location']), $kltg_coords[trim(urldecode($row['accommodation_top_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['accommodation_top_hours']) { ?>
                           <p class="mb-2">
-                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo $row['accommodation_top_hours'] ?>
+                            <i class="bi bi-clock-fill" style="color: black;"></i> <?php echo urldecode($row['accommodation_top_hours']) ?>
                           </p>
                         <?php } ?>
 
@@ -264,12 +277,13 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h5 class="card-title">' . urldecode($row['accommodation_h_title']) . '</h5>';
                 if ($row['accommodation_h_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_h_locationurl'] . '">' . urldecode($row['accommodation_h_location']) . '</a></p>';
+                  echo viewOnMapButton(urldecode($row['accommodation_h_title']), urldecode($row['accommodation_h_location']), $kltg_coords[trim(urldecode($row['accommodation_h_title']))] ?? '');
                 }
                 if ($row['accommodation_h_hours']) {
-                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . $row['accommodation_h_hours'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_h_hours']) . '</p>';
                 }
                 if ($row['accommodation_h_phone']) {
-                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . $row['accommodation_h_phone'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . urldecode($row['accommodation_h_phone']) . '</p>';
                 }
                 if ($row['accommodation_h_website']) {
                   echo '          <p class="card-text"><i class="bi bi-globe" style="color: black;"></i> <a href="' . $row['accommodation_h_websiteurl'] . '">' . urldecode($row['accommodation_h_website']) . '</a></p>';
@@ -313,12 +327,13 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h4 class="card-title"><strong>' . urldecode($row['accommodation_bh_title']) . '</strong></h4>';
                 if ($row['accommodation_bh_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_bh_locationurl'] . '">' . urldecode($row['accommodation_bh_location']) . '</a></p>';
+                  echo viewOnMapButton(urldecode($row['accommodation_bh_title']), urldecode($row['accommodation_bh_location']), $kltg_coords[trim(urldecode($row['accommodation_bh_title']))] ?? '');
                 }
                 if ($row['accommodation_bh_hours']) {
-                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . $row['accommodation_bh_hours'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bh_hours']) . '</p>';
                 }
                 if ($row['accommodation_bh_phone']) {
-                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . $row['accommodation_bh_phone'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bh_phone']) . '</p>';
                 }
                 if ($row['accommodation_bh_website']) {
                   echo '          <p class="card-text"><i class="bi bi-globe" style="color: black;"></i> <a href="' . $row['accommodation_bh_websiteurl'] . '">' . urldecode($row['accommodation_bh_website']) . '</a></p>';
@@ -372,12 +387,13 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h4 class="card-title"><strong>' . urldecode($row['accommodation_bks_title']) . '</strong></h4>';
                 if ($row['accommodation_bks_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_bks_locationurl'] . '">' . urldecode($row['accommodation_bks_location']) . '</a></p>';
+                  echo viewOnMapButton(urldecode($row['accommodation_bks_title']), urldecode($row['accommodation_bks_location']), $kltg_coords[trim(urldecode($row['accommodation_bks_title']))] ?? '');
                 }
                 if ($row['accommodation_bks_hours']) {
-                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . $row['accommodation_bks_hours'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bks_hours']) . '</p>';
                 }
                 if ($row['accommodation_bks_phone']) {
-                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . $row['accommodation_bks_phone'] . '</p>';
+                  echo '          <p class="card-text"><i class="bi bi-telephone-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bks_phone']) . '</p>';
                 }
                 if ($row['accommodation_bh_website']) {
                   echo '          <p class="card-text"><i class="bi bi-globe" style="color: black;"></i> <a href="' . $row['accommodation_bh_websiteurl'] . '">' . urldecode($row['accommodation_bh_website']) . '</a></p>';

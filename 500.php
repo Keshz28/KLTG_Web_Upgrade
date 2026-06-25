@@ -1,3 +1,11 @@
+<!-- ============================================================================
+                                  500.php
+
+     Custom HTTP 500 error page (static HTML).
+     Not currently wired to an .htaccess ErrorDocument directive.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +15,8 @@
     Bad Request
   </title>
 
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta content="Error 500 Page" name="description">
   <meta content="" name="keywords">
 

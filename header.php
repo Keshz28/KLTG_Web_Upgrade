@@ -1,3 +1,12 @@
+<!-- ============================================================================
+                                 header.php
+
+     Shared <head> include: SEO/OpenGraph meta, Google Analytics + AdSense,
+     fonts, vendor CSS, main.css, PWA manifest link.
+     Include AFTER the page sets its own <title>/meta.
+
+     MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+============================================================================ -->
 
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -39,6 +48,9 @@
 
 <!-- Template Main CSS File -->
 <link href="assets/css/main.css" rel="stylesheet">
+
+<!-- Polished category-tile menus (overrides main.css) -->
+<link href="assets/css/tiles.css" rel="stylesheet">
 
 <!-- Web Manifest -->
 <link rel="manifest" href="manifest.json">

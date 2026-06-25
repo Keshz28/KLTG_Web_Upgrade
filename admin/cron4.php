@@ -1,4 +1,12 @@
-<?php include('functions.php');
+<?php
+/* ============================================================================
+ *                                cron4.php
+ *
+ *   Cron entry point — drains the email/push queue via functions.php testqueue.
+ *   (Variant of cron2.)
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
 
 
 $datenow = date('H');

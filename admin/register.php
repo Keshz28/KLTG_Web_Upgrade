@@ -1,4 +1,18 @@
-<?php include('functions.php') ?>
+<?php
+/* ============================================================================
+ *                               register.php
+ *
+ *   Admin — create a new admin user. Requires an existing logged-in admin session.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */ include('functions.php');
+
+if (!isset($_SESSION['username'])) {
+    $_SESSION['msg'] = "You must log in first";
+    header('location: login.php');
+    exit;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
