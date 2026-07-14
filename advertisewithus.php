@@ -37,8 +37,95 @@
     content="Bluedale Publishing is dedicated to helping people make the most of their open-ended travel experiences, so we feel a deep sense of responsibility and privilege when we help someone create their own stories." />
   <meta property="twitter:image" content="https://www.kltheguide.com.my/assets/img/kltgseo.jpg" />
 
+  <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
+
   <?php include 'header.php'; ?>
-  <link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet" />
+
+  <style>
+    /* Match the site's unified blue section titles (Carter One / #1520A6) */
+    #aboutus .section-header h2 {
+      font-family: 'Carter One', cursive;
+      color: #1520A6;
+      font-weight: 700;
+      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      line-height: 1.15;
+    }
+
+    /* Floating "pop-up" form fields — each box lifts off the page with a shadow */
+    #aboutus .php-email-form .form-control {
+      border: 1px solid #eef0f3;
+      border-radius: 12px;
+      padding: 16px 18px;
+      background: #fff;
+      box-shadow: 0 10px 25px rgba(21, 32, 166, 0.08);
+      transition: box-shadow .25s ease, transform .25s ease, border-color .25s ease;
+    }
+
+    #aboutus .php-email-form .form-control:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 34px rgba(21, 32, 166, 0.14);
+    }
+
+    #aboutus .php-email-form .form-control:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 16px 36px rgba(14, 162, 189, 0.22);
+      outline: none;
+    }
+
+    /* Two elevated action buttons (Email + WhatsApp) with the floating treatment */
+    #aboutus .adv-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    #aboutus .btn-adv {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 34px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: box-shadow .25s ease, transform .25s ease, background-color .25s ease;
+    }
+
+    #aboutus .btn-adv i {
+      font-size: 1.15em;
+    }
+
+    #aboutus .btn-adv:hover {
+      transform: translateY(-3px);
+    }
+
+    #aboutus .btn-adv:active {
+      transform: translateY(-1px);
+    }
+
+    #aboutus .btn-adv--email {
+      background: var(--color-primary);
+      box-shadow: 0 12px 26px rgba(14, 162, 189, 0.35);
+    }
+
+    #aboutus .btn-adv--email:hover {
+      background: var(--color-primary-dark);
+      box-shadow: 0 18px 34px rgba(14, 162, 189, 0.45);
+    }
+
+    #aboutus .btn-adv--wa {
+      background: #25D366;
+      box-shadow: 0 12px 26px rgba(37, 211, 102, 0.35);
+    }
+
+    #aboutus .btn-adv--wa:hover {
+      background: #1EBE5A;
+      box-shadow: 0 18px 34px rgba(37, 211, 102, 0.45);
+    }
+  </style>
 
 </head>
 
@@ -66,6 +153,18 @@
 
 
       <div class="container">
+
+        <?php if (isset($_GET['sent'])): ?>
+          <?php if ($_GET['sent'] === '1'): ?>
+            <div class="alert alert-success text-center" role="alert">
+              Thank you! Your enquiry has been sent. Our team will get back to you shortly.
+            </div>
+          <?php else: ?>
+            <div class="alert alert-danger text-center" role="alert">
+              Sorry, something went wrong and your enquiry could not be sent. Please try again later.
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
 
         <div class="row gy-5 gx-lg-5">
 
@@ -106,7 +205,7 @@
           </div>
 
           <div class="col-lg-8">
-            <form action="" method="post" role="form" class="php-email-form">
+            <form action="" method="post" role="form" class="php-email-form" id="advertiseForm">
               <div class="row">
                 <div class="col-md-6 form-group">
                   <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
@@ -128,7 +227,14 @@
                 <textarea class="form-control" name="message" placeholder="Message" required></textarea>
               </div>
 
-              <div class="text-center"><button type="submit" name="advertise">Submit</button></div>
+              <div class="adv-actions">
+                <button type="submit" name="advertise" class="btn-adv btn-adv--email">
+                  <i class="bi bi-envelope"></i> Send via Email
+                </button>
+                <button type="button" id="btnWhatsApp" class="btn-adv btn-adv--wa">
+                  <i class="bi bi-whatsapp"></i> Send via WhatsApp
+                </button>
+              </div>
             </form>
           </div><!-- End Contact Form -->
 
@@ -204,75 +310,59 @@
   <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="//cdn.quilljs.com/1.3.7/quill.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-  <script src="assets/vendor/quill-image-resize-module/image-resize.min.js"></script>
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
   <script>
-    var toolbarOptions = [
-      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-      ['blockquote', 'code-block'],
+    /* Two ways to send an Advertise With Us enquiry:
+         1. "Send via Email"    — submits the form (email to enquiry@bluedale.com.my) AND pings
+                                   the WhatsApp number with a short heads-up (name, topic, email).
+         2. "Send via WhatsApp" — opens a pre-filled WhatsApp chat with the full enquiry (no email). */
+    (function () {
+      var WHATSAPP_NUMBER = '60122200622';
+      var form = document.getElementById('advertiseForm');
+      if (!form) return;
 
-      [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],      // superscript/subscript
-      [{ 'indent': '-1' }, { 'indent': '+1' }],          // outdent/indent
-      [{ 'direction': 'rtl' }],                         // text direction
+      var val = function (n) {
+        var el = form.querySelector('[name="' + n + '"]');
+        return el ? el.value.trim() : '';
+      };
 
-      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-      [{ 'header': [1, 2, 3, 4, 5, false] }],
+      var openWhatsApp = function (text) {
+        window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(text), '_blank');
+      };
 
-      [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-      [{ 'font': [] }],
-      [{ 'align': [] }],
-      ['image'],
-      ['link'],
-
-      ['clean']                                         // remove formatting button
-    ];
-
-    var quill = new Quill('#editor', {
-      modules: {
-        toolbar: toolbarOptions,
-        imageResize: {
-          displaySize: true
-        },
-      },
-      theme: 'snow'
-    });
-
-    var form = document.querySelector('form');
-    form.onsubmit = function () {
-      // Populate hidden form on submit
-      about.value = JSON.stringify(quill.getContents());
-      // console.log(about.value);
-      // console.log("Submitted", $(form).serialize(), $(form).serializeArray());
-
-      // No back end to actually submit to!
-      // alert('Open the console to see the submit data!')
-      // return false;
-
-
-
-      const xhttp = new XMLHttpRequest();
-      xhttp.open("POST", "admin/functions.php", true);
-      xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      const body = JSON.stringify({
-
-        formdata: about.value,
+      // 1. Email path — fires when the form is submitted via the "Send via Email" button.
+      form.addEventListener('submit', function () {
+        var text = [
+          '*Advertise With Us — email enquiry received*',
+          'This person has just sent an email to advertise with us through the KL The Guide website.',
+          '',
+          'Name: ' + val('name'),
+          'Topic: ' + val('subject'),
+          'Email: ' + val('email')
+        ].join('\n');
+        openWhatsApp(text);
       });
 
-      xhttp.onload = function () {
-        // console.log(body);
-
-        console.log(this.responseText);
-
-      };
-      xhttp.send("contribute=" + body);
-      return false;
-    };
+      // 2. WhatsApp path — full enquiry sent straight through WhatsApp (no email).
+      var waBtn = document.getElementById('btnWhatsApp');
+      if (waBtn) {
+        waBtn.addEventListener('click', function () {
+          if (!form.reportValidity()) return; // enforce the required fields first
+          var text = [
+            '*Advertise With Us — new enquiry*',
+            'Name: ' + val('name'),
+            'Email: ' + val('email'),
+            'Company: ' + val('company'),
+            'Phone: ' + val('phone'),
+            'Subject: ' + val('subject'),
+            'Message: ' + val('message')
+          ].join('\n');
+          openWhatsApp(text);
+        });
+      }
+    })();
   </script>
 </body>
 

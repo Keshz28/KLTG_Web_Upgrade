@@ -10,8 +10,21 @@
  * ============================================================================ */
 // fetch_blogger.php
 
+// Load just the .env (not the full functions.php bootstrap — this endpoint
+// needs no DB/session, only the API key).
+require_once __DIR__ . '/admin/vendor/autoload.php';
+if (class_exists('Dotenv\\Dotenv')) {
+    $envDir = is_file(__DIR__ . '/.env') ? __DIR__ : __DIR__ . '/admin';
+    Dotenv\Dotenv::createImmutable($envDir)->safeLoad();
+}
+
 // Google Blogger API
-$apiKey = "AIzaSyARErRCSmyD1dikK0ndYipEuORgXIeLRB8"; 
+$apiKey = $_ENV['BLOGGER_API_KEY'] ?? getenv('BLOGGER_API_KEY');
+if (!$apiKey) {
+    http_response_code(500);
+    echo json_encode(["error" => "Blogger API key not configured"]);
+    exit;
+}
 $blogId = "1732826187557117921";
 
 // Check if single post requested

@@ -78,7 +78,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     display: block;
     margin: 0;
     padding: 0;
-    width: min(96%, 1180px);
+    width: min(92%, 920px);
     background: transparent;
     overflow: visible;
     border-radius: 14px;
@@ -114,6 +114,11 @@ while ($row = mysqli_fetch_assoc($result)) {
   #hero.home-ad-carousel .carousel-item {
     flex: 0 0 100%;
     width: 100%;
+    /* Override Bootstrap's .carousel-item { margin-right:-100%; float:left }
+       which otherwise collapses every slide onto position 0 (all left=0),
+       so only the first banner shows and the rest go blank when sliding. */
+    margin-right: 0 !important;
+    float: none !important;
     display: block !important;
     background: transparent;
     -webkit-user-select: none;
@@ -135,8 +140,6 @@ while ($row = mysqli_fetch_assoc($result)) {
 
   #hero.home-ad-carousel .hero-ad-frame {
     aspect-ratio: 1920 / 300;
-    max-height: 170px;
-    min-height: 110px;
     overflow: hidden;
   }
 
@@ -144,7 +147,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     display: block;
     height: 100%;
     max-height: none;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     width: 100%;
   }
@@ -203,7 +206,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     padding: 80px 16px 230px !important;
     overflow: hidden;
     align-items: center !important;
-    background: #071926 url("assets/img/kltgseohp.jpeg") center / cover no-repeat;
+    background: #071926;
   }
 
   #hero-animated.home-video-hero::before {
@@ -224,6 +227,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     height: 100%;
     object-fit: cover;
     object-position: center;
+    /* Punch up the footage so the hero reads bright & vibrant */
+    filter: saturate(1.32) brightness(1.14) contrast(1.05);
   }
 
   #hero-animated.home-video-hero .home-video-hero__content {
@@ -350,9 +355,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     #hero.home-ad-carousel .hero-ad-frame {
-      aspect-ratio: 16 / 9;
-      max-height: 160px;
-      min-height: 100px;
+      aspect-ratio: 1920 / 300;
     }
 
     #hero-animated.home-video-hero {
@@ -469,41 +472,30 @@ while ($row = mysqli_fetch_assoc($result)) {
   }
 
   .home-highlights__layout {
-    display: grid;
-    grid-template-columns: 50% 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     min-height: calc(100vh - 84px);
   }
 
-  /* LEFT — single static feature image */
-  .home-highlights__feature {
-    position: relative;
-    margin: 0;
-    overflow: hidden;
-    background: #0d1117;
-  }
-
-  .home-highlights__feature img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  /* RIGHT — header + interactive image cards */
+  /* Centered single column — header + interactive image cards */
   .home-highlights__content {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 44px clamp(34px, 5vw, 72px) 0;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 48px clamp(20px, 5vw, 60px);
     background: #fff;
   }
 
   .home-highlights__header {
     width: 100%;
-    max-width: 640px;
-    margin: 0 auto 26px;
+    max-width: 760px;
+    margin: 0 auto 30px;
     text-align: center;
   }
 
@@ -528,9 +520,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    flex: 1 1 auto;
     width: 100%;
-    max-width: 640px;
+    max-width: 900px;
     min-height: 0;
     margin: 0 auto;
   }
@@ -539,12 +530,15 @@ while ($row = mysqli_fetch_assoc($result)) {
     position: relative;
     display: flex;
     align-items: flex-end;
-    flex: 1 1 0;
-    min-height: 120px;
+    flex: 0 0 auto;
+    min-height: 175px;
+    border-radius: 14px;
     overflow: hidden;
     text-decoration: none;
     color: #fff;
     background: #0d1117;
+    box-shadow: 0 10px 26px rgba(13, 17, 23, .14);
+    transition: transform .4s ease, box-shadow .4s ease;
   }
 
   .home-highlights__card img {
@@ -555,6 +549,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     object-fit: cover;
     transform: scale(1.01);
     transition: transform .55s ease;
+    /* Brighter, more vibrant card imagery */
+    filter: saturate(1.28) brightness(1.14) contrast(1.04);
   }
 
   /* dark/blue gradient for legibility */
@@ -619,6 +615,12 @@ while ($row = mysqli_fetch_assoc($result)) {
     transition: opacity .35s ease, transform .35s ease;
   }
 
+  .home-highlights__card:hover,
+  .home-highlights__card:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(21, 32, 166, .28);
+  }
+
   .home-highlights__card:hover img,
   .home-highlights__card:focus-visible img {
     transform: scale(1.08);
@@ -664,12 +666,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     .home-highlights__layout {
-      grid-template-columns: 1fr;
       min-height: 0;
-    }
-
-    .home-highlights__feature {
-      aspect-ratio: 16 / 10;
     }
 
     .home-highlights__content {
@@ -677,13 +674,13 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     .home-highlights__card {
-      min-height: 110px;
+      min-height: 150px;
     }
   }
 
   @media (max-width: 575px) {
-    .home-highlights__feature {
-      aspect-ratio: 4 / 3;
+    .home-highlights__card {
+      min-height: 130px;
     }
 
     .home-highlights__header h2 {
@@ -701,6 +698,16 @@ while ($row = mysqli_fetch_assoc($result)) {
     .home-highlights__card-body {
       padding: 14px 18px;
     }
+  }
+
+  /* ===== Exclusive Recommendations — brighter, more vibrant imagery ===== */
+  #index #services.excl-recos .recos-panel img {
+    filter: saturate(1.28) brightness(1.12) contrast(1.04);
+  }
+
+  /* Lighten the dark overlay so the vibrancy shows through */
+  #index #services.excl-recos .recos-panel::after {
+    background: linear-gradient(160deg, rgba(0, 0, 0, .02) 0%, rgba(0, 0, 0, .42) 100%);
   }
 </style>
 
@@ -781,9 +788,9 @@ while ($row = mysqli_fetch_assoc($result)) {
     #hero-animated.home-video-hero::before {
       background:
         linear-gradient(180deg,
-          rgba(0, 0, 0, .40) 0%,
-          rgba(0, 0, 0, .25) 40%,
-          rgba(0, 0, 0, .45) 100%) !important;
+          rgba(0, 0, 0, .28) 0%,
+          rgba(0, 0, 0, .12) 40%,
+          rgba(0, 0, 0, .34) 100%) !important;
     }
 
     /* Carousel now sits below the video hero — no top margin needed */
@@ -844,6 +851,14 @@ while ($row = mysqli_fetch_assoc($result)) {
       position: relative !important;
       /* vertical divider on the right */
       border-right: 1px solid rgba(255, 255, 255, 0.28) !important;
+    }
+
+    /* Hide the library's little dropdown caret next to the flag — the flag/input
+       stays fully clickable so the country picker still works. */
+    #hero-animated.home-video-hero .country-select .arrow,
+    #hero-animated.home-video-hero .country-select .iti-arrow,
+    #hero-animated.home-video-hero .country-select .selected-flag .arrow {
+      display: none !important;
     }
 
     /* The text input inside the country selector (has absolute-positioned flag from library) */
@@ -972,11 +987,11 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     <!-- ======= Video Hero (sits under transparent navbar) ======= -->
     <section id="hero-animated" class="home-video-hero d-flex align-items-center justify-content-center w-100">
-      <video class="home-video-hero__video" id="hero-video" autoplay muted loop playsinline poster="assets/img/kltgseohp.jpeg" aria-hidden="true">
-        <source src="asset-backups/KLOverview.mp4" type="video/mp4">
+      <video class="home-video-hero__video" id="hero-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+        <source src="assets/img/KLOverview.mp4" type="video/mp4">
       </video>
       <!-- Animated WebP fallback for hosts that block .mp4 (e.g. InfinityFree) -->
-      <img id="hero-webp" src="asset-backups/KLOverview3.webp" aria-hidden="true"
+      <img id="hero-webp" src="assets/img/KLOverview3.webp" aria-hidden="true"
            style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
       <script>
         (function(){
@@ -1000,7 +1015,7 @@ while ($row = mysqli_fetch_assoc($result)) {
           var started = false;
           v.addEventListener('timeupdate', function(){ started = true; });
           v.addEventListener('playing', function(){ started = true; });
-          setTimeout(function(){ if (!started) showWebp(); }, 3000);
+          setTimeout(function(){ if (!started) showWebp(); }, 8000);
         })();
       </script>
       <div class="container-fluid position-relative">
@@ -1020,6 +1035,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                   <input type="email" name="email" id="emailsubscribe" placeholder="Your email address" class="inputemailsub" required>
                   <input type="text" id="country_selector" name="country" class="location" aria-label="Country">
                   <input type="submit" value="Subscribe" name="subscribe" class="inputemailsubbtn">
+                  <!-- honeypot: hidden from humans, bots fill it -->
+                  <input type="text" name="hp_email" tabindex="-1" autocomplete="off" aria-hidden="true"
+                    style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0;">
                 </div>
                 <div class="form-check home-video-hero__consent d-flex justify-content-center align-items-start mt-3">
                   <input class="form-check-input me-2" type="checkbox" value="1" id="monthlyUpdates" name="consent">
@@ -1046,7 +1064,9 @@ while ($row = mysqli_fetch_assoc($result)) {
           $bannerFile = htmlspecialchars($row['banner_filename'], ENT_QUOTES);
           $bannerName = htmlspecialchars($row['banner_name'], ENT_QUOTES);
           $bannerMobile = !empty($row['banner_filename2']) ? htmlspecialchars($row['banner_filename2'], ENT_QUOTES) : '';
-          $loadingAttr = $counter == 1 ? 'eager' : 'lazy';
+          // All banner slides load eagerly: lazy slides inside the transform
+          // carousel never enter the viewport normally, so they'd stay blank.
+          $loadingAttr = 'eager';
 
           if ($counter == 1) {
             echo '<div class="carousel-item active" data-filename="' . $bannerFile . '" data-name="' . $bannerName . '">';
@@ -1132,11 +1152,6 @@ while ($row = mysqli_fetch_assoc($result)) {
       ];
       ?>
       <div class="home-highlights__layout">
-        <figure class="home-highlights__feature">
-          <img src="assets/img/<?php echo htmlspecialchars($home_highlights_main_image, ENT_QUOTES); ?>"
-            alt="Kuala Lumpur skyline with Petronas Twin Towers" loading="lazy" decoding="async">
-        </figure>
-
         <div class="home-highlights__content">
           <div class="home-highlights__header">
             <h2 id="homeHighlightsTitle"><?php echo htmlspecialchars(urldecode($tile1_title), ENT_QUOTES); ?></h2>
@@ -1400,6 +1415,14 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     </section><!-- End Recent Blog Posts Section -->
 
+    <?php
+    /* DevPanel house ads (image banners managed from xp.php → Ads tab). Renders
+       only on the homepage and only when ads are NOT hidden for this visitor, so
+       blocked IPs never see them. Empty string when there are no active ads. */
+    if (function_exists('kltg_render_house_ads')) {
+        echo kltg_render_house_ads($db);
+    }
+    ?>
 
     <div class="row d-flex justify-content-center btmbanner mt-4">
       <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3696733888071014"
@@ -1701,7 +1724,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             if (data.status === 'duplicate') {
               alert('✅ This email is already subscribed!');
             } else {
-              alert('📧 Almost there! Please check your inbox and click the confirmation link to complete your subscription.');
+              alert('🎉 You\'re subscribed! Thanks for joining KL The Guide.');
             }
             form.reset(); // Reset form fields
             // Optionally, you could display a success message in the UI instead of an alert

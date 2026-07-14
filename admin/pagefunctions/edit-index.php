@@ -264,72 +264,124 @@ if (isset($_POST['deletebanner'])) {
 }
 
 //recommend
-if (isset($_POST['saverecommendation'])) {
+/**
+ * Resolves a pasted blog-post link or raw numeric ID to the Blogger post's
+ * numeric ID. Accepts e.g. "blog-details.php?postid=123456" or just "123456".
+ */
+function extractBloggerPostId($input)
+{
+    $input = trim((string) $input);
+    if (preg_match('/postid=(\d+)/', $input, $m)) {
+        return $m[1];
+    }
+    if (preg_match('/^\d+$/', $input)) {
+        return $input;
+    }
+    return '';
+}
 
-    $name = urlencode($_POST['name']);
-    $image2 = urlencode($_POST['image2']);
-    $id = $_POST['postid'];
+/**
+ * Fetches a single post from the KLTG Blogger blog (same blog that powers
+ * blog.php / blog-details.php) and returns [name, image] or null on failure.
+ */
+function fetchBloggerPost($postId)
+{
+    $apiKey = envv('BLOGGER_API_KEY');
+    if (!$apiKey) {
+        return null;
+    }
+    $blogId = '1732826187557117921';
+    $url = "https://www.googleapis.com/blogger/v3/blogs/$blogId/posts/$postId?key=" . urlencode($apiKey) . "&fetchImages=true";
 
-    $query = "INSERT INTO recommendation (recommendation_name, recommendation_image, recommendation_postid) 
-    VALUES('$name', '$image2', '$id')";
-    // debug_to_console($query);
-
-    $update = mysqli_query($db, $query);
-    if ($update) {
-        array_push($errors2, "Recommendation Added");
-        sendpushnotification($db, "New Recommendation", "KL The Guide Just updated their recommendation");
-        // debug_to_console("test");
-
-    } else {
-        echo "Error updating record: " . mysqli_error($db);
+    $response = @file_get_contents($url);
+    $post = $response ? json_decode($response, true) : null;
+    if (!$post || isset($post['error']) || empty($post['title'])) {
+        return null;
     }
 
+    $image = '';
+    if (!empty($post['images'][0]['url'])) {
+        $image = preg_replace('#^https?://#', '', $post['images'][0]['url']);
+    }
 
+    return ['name' => $post['title'], 'image' => $image];
+}
+
+if (isset($_POST['saverecommendation'])) {
+
+    $postId = extractBloggerPostId($_POST['posturl'] ?? '');
+    $category = mysqli_real_escape_string($db, trim($_POST['category'] ?? ''));
+
+    if ($postId === '') {
+        array_push($errors2, "Could not find a valid Post ID in that link.");
+    } else {
+        $post = fetchBloggerPost($postId);
+        if (!$post) {
+            array_push($errors2, "Couldn't find that blog post. Double-check the link/ID.");
+        } else {
+            $name = mysqli_real_escape_string($db, urlencode($post['name']));
+            $image = mysqli_real_escape_string($db, urlencode($post['image']));
+            $postIdEsc = mysqli_real_escape_string($db, $postId);
+
+            $query = "INSERT INTO recommendation (recommendation_name, recommendation_image, recommendation_postid, recommendation_category)
+            VALUES('$name', '$image', '$postIdEsc', '$category')";
+
+            $update = mysqli_query($db, $query);
+            if ($update) {
+                array_push($errors2, "Recommendation Added");
+                sendpushnotification($db, "New Recommendation", "KL The Guide Just updated their recommendation");
+            } else {
+                array_push($errors2, "Error adding record: " . mysqli_error($db));
+            }
+        }
+    }
 }
 
 
 if (isset($_POST['editrecommend'])) {
 
+    $hidid = mysqli_real_escape_string($db, $_POST['hiddenid']);
+    $category = mysqli_real_escape_string($db, trim($_POST['recommendcategory'] ?? ''));
+    $postInput = trim($_POST['posturl'] ?? '');
 
-    $name = $_POST['recommendname'];
-    $category = $_POST['recommendcategory'];
-    $hidid = $_POST['hiddenid'];
-
-    // $filename = $_POST['filename'];
-    // $id = $_POST['id'];
-
-    $query = "UPDATE recommendation SET recommendation_category='$category' WHERE recommendation_id='$hidid'";
-    //debug_to_console($query);
-    $update = mysqli_query($db, $query);
-    if ($update) {
-        // echo "Record updated successfully";
-        // debug_to_console("test");
-
-        array_push($errors2, "Recommendation Edit Saved");
-
+    if ($postInput === '') {
+        // No new post specified — just update the category.
+        $query = "UPDATE recommendation SET recommendation_category='$category' WHERE recommendation_id='$hidid'";
+        $update = mysqli_query($db, $query);
+        if ($update) {
+            array_push($errors2, "Recommendation Edit Saved");
+        } else {
+            array_push($errors2, "Error updating record: " . mysqli_error($db));
+        }
     } else {
-        echo "Error updating record: " . mysqli_error($db);
+        $postId = extractBloggerPostId($postInput);
+        if ($postId === '') {
+            array_push($errors2, "Could not find a valid Post ID in that link.");
+        } else {
+            $post = fetchBloggerPost($postId);
+            if (!$post) {
+                array_push($errors2, "Couldn't find that blog post. Double-check the link/ID.");
+            } else {
+                $name = mysqli_real_escape_string($db, urlencode($post['name']));
+                $image = mysqli_real_escape_string($db, urlencode($post['image']));
+                $postIdEsc = mysqli_real_escape_string($db, $postId);
+
+                $query = "UPDATE recommendation SET recommendation_name='$name', recommendation_image='$image', recommendation_postid='$postIdEsc', recommendation_category='$category' WHERE recommendation_id='$hidid'";
+                $update = mysqli_query($db, $query);
+                if ($update) {
+                    array_push($errors2, "Recommendation Edit Saved");
+                } else {
+                    array_push($errors2, "Error updating record: " . mysqli_error($db));
+                }
+            }
+        }
     }
-    // echo '<script type="text/JavaScript"> 
-    // $("#editrecommend").modal("hide");
-    // </script>';
-
-
-
-
 }
 if (isset($_POST['deleterecommend'])) {
 
-    // debug_to_console("test");
+    $hidid = mysqli_real_escape_string($db, $_POST['hiddenid']);
 
-    $name = $_POST['recommendname'];
-    $category = $_POST['recommendcategory'];
-    $hidid = $_POST['hiddenid'];
-
-    // $filename = $_POST['filename'];
-    // $id = $_POST['id'];
-
-    $query = "DELETE FROM recommendation  WHERE recommendation_id='$hidid'";
+    $query = "DELETE FROM recommendation WHERE recommendation_id='$hidid'";
     //debug_to_console($query);
     $update = mysqli_query($db, $query);
     if ($update) {

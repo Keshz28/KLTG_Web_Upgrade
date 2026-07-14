@@ -217,7 +217,7 @@ $eventCategories = ['All', 'Holiday', 'Exhibition', 'Nightlife', 'Food', 'Happen
                         $imgFile = $event['event_image'] ? 'assets/img/event/' . $event['event_image'] : 'assets/img/event/comingsoon.png';
                         ?>
                         <a href="event-details.php?id=<?= (int) $event['event_id'] ?>" class="ev-card" aria-label="View details for <?= htmlspecialchars($title) ?>">
-                            <img class="ev-card__img" src="<?= htmlspecialchars($imgFile) ?>" alt="<?= htmlspecialchars($title) ?>" loading="lazy" decoding="async">
+                            <img class="ev-card__img" src="<?= htmlspecialchars($imgFile) ?>" alt="<?= htmlspecialchars($title) ?>" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='assets/img/event/comingsoon.png';">
                             <span class="ev-card__shade"></span>
                             <?php if ($category): ?>
                                 <span class="ev-card__chip"><?= htmlspecialchars($category) ?></span>

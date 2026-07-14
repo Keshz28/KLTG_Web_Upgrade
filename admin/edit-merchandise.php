@@ -28,6 +28,16 @@ if ($catRes) {
 }
 $cat_map = [];
 foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
+
+// Store settings (single row) — WhatsApp number + payment QR filename.
+$settings = ['whatsapp_number' => '', 'payment_qr' => ''];
+$setRes = mysqli_query($db, "SELECT whatsapp_number, payment_qr FROM merchandise_settings WHERE id = 1");
+if ($setRes && ($r = mysqli_fetch_assoc($setRes))) { $settings = $r; }
+
+// Customer orders (newest first) for the Orders card.
+$orders = [];
+$ordRes = mysqli_query($db, "SELECT * FROM merchandise_orders ORDER BY created_at DESC, order_id DESC");
+if ($ordRes) { while ($o = mysqli_fetch_assoc($ordRes)) { $orders[] = $o; } }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,6 +72,43 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
 
                     <h1 class="h3 mb-2 text-gray-800">Merchandise</h1>
                     <p class="mb-4">Add, edit and remove the products shown on the public Merchandise page.</p>
+
+                    <!-- ===================== Store Settings ===================== -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Store Settings</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">
+                                The WhatsApp number receives every completed order, and the payment QR is shown
+                                to customers on the checkout page. Set both before going live.
+                            </p>
+                            <form action="edit-merchandise.php" method="post" enctype="multipart/form-data">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Business WhatsApp number
+                                            <small class="text-muted">(intl format, digits only — e.g. 60123456789)</small></label>
+                                        <input type="text" class="form-control" name="whatsapp_number"
+                                            value="<?php echo htmlspecialchars($settings['whatsapp_number'], ENT_QUOTES); ?>"
+                                            placeholder="60123456789">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Payment QR image
+                                            <small class="text-muted">(DuitNow / bank QR — leave empty to keep current)</small></label>
+                                        <input type="file" name="payment_qr" class="form-control-file" accept="image/*">
+                                    </div>
+                                </div>
+                                <?php if (!empty($settings['payment_qr'])): ?>
+                                <div class="mb-3">
+                                    <label class="d-block mb-1">Current payment QR</label>
+                                    <img src="../assets/img/merchandise/<?php echo rawurlencode($settings['payment_qr']); ?>"
+                                        alt="Payment QR" style="max-width:150px;border:1px solid #e3e6f0;border-radius:8px;">
+                                </div>
+                                <?php endif; ?>
+                                <button type="submit" name="save_merch_settings" class="btn btn-primary">Save Settings</button>
+                            </form>
+                        </div>
+                    </div>
 
                     <!-- ===================== Categories ===================== -->
                     <div class="card shadow mb-4">
@@ -133,6 +180,7 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                                             while ($p = mysqli_fetch_assoc($prodRes)):
                                                 $pid   = (int)$p['merchandise_id'];
                                                 $pname = htmlspecialchars($p['name'], ENT_QUOTES);
+                                                $pdesc = htmlspecialchars($p['description'] ?? '', ENT_QUOTES);
                                                 $pimg  = htmlspecialchars($p['image'], ENT_QUOTES);
                                                 $pcat  = (int)$p['category_id'];
                                                 $pprice= htmlspecialchars($p['price'], ENT_QUOTES);
@@ -156,6 +204,7 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                                                 <a href="#" onclick="editMerch(this); return false;"
                                                     data-id="<?php echo $pid; ?>"
                                                     data-name="<?php echo $pname; ?>"
+                                                    data-desc="<?php echo $pdesc; ?>"
                                                     data-image="<?php echo $pimg; ?>"
                                                     data-cat="<?php echo $pcat; ?>"
                                                     data-price="<?php echo $pprice; ?>"
@@ -163,6 +212,87 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                                             </td>
                                         </tr>
                                         <?php endwhile; } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===================== Orders ===================== -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                Orders <span class="badge badge-secondary"><?php echo count($orders); ?></span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="ordersTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Product</th>
+                                            <th>Customer</th>
+                                            <th>Contact</th>
+                                            <th>Receipt</th>
+                                            <th>Status</th>
+                                            <th style="width:70px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($orders as $o): ?>
+                                        <tr>
+                                            <td><?php echo (int)$o['order_id']; ?></td>
+                                            <td><?php echo htmlspecialchars($o['created_at'], ENT_QUOTES); ?></td>
+                                            <td>
+                                                <?php echo htmlspecialchars($o['product_name'], ENT_QUOTES); ?><br>
+                                                <small class="text-muted"><?php echo htmlspecialchars($o['product_price'], ENT_QUOTES); ?></small>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($o['customer_name'], ENT_QUOTES); ?><br>
+                                                <small class="text-muted"><?php echo nl2br(htmlspecialchars($o['customer_address'], ENT_QUOTES)); ?></small>
+                                            </td>
+                                            <td>
+                                                <?php echo htmlspecialchars($o['customer_phone'], ENT_QUOTES); ?><br>
+                                                <small class="text-muted"><?php echo htmlspecialchars($o['customer_email'], ENT_QUOTES); ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($o['receipt_image'] !== ''): ?>
+                                                <a href="../assets/img/receipts/<?php echo rawurlencode($o['receipt_image']); ?>" target="_blank" rel="noopener">
+                                                    <img src="../assets/img/receipts/<?php echo rawurlencode($o['receipt_image']); ?>"
+                                                        alt="receipt" style="width:48px;height:48px;object-fit:cover;border-radius:6px;">
+                                                </a>
+                                                <?php else: ?>
+                                                <span class="text-muted">—</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <form action="edit-merchandise.php" method="post" style="margin:0;">
+                                                    <input type="hidden" name="order_id" value="<?php echo (int)$o['order_id']; ?>">
+                                                    <select name="order_status" class="form-control form-control-sm"
+                                                        onchange="this.form.submit()">
+                                                        <?php foreach (['pending','confirmed','completed','cancelled'] as $st): ?>
+                                                        <option value="<?php echo $st; ?>" <?php echo $o['status'] === $st ? 'selected' : ''; ?>>
+                                                            <?php echo ucfirst($st); ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                    <input type="hidden" name="update_order_status" value="1">
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <form action="edit-merchandise.php" method="post" style="margin:0;"
+                                                    onsubmit="return confirm('Delete this order?');">
+                                                    <input type="hidden" name="order_id" value="<?php echo (int)$o['order_id']; ?>">
+                                                    <button type="submit" name="delete_order" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                        <?php if (empty($orders)): ?>
+                                        <tr><td colspan="8" class="text-muted">No orders yet.</td></tr>
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -219,6 +349,10 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                             <input type="text" class="form-control" name="name" required>
                         </div>
                         <div class="form-group">
+                            <label>Description <small class="text-muted">(shown on the product card &amp; checkout)</small></label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label>Category</label>
                             <select class="form-control" name="category_id">
                                 <?php foreach ($categories as $c): ?>
@@ -270,6 +404,10 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                             <input type="text" class="form-control" name="name" id="em_name" required>
                         </div>
                         <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" name="description" id="em_desc" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label>Category</label>
                             <select class="form-control" name="category_id" id="em_cat">
                                 <?php foreach ($categories as $c): ?>
@@ -305,11 +443,15 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
     <script>
-        $(document).ready(function () { $('#merchTable').DataTable(); });
+        $(document).ready(function () {
+            $('#merchTable').DataTable();
+            $('#ordersTable').DataTable({ order: [[0, 'desc']] });
+        });
 
         function editMerch(el) {
             document.getElementById('em_id').value = el.getAttribute('data-id');
             document.getElementById('em_name').value = el.getAttribute('data-name');
+            document.getElementById('em_desc').value = el.getAttribute('data-desc') || '';
             document.getElementById('em_price').value = el.getAttribute('data-price');
             document.getElementById('em_url').value = el.getAttribute('data-url');
             document.getElementById('em_cat').value = el.getAttribute('data-cat');
@@ -326,6 +468,21 @@ foreach ($categories as $c) { $cat_map[(int)$c['id']] = $c['name']; }
                 noimg.style.display = 'inline';
             }
             $('#editProductModal').modal('show');
+        }
+    </script>
+    <!-- This page loads no edit*.js, so define a self-contained toast for errors2.php feedback. -->
+    <div aria-live="polite" aria-atomic="true" style="position:fixed;top:1rem;right:1rem;z-index:1080;">
+        <div id="merchToast" class="toast" role="alert" data-delay="5000"
+            style="min-width:280px;background:#fff;">
+            <div class="toast-body" id="merchToastBody" style="font-weight:600;"></div>
+        </div>
+    </div>
+    <script>
+        function toastupdate(body) {
+            var el = document.getElementById('merchToastBody');
+            if (!el) { console.log(body); return; }
+            el.textContent = body;
+            try { $('#merchToast').toast('show'); } catch (e) { alert(body); }
         }
     </script>
     <?php include('errors2.php'); ?>

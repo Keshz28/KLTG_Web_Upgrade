@@ -3,6 +3,9 @@
 admin/.env
 --settingsEnv/.env
 
+# Customer-uploaded order receipts — contain personal payment details
+assets/img/receipts/
+
 # Local build / deploy artifacts
 admin/node_modules/
 *.zip

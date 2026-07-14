@@ -293,6 +293,9 @@
   display: block;
   width: 100%;
   height: auto;
+  min-height: 180px;            /* reserve space so broken/lazy images don't collapse the card */
+  object-fit: cover;
+  background: #1a1f24;
   transition: transform .5s ease;
 }
 

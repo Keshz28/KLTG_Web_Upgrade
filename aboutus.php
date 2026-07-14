@@ -201,10 +201,10 @@
         display: flex;
         flex-direction: column;
       }
-      .dp-panel:hover { border-color: rgba(14,162,189,.45); }
+      .dp-panel:hover { border-color: rgba(65,105,225,.45); }
       .dp-panel.dp-open {
-        box-shadow: 0 16px 50px rgba(14,162,189,.18);
-        border-color: #0ea2bd;
+        box-shadow: 0 16px 50px rgba(65,105,225,.18);
+        border-color: #4169e1;
         transform: translateY(-4px);
       }
       .dp-panel.dp-inactive { opacity: .45; transform: scale(.99); }
@@ -219,8 +219,8 @@
       }
       .dp-tag {
         display: inline-block;
-        background: rgba(14,162,189,.1);
-        color: #0ea2bd;
+        background: rgba(65,105,225,.1);
+        color: #4169e1;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 2px;
@@ -236,7 +236,7 @@
         margin-bottom: 10px;
         line-height: 1.3;
       }
-      .dp-title span { color: #0ea2bd; }
+      .dp-title span { color: #4169e1; }
       .dp-subtitle {
         color: #718096;
         font-size: 0.91rem;
@@ -254,8 +254,28 @@
         margin-top: auto;
       }
       .dp-expand-hint i { transition: transform .35s; font-size: 1rem; }
-      .dp-panel.dp-open .dp-expand-hint { color: #0ea2bd; }
+      .dp-panel.dp-open .dp-expand-hint { color: #4169e1; }
       .dp-panel.dp-open .dp-expand-hint i { transform: rotate(180deg); }
+
+      .dp-chat-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+        background: linear-gradient(135deg, #4169e1 0%, #2c4fc0 100%);
+        color: #fff;
+        font-size: 0.88rem;
+        font-weight: 700;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 50px;
+        cursor: pointer;
+        margin: 4px 0 18px;
+        box-shadow: 0 6px 18px rgba(65,105,225,.28);
+        transition: transform .2s, box-shadow .25s;
+      }
+      .dp-chat-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(65,105,225,.38); }
+      .dp-chat-btn i { font-size: 1.05rem; }
 
       .dp-body {
         height: 0;
@@ -285,15 +305,15 @@
         flex-shrink: 0;
         width: 28px; height: 28px;
         border-radius: 50%;
-        background: rgba(14,162,189,.1);
-        color: #0ea2bd;
+        background: rgba(65,105,225,.1);
+        color: #4169e1;
         font-size: 0.7rem;
         font-weight: 700;
         display: flex; align-items: center; justify-content: center;
         margin-top: 2px;
         transition: background .25s, color .25s;
       }
-      .dp-faq-item.dp-faq-open .dp-faq-num { background: #0ea2bd; color: #fff; }
+      .dp-faq-item.dp-faq-open .dp-faq-num { background: #4169e1; color: #fff; }
       .dp-faq-q {
         flex: 1;
         font-size: 0.91rem;
@@ -303,7 +323,7 @@
       }
       .dp-faq-chev {
         flex-shrink: 0;
-        color: #0ea2bd;
+        color: #4169e1;
         font-size: 0.95rem;
         margin-top: 4px;
         transition: transform .3s;
@@ -311,7 +331,7 @@
       .dp-faq-item.dp-faq-open .dp-faq-chev { transform: rotate(180deg); }
       .dp-faq-answer { height: 0; overflow: hidden; transition: height .3s ease; padding-left: 41px; }
       .dp-faq-answer-inner { padding: 0 0 13px; color: #718096; font-size: 0.87rem; line-height: 1.7; }
-      .dp-faq-answer-inner a { color: #0ea2bd; font-weight: 600; text-decoration: none; }
+      .dp-faq-answer-inner a { color: #4169e1; font-weight: 600; text-decoration: none; }
       .dp-faq-answer-inner a:hover { text-decoration: underline; }
 
       /* Bluedale info rows */
@@ -323,7 +343,7 @@
       .dp-bd-icon {
         flex-shrink: 0;
         width: 42px; height: 42px; border-radius: 12px;
-        background: rgba(14,162,189,.1); color: #0ea2bd; font-size: 1.2rem;
+        background: rgba(65,105,225,.1); color: #4169e1; font-size: 1.2rem;
         display: flex; align-items: center; justify-content: center;
       }
       .dp-bd-text h4 { font-size: 0.95rem; font-weight: 700; color: #2d3748; margin: 0 0 5px; }
@@ -332,14 +352,14 @@
       .dp-bd-cta {
         display: flex; align-items: center; justify-content: space-between;
         gap: 16px; flex-wrap: wrap;
-        background: linear-gradient(135deg, #0ea2bd 0%, #0881a0 100%);
+        background: linear-gradient(135deg, #4169e1 0%, #2c4fc0 100%);
         border-radius: 14px; padding: 20px 22px; margin-top: 18px;
       }
       .dp-bd-cta p { color: rgba(255,255,255,.9); font-size: 0.88rem; line-height: 1.55; margin: 0; flex: 1; }
       .dp-bd-cta a {
         flex-shrink: 0;
         display: inline-flex; align-items: center; gap: 7px;
-        background: #fff; color: #0ea2bd;
+        background: #fff; color: #4169e1;
         font-weight: 700; font-size: 0.88rem;
         padding: 10px 22px; border-radius: 50px;
         text-decoration: none; white-space: nowrap;
@@ -364,6 +384,9 @@
               <span class="dp-tag">Got Questions?</span>
               <h2 class="dp-title">Frequently Asked <span>Questions</span></h2>
               <p class="dp-subtitle">Everything you need to know about KL The Guide and exploring Kuala Lumpur.</p>
+              <button type="button" class="dp-chat-btn" onclick="event.stopPropagation(); if(window.kltgToggleChat){window.kltgToggleChat();}">
+                <i class="bi bi-chat-dots-fill"></i> Ask our Chat Assistant
+              </button>
               <div class="dp-expand-hint"><span>Click to explore</span><i class="bi bi-chevron-down"></i></div>
             </div>
             <div class="dp-body" id="dpFaqBody">

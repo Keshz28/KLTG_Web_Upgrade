@@ -295,6 +295,135 @@ function send_email_html(string $to, string $subject, string $html, ?string $fro
     }
 }
 
+// ============================================================================
+//  Newsletter subscription helpers (shared by sub_handler.php)
+// ============================================================================
+
+/**
+ * Canonicalise an email so bot-generated variants collapse to one identity.
+ * Gmail ignores dots and everything after a "+", so "f.a.n+x@gmail.com" and
+ * "fan@gmail.com" are the same mailbox. Storing the normalised form lets the
+ * duplicate check reject the endless dotted variants spammers submit.
+ */
+function normalize_subscribe_email(string $email): string
+{
+    $email = strtolower(trim($email));
+    $at = strrpos($email, '@');
+    if ($at === false) {
+        return $email;
+    }
+    $local  = substr($email, 0, $at);
+    $domain = substr($email, $at + 1);
+
+    // Drop "+tag" sub-addressing (delivers to the base mailbox anyway).
+    $plus = strpos($local, '+');
+    if ($plus !== false) {
+        $local = substr($local, 0, $plus);
+    }
+
+    // Gmail / Googlemail ignore dots in the local part.
+    if ($domain === 'gmail.com' || $domain === 'googlemail.com') {
+        $local  = str_replace('.', '', $local);
+        $domain = 'gmail.com';
+    }
+
+    return $local . '@' . $domain;
+}
+
+/** Best-effort real client IP, honouring common proxy headers. */
+function subscribe_client_ip(): string
+{
+    foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'] as $k) {
+        if (!empty($_SERVER[$k])) {
+            $ip = trim(explode(',', $_SERVER[$k])[0]);
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
+        }
+    }
+    return '';
+}
+
+/**
+ * Per-IP rate limiter for the subscribe endpoint. Logs every attempt (even
+ * rejected ones) in a self-creating throttle table so a single IP cannot flood
+ * the list. Returns true if the attempt is allowed.
+ */
+function subscribe_throttle_ok(mysqli $db, string $ip, int $maxPerHour = 6): bool
+{
+    if ($ip === '') {
+        return true; // can't identify — don't hard-block real users
+    }
+
+    @mysqli_query($db, "CREATE TABLE IF NOT EXISTS subscribe_throttle (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip VARCHAR(45) NOT NULL,
+        created_at DATETIME NOT NULL,
+        INDEX idx_ip_time (ip, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Housekeeping: drop entries older than a day so the table stays small.
+    @mysqli_query($db, "DELETE FROM subscribe_throttle WHERE created_at < (NOW() - INTERVAL 1 DAY)");
+
+    $count = 0;
+    if ($st = mysqli_prepare($db, "SELECT COUNT(*) AS c FROM subscribe_throttle WHERE ip = ? AND created_at > (NOW() - INTERVAL 1 HOUR)")) {
+        mysqli_stmt_bind_param($st, 's', $ip);
+        mysqli_stmt_execute($st);
+        $count = (int) (mysqli_fetch_assoc(mysqli_stmt_get_result($st))['c'] ?? 0);
+        mysqli_stmt_close($st);
+    }
+
+    // Record this attempt regardless of the outcome.
+    if ($ins = mysqli_prepare($db, "INSERT INTO subscribe_throttle (ip, created_at) VALUES (?, NOW())")) {
+        mysqli_stmt_bind_param($ins, 's', $ip);
+        mysqli_stmt_execute($ins);
+        mysqli_stmt_close($ins);
+    }
+
+    return $count < $maxPerHour;
+}
+
+/**
+ * Send the "welcome / you're subscribed" email. Uses the admin's active
+ * template (email_templates.is_active_subscribe = 1) when present, otherwise a
+ * built-in default. Best-effort: never throws, returns whether it was accepted.
+ */
+function send_subscriber_welcome_email(mysqli $db, string $email): bool
+{
+    $brandName = brand_name();
+    $tplRes = @mysqli_query($db, "SELECT * FROM email_templates WHERE is_active_subscribe = 1 LIMIT 1");
+    $tpl    = ($tplRes && mysqli_num_rows($tplRes) > 0) ? mysqli_fetch_assoc($tplRes) : null;
+
+    if ($tpl && function_exists('render_email_html')) {
+        $placeholders = [
+            'email'           => $email,
+            'date'            => date('d M Y'),
+            'site_name'       => $brandName,
+            'unsubscribe_url' => app_base_url() . '/unsubscribe.php?e=' . urlencode($email),
+        ];
+        $html    = render_email_html($tpl['subject'], $tpl['preheader'] ?? '', $tpl['from_name'] ?? $brandName, $tpl['body_html'], $tpl['footer_html'] ?? '', $placeholders);
+        $subject = $tpl['subject'];
+        $from    = $tpl['from_name'] ?? $brandName;
+    } else {
+        $brandEsc = htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8');
+        $unsubUrl = htmlspecialchars(app_base_url() . '/unsubscribe.php?e=' . urlencode($email), ENT_QUOTES, 'UTF-8');
+        $subject  = 'Welcome to ' . $brandName . '!';
+        $from     = $brandName;
+        $html     = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f5f5f5;margin:0;padding:0;">
+  <div style="max-width:600px;margin:40px auto;background:#fff;padding:36px;border-radius:8px;">
+    <h2 style="color:#2c3e50;margin-top:0;">You\'re subscribed!</h2>
+    <p>Welcome to <strong>' . $brandEsc . '</strong>. We\'re glad to have you with us.</p>
+    <p>You\'ll be the first to know about our latest articles, events, and updates from around Kuala Lumpur.</p>
+    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+    <p style="font-size:12px;color:#aaa;"><a href="' . $unsubUrl . '" style="color:#aaa;">Unsubscribe</a></p>
+  </div>
+</body></html>';
+    }
+
+    return send_email_html($email, $subject, $html, $from);
+}
+
 
 function sendmail($subscriberemail, $content, $title)
 {
@@ -523,8 +652,8 @@ function uploadpdf($formname, $folder, $category)
         return false;
     }
 
-    // 4️⃣ File size limit (100MB)
-    if ($formname['size'] > 100 * 1024 * 1024) {
+    // 4️⃣ File size limit (300MB) — keep <= upload_max_filesize in .user.ini
+    if ($formname['size'] > 300 * 1024 * 1024) {
         return false;
     }
 
@@ -641,6 +770,114 @@ function app_base_url(): string
 function brand_name(): string
 {
     return 'KL The Guide'; // or read from env/config if you have it
+}
+
+// === DevPanel: ad visibility by IP ==========================================
+// The hidden DevPanel (xp.php) lets the operator hide all advertisements for a
+// specific visitor IP. The visitor's IP is matched against the
+// `devpanel_ad_block` table; header.php uses kltg_ads_hidden() to suppress the
+// AdSense slots for those IPs only. See db_migration_devpanel.sql.
+
+/**
+ * Best-effort real client IP. Honours common proxy/CDN headers (Cloudflare,
+ * standard reverse proxies) before falling back to REMOTE_ADDR, and validates
+ * the result so a spoofed header can't inject garbage. Returns '' if unknown.
+ */
+function kltg_client_ip(): string
+{
+    $candidates = [];
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        $candidates[] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        // First hop in the list is the original client.
+        $candidates[] = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+    }
+    if (!empty($_SERVER['REMOTE_ADDR'])) {
+        $candidates[] = $_SERVER['REMOTE_ADDR'];
+    }
+    foreach ($candidates as $ip) {
+        $ip = trim((string) $ip);
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
+    }
+    return '';
+}
+
+/**
+ * True when ads should be hidden for the current visitor (their IP is in the
+ * devpanel_ad_block list). Computed once per request and fails safe: any DB
+ * error or a missing table simply means "show ads" so the public site is never
+ * broken by this feature.
+ */
+function kltg_ads_hidden(mysqli $db): bool
+{
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+    $cached = false;
+
+    $ip = kltg_client_ip();
+    if ($ip === '') {
+        return $cached;
+    }
+
+    $stmt = @mysqli_prepare($db, "SELECT 1 FROM devpanel_ad_block WHERE ip_address = ? LIMIT 1");
+    if (!$stmt) {
+        return $cached; // table missing or DB error -> show ads
+    }
+    mysqli_stmt_bind_param($stmt, 's', $ip);
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_store_result($stmt);
+        $cached = mysqli_stmt_num_rows($stmt) > 0;
+    }
+    mysqli_stmt_close($stmt);
+    return $cached;
+}
+
+/**
+ * Active "house ads" (image banners) managed from the DevPanel (xp.php → Ads).
+ * Returns [] for blocked IPs so they never see house ads either. Fails safe:
+ * a missing devpanel_house_ad table just yields no ads.
+ */
+function kltg_house_ads(mysqli $db): array
+{
+    if (kltg_ads_hidden($db)) {
+        return [];
+    }
+    $ads = [];
+    $res = @mysqli_query($db, "SELECT image, link_url FROM devpanel_house_ad WHERE active = 1 ORDER BY id DESC");
+    if ($res) {
+        while ($r = mysqli_fetch_assoc($res)) {
+            $ads[] = $r;
+        }
+    }
+    return $ads;
+}
+
+/** Render the active house ads as a centered banner block (or '' if none). */
+function kltg_render_house_ads(mysqli $db): string
+{
+    $ads = kltg_house_ads($db);
+    if (!$ads) {
+        return '';
+    }
+    $out = '<div class="house-ads d-flex flex-column align-items-center my-4">';
+    foreach ($ads as $a) {
+        $src = 'assets/img/houseads/' . rawurlencode($a['image']);
+        $img = '<img src="' . htmlspecialchars($src, ENT_QUOTES) . '" alt="Advertisement" '
+             . 'style="max-width:100%;height:auto;display:block;margin:0 auto;">';
+        if (!empty($a['link_url'])) {
+            $out .= '<a href="' . htmlspecialchars($a['link_url'], ENT_QUOTES) . '" target="_blank" '
+                  . 'rel="noopener sponsored" class="house-ad mb-3">' . $img . '</a>';
+        } else {
+            $out .= '<div class="house-ad mb-3">' . $img . '</div>';
+        }
+    }
+    $out .= '</div>';
+    return $out;
 }
 
 // === Login rate limiting (file-based, per IP, max 5 attempts / 15 min) ===
@@ -1033,9 +1270,9 @@ if (isset($_POST['reg_user'])) {
 
     // Finally, register user if there are no errors in the form
     if (count($errors) == 0) {
-        $password = md5($password_1); //encrypt the password before saving in the database
+        $password = password_hash($password_1, PASSWORD_DEFAULT); // bcrypt (was: md5())
 
-        $query = "INSERT INTO users (username, email, password) 
+        $query = "INSERT INTO users (username, email, password)
   			  VALUES('$username', '$email', '$password')";
         mysqli_query($db, $query);
         $_SESSION['username'] = $username;
@@ -1063,10 +1300,25 @@ if (isset($_POST['login_user'])) {
         }
 
         if (count($errors) == 0) {
-            $password = md5($password);
-            $query = "SELECT * FROM users WHERE username='$username' AND password='$password'";
+            $query = "SELECT * FROM users WHERE username='$username' LIMIT 1";
             $results = mysqli_query($db, $query);
-            if (mysqli_num_rows($results) == 1) {
+            $user = $results ? mysqli_fetch_assoc($results) : null;
+            $ok = false;
+            if ($user) {
+                $stored = $user['password'];
+                if (password_verify($password, $stored)) {
+                    $ok = true; // modern bcrypt/argon2 hash
+                } elseif (hash_equals($stored, md5($password))) {
+                    // legacy MD5 hash — verify, then transparently upgrade to bcrypt
+                    $ok = true;
+                    $newHash = password_hash($password, PASSWORD_DEFAULT);
+                    $upd = mysqli_prepare($db, "UPDATE users SET password = ? WHERE username = ?");
+                    mysqli_stmt_bind_param($upd, 'ss', $newHash, $username);
+                    mysqli_stmt_execute($upd);
+                    mysqli_stmt_close($upd);
+                }
+            }
+            if ($ok) {
                 login_rate_limit_clear();
                 session_regenerate_id(true);
                 $_SESSION['username'] = $username;
@@ -1084,63 +1336,13 @@ if (isset($_POST['login_user'])) {
 
 
 
-//email subscribe
-if (isset($_POST['subscribe'])) {
-
-    $email = $_POST['emailsubscribe'];
-    $country = $_POST['country'];
-    $monthly_updates = $_POST['monthly_updates'];
-
-    // sanitize and validate email
-    $email = filter_var($email, FILTER_SANITIZE_EMAIL);
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "<script>
-            alert('Invalid email address!');
-            window.location.href = 'index.php';
-        </script>";
-        exit;
-    }
-
-    $domain = substr(strrchr($email, "@"), 1);
-
-    if (!checkdnsrr($domain, "MX")) {
-        echo "<script>
-            alert('Invalid email domain!');
-            window.location.href = 'index.php';
-        </script>";
-        exit;
-    }
-
-    // Remove native language in parentheses
-    $country = preg_replace('/\s*\(.*?\)/', '', $country);
-    $country = trim($country);
-
-    $user_check_query = "SELECT * FROM emailsub WHERE emailsub_email='$email' LIMIT 1";
-    $result = mysqli_query($db, $user_check_query);
-    $user = mysqli_fetch_assoc($result);
-
-    if ($user) {
-    } else {
-        $query = "INSERT INTO emailsub (emailsub_name, emailsub_email, emailsub_country, emailsub_consent) 
-                  VALUES('', '$email', '$country', '$monthly_updates')";
-        mysqli_query($db, $query);
-
-        $query2 = "SELECT * FROM welcomeemail";
-        $result2 = mysqli_query($db, $query2);
-        while ($row2 = mysqli_fetch_assoc($result2)) {
-            $title = $row2['title'];
-            $content = $row2['content'];
-        }
-
-        send_email_html($email, $title, $content, 'KL The Guide');
-
-
-        echo "<script>
-            alert('Subscription successful!');
-        </script>";
-    }
-}
+// NOTE: The legacy `$_POST['subscribe']` newsletter handler that used to live
+// here has been REMOVED (2026-07). It ran on every page that includes this file
+// and inserted subscribers directly — with no honeypot, no rate limit and no
+// bot protection — which let spam bots flood the `emailsub` table simply by
+// POSTing `subscribe`/`emailsubscribe` to any page. All newsletter sign-ups now
+// go exclusively through admin/sub_handler.php (?action=subscribe), which
+// validates, de-dupes (Gmail-normalised), honeypots and rate-limits the input.
 
 //email send
 if (isset($_POST['sendmail'])) {
@@ -1374,8 +1576,13 @@ if (isset($_POST['sub'])) {
 
 // Central CSRF guard: fires once before all pagefunctions.
 // Covers all 26 pagefunctions handlers without touching each file.
-// Only enforced on admin pages with an active session (public POST routes are unaffected).
-if (!empty($_POST) && isset($_SESSION['username']) && strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
+// Only enforced on admin pages with an active session. Excludes sub_handler.php's
+// public, unauthenticated actions (e.g. newsletter "subscribe") — those are hit by
+// anonymous site visitors and never carry a CSRF token, but an admin who is also
+// logged into the CMS in the same browser would otherwise get falsely blocked here.
+$public_subhandler_actions = ['subscribe'];
+$is_public_subhandler_action = isset($_GET['action']) && in_array($_GET['action'], $public_subhandler_actions, true);
+if (!empty($_POST) && isset($_SESSION['username']) && strpos($_SERVER['PHP_SELF'], '/admin/') !== false && !$is_public_subhandler_action) {
     csrf_check();
 }
 
@@ -2298,63 +2505,41 @@ if (isset($_POST["banner"]) && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 if (isset($_POST['contribute'])) {
-    // echo json_decode($_POST,true);
+    // Article contribution form (contribute.php) — emailed straight to the editorial inbox.
+    $name    = trim($_POST['name']    ?? '');
+    $email   = trim($_POST['email']   ?? '');
+    $title   = trim($_POST['title']   ?? '');
+    $article = trim($_POST['article'] ?? '');
 
-    $data = json_decode($_POST['contribute'], true);
-    // print_r($data);
+    $toEmail = 'enquiry@bluedale.com.my';
+    $subject = 'Article Contribution' . ($title !== '' ? ' - ' . $title : '');
 
-    $ops = ($data['formdata']);
+    $htmlContent =
+        '<h2>New Article Contribution</h2>' .
+        '<p><b>Name:</b> '          . htmlspecialchars($name)  . '</p>' .
+        '<p><b>Email:</b> '         . htmlspecialchars($email) . '</p>' .
+        '<p><b>Article Title:</b> ' . htmlspecialchars($title) . '</p>' .
+        '<hr><p><b>Article:</b></p>' .
+        '<div>' . nl2br(htmlspecialchars($article)) . '</div>';
 
-
-
-
-    $image = new \nadar\quill\listener\Image;
-    $image->wrapper = "<img  src='cid:$id' class='my-image' />";
-    $lexer->registerListener($image);
-    // override the default listener behavior for image color:
-    $lexer = new \nadar\quill\Lexer($ops);
-
-    $html = $lexer->render();
-    // print_r($html);
-
-    preg_match_all('@src="([^"]+)"@', $html, $match);
-    // print_r(array_filter($match));
-    $src = array_pop($match);
-    // print_r($src[0]);
-    $i = 1;
-
-    // foreach ($src as $as) {
-    //     print_r(str_replace("data:image/jpeg;base64,", "", $as));
-
-    // }
-
-    $errors2 = array();
-    $title = "Article Contribution";
-    $mail = new PHPMailer(true);
     try {
-
-        $mail->isSMTP();
-        $mail->Host       = '127.0.0.1'; // not "localhost"
-        $mail->Port       = 1025;
-        $mail->SMTPAuth   = false;       // no username/password
-        $mail->Username   = '';
-        $mail->Password   = '';
-        $mail->SMTPSecure = false;       // IMPORTANT: no SSL/TLS
-        $mail->SMTPAutoTLS = false;      // don't upgrade to TLS
-
-        $mail->isHTML(true); //Set email format to HTML
-        $mail->Subject = $title;
-
-        $mail->Body = $html . "<br>";
-        $mail->AltBody = $title;
+        $mail = mailer_from_config();
+        $mail->addAddress($toEmail);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $mail->addReplyTo($email, $name !== '' ? $name : $email);
+        }
+        $mail->Subject = $subject;
+        $mail->isHTML(true);
+        $mail->Body    = $htmlContent;
+        $mail->AltBody = strip_tags($htmlContent);
         $mail->send();
 
-        $mail->clearAddresses();
-        $mail->clearAttachments();
-        return '1';
+        header('Location: contribute.php?sent=1');
     } catch (Exception $e) {
-        return "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        error_log('Contribute mail failed: ' . $e->getMessage());
+        header('Location: contribute.php?sent=0');
     }
+    exit;
 }
 if (isset($_POST['advertise'])) {
     $email   = $_POST['email']   ?? '';
@@ -2375,14 +2560,22 @@ if (isset($_POST['advertise'])) {
         '<p><b>Phone:</b> '   . htmlspecialchars($phone)   . '</p>' .
         '<p><b>Message:</b><br/>' . nl2br(htmlspecialchars($message)) . '</p>';
 
-    $mail = mailer_from_config();
-    $mail->addAddress($toEmail);
-    $mail->Subject = $fromName;
-    $mail->isHTML(true);
-    $mail->Body    = $htmlContent;
-    $mail->AltBody = strip_tags($htmlContent);
-    $mail->send();
+    try {
+        $mail = mailer_from_config();
+        $mail->addAddress($toEmail);
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $mail->addReplyTo($email, $name !== '' ? $name : $email);
+        }
+        $mail->Subject = $fromName;
+        $mail->isHTML(true);
+        $mail->Body    = $htmlContent;
+        $mail->AltBody = strip_tags($htmlContent);
+        $mail->send();
 
-    header('Location: advertisewithus.php');
+        header('Location: advertisewithus.php?sent=1');
+    } catch (Exception $e) {
+        error_log('Advertise mail failed: ' . $e->getMessage());
+        header('Location: advertisewithus.php?sent=0');
+    }
     exit;
 }

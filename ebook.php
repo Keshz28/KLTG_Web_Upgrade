@@ -120,7 +120,7 @@ foreach ($categories as $cat => $info) {
     }
     .ebook-card img {
       width: 100%;
-      height: auto;
+      height: auto;      /* card height follows each cover's natural proportions */
       display: block;
     }
     /* PDF cover: render the first page in the same slot as an image cover */

@@ -259,20 +259,20 @@ if (isset($_GET['logout'])) {
 
 <script>
 (function () {
-    document.getElementById(‘admin-subscribe-form’).addEventListener(‘submit’, async function (e) {
+    document.getElementById('admin-subscribe-form').addEventListener('submit', async function (e) {
         e.preventDefault();
-        const btn = this.querySelector(‘button[type="submit"]’);
-        const msgEl = document.getElementById(‘admin-sub-msg’);
-        const email = document.getElementById(‘admin-sub-email’).value.trim();
+        const btn = this.querySelector('button[type="submit"]');
+        const msgEl = document.getElementById('admin-sub-msg');
+        const email = document.getElementById('admin-sub-email').value.trim();
 
         btn.disabled = true;
-        btn.textContent = ‘Sending...’;
-        msgEl.textContent = ‘’;
+        btn.textContent = 'Adding...';
+        msgEl.textContent = '';
 
         try {
-            const res = await fetch(‘sub_handler.php?action=subscribe’, {
-                method: ‘POST’,
-                headers: { ‘Accept’: ‘application/json’ },
+            const res = await fetch('sub_handler.php?action=subscribe', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
                 body: new URLSearchParams({ email })
             });
             const text = await res.text();
@@ -280,20 +280,20 @@ if (isset($_GET['logout'])) {
             try { data = JSON.parse(text); } catch (_) { data = { ok: false, error: text }; }
 
             if (data.ok) {
-                if (data.status === ‘duplicate’) {
-                    msgEl.innerHTML = ‘<span style="color:#27ae60;">&#10003; This email is already verified and subscribed.</span>’;
+                if (data.status === 'duplicate') {
+                    msgEl.innerHTML = '<span style="color:#27ae60;">&#10003; This email is already subscribed.</span>';
                 } else {
-                    msgEl.innerHTML = ‘<span style="color:#2980b9;">&#9993; Verification email sent. Subscriber will be activated once they confirm.</span>’;
-                    document.getElementById(‘admin-sub-email’).value = ‘’;
+                    msgEl.innerHTML = '<span style="color:#27ae60;">&#10003; Subscriber added. A welcome email has been sent.</span>';
+                    document.getElementById('admin-sub-email').value = '';
                 }
             } else {
-                msgEl.innerHTML = ‘<span style="color:#c0392b;">&#10005; ‘ + (data.error || ‘Subscription failed.’) + ‘</span>’;
+                msgEl.innerHTML = '<span style="color:#c0392b;">&#10005; ' + (data.error || 'Subscription failed.') + '</span>';
             }
         } catch (err) {
-            msgEl.innerHTML = ‘<span style="color:#c0392b;">&#10005; Network error. Please try again.</span>’;
+            msgEl.innerHTML = '<span style="color:#c0392b;">&#10005; Network error. Please try again.</span>';
         } finally {
             btn.disabled = false;
-            btn.textContent = ‘Send Verification’;
+            btn.textContent = 'Add Subscriber';
         }
     });
 }());

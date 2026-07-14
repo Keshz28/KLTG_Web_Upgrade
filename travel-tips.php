@@ -73,10 +73,12 @@ $tile1_title3 = $row['tile1_title3'];
     }
 
     .klag-tab.is-active {
-      border-bottom-color: #0ea2bd;
-      transform: translateY(-8px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.55);
-      z-index: 2;
+      transform: translateY(-8px) scale(1.02);
+      /* bright colour lining (inset ring) + glow so the active page pops */
+      box-shadow: 0 14px 38px rgba(0,0,0,.6),
+                  inset 0 0 0 3px #19c7e6,
+                  0 0 22px rgba(25,199,230,.55);
+      z-index: 3;
     }
 
     .klag-tab__bg {
@@ -84,12 +86,12 @@ $tile1_title3 = $row['tile1_title3'];
       inset: 0;
       background-size: cover;
       background-position: center;
-      filter: brightness(0.48);
+      filter: brightness(0.7);
       transition: filter .3s;
     }
 
-    .klag-tab:hover .klag-tab__bg { filter: brightness(0.68); }
-    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.85); }
+    .klag-tab:hover .klag-tab__bg { filter: brightness(0.9); }
+    .klag-tab.is-active .klag-tab__bg { filter: brightness(1.08); }
 
     .klag-tab__label {
       position: relative;
@@ -132,7 +134,7 @@ $tile1_title3 = $row['tile1_title3'];
     #tt-section .tt-bg {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%);
+      background: radial-gradient(circle at 72% 28%, #2f8fe6 0%, #1f6cc4 45%, #164f9c 100%);
       z-index: 0;
     }
 
@@ -176,10 +178,10 @@ $tile1_title3 = $row['tile1_title3'];
     }
 
     .tt-tab {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(10, 26, 52, 0.55);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(120, 190, 255, 0.18);
       color: rgba(255, 255, 255, 0.8);
       padding: 14px 18px;
       border-radius: 10px;
@@ -236,26 +238,26 @@ $tile1_title3 = $row['tile1_title3'];
     .tt-tab.active .tt-tab__label { opacity: 0.85; }
 
     .tt-tab:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(14, 34, 66, 0.72);
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.22);
+      border-color: rgba(25, 199, 230, 0.4);
     }
 
     .tt-tab.active {
-      background: linear-gradient(135deg, #7b2fbe 0%, #5c1d96 100%);
-      border-color: #9b50de;
+      background: linear-gradient(135deg, #0ea2bd 0%, #0a6f81 100%);
+      border-color: #19c7e6;
       color: #fff;
       font-weight: 600;
-      box-shadow: 0 6px 22px rgba(123, 47, 190, 0.45);
+      box-shadow: 0 6px 22px rgba(14, 162, 189, 0.5);
     }
 
     /* ===== Right: Accordion Panel ===== */
     .tt-panel {
       flex: 1;
-      background: rgba(0, 0, 0, 0.42);
+      background: linear-gradient(135deg, rgba(12, 30, 58, 0.55) 0%, rgba(8, 20, 42, 0.62) 100%);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(120, 190, 255, 0.18);
       border-radius: 14px;
       padding: 30px 36px;
       min-height: 440px;
@@ -299,7 +301,7 @@ $tile1_title3 = $row['tile1_title3'];
     }
 
     .tt-acc-hd:hover {
-      color: #c792ff;
+      color: #4fd6ea;
     }
 
     .tt-acc-icon {
@@ -328,11 +330,11 @@ $tile1_title3 = $row['tile1_title3'];
 
     .tt-acc.open .tt-acc-icon {
       transform: rotate(180deg);
-      border-color: #9b50de;
+      border-color: #19c7e6;
     }
 
     .tt-acc.open .tt-acc-icon svg {
-      stroke: #c792ff;
+      stroke: #4fd6ea;
     }
 
     .tt-acc-bd {
@@ -373,7 +375,7 @@ $tile1_title3 = $row['tile1_title3'];
 
     .tt-cta {
       background: rgba(255, 255, 255, 0.92);
-      color: #2d1b4e;
+      color: #123a6b;
       padding: 8px 20px;
       border-radius: 6px;
       font-family: 'Poppins', sans-serif;
@@ -387,7 +389,7 @@ $tile1_title3 = $row['tile1_title3'];
       text-decoration: none;
     }
 
-    a.tt-cta:hover { color: #2d1b4e; text-decoration: none; }
+    a.tt-cta:hover { color: #123a6b; text-decoration: none; }
 
     .tt-legal-list {
       color: rgba(255, 255, 255, 0.78);
@@ -398,7 +400,7 @@ $tile1_title3 = $row['tile1_title3'];
       padding-left: 18px;
     }
     .tt-legal-list li { margin-bottom: 8px; }
-    .tt-legal-list strong { color: #c792ff; font-weight: 600; }
+    .tt-legal-list strong { color: #4fd6ea; font-weight: 600; }
     .tt-legal-sub {
       color: #fff;
       font-family: 'Poppins', sans-serif;

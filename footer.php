@@ -138,6 +138,9 @@ if (isset($db)) {
                     <form id="subscribe-form">
                         <input type="email" name="email" id="emailsubscribe" required><input type="submit"
                             value="Subscribe" name="subscribe">
+                        <!-- honeypot: hidden from humans, bots fill it -->
+                        <input type="text" name="hp_email" tabindex="-1" autocomplete="off" aria-hidden="true"
+                            style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0;">
                     </form>
                     <div class="row mt-2">
 
@@ -184,8 +187,8 @@ if (isset($db)) {
 </footer><!-- End Footer -->
 
 <!-- KL Travel Concierge Chatbot -->
-<link rel="stylesheet" href="assets/css/chatbot.css">
-<script src="assets/js/chatbot.js" defer></script>
+<link rel="stylesheet" href="assets/css/chatbot.css?v=20260701">
+<script src="assets/js/chatbot.js?v=20260701" defer></script>
 
 <script>
 document.querySelector('#subscribe-form').addEventListener('submit', async (e) => {
@@ -208,11 +211,11 @@ document.querySelector('#subscribe-form').addEventListener('submit', async (e) =
     if (data.ok) {
       if (data.status === 'duplicate') {
         alert('This email is already subscribed to our newsletter.');
-      } else if (data.status === 'verification_sent') {
-        alert('Almost there! Please check your inbox and click the confirmation link to complete your subscription.');
+      } else if (data.status === 'subscribed') {
+        alert('🎉 You\'re subscribed! Thanks for joining KL The Guide.');
         e.target.reset();
       } else {
-        alert('Please check your inbox and click the confirmation link to complete your subscription.');
+        alert('Thanks for subscribing!');
         e.target.reset();
       }
     } else {

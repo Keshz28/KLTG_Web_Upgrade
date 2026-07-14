@@ -43,6 +43,36 @@ function html_out($html, $code = 200)
     exit;
 }
 
+// Safety net: PHP 8 turns things like "method call on bool" into an uncaught
+// Error/Throwable, which set_exception_handler catches reliably (unlike
+// register_shutdown_function+error_get_last, which misses these).
+set_exception_handler(function (Throwable $e) {
+    error_log('sub_handler.php uncaught: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    _flush_buffers();
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=UTF-8');
+    }
+    echo json_encode(['ok' => false, 'error' => 'Server error: ' . $e->getMessage()]);
+    exit;
+});
+
+// Safety net: if a fatal error happens anywhere below (undefined function on a
+// locked-down host, etc.), turn it into JSON instead of an empty/broken body
+// that breaks the client's JSON.parse().
+register_shutdown_function(function () {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+        error_log('sub_handler.php fatal: ' . $err['message'] . ' in ' . $err['file'] . ':' . $err['line']);
+        _flush_buffers();
+        if (!headers_sent()) {
+            http_response_code(500);
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+        echo json_encode(['ok' => false, 'error' => 'Server error: ' . $err['message']]);
+    }
+});
+
 // ============================================
 // DB CONNECTION GUARD
 // ============================================
@@ -302,107 +332,78 @@ if ($action === 'assets.list') {
 }
 
 if ($action === 'subscribe' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
 
-    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        json_out(['ok' => false, 'error' => 'Invalid email address'], 422);
+    // ---- 1. Honeypot -------------------------------------------------------
+    // Real browsers leave these hidden fields empty; bots fill everything.
+    // Pretend success so the bot has no signal that it was blocked.
+    foreach (['hp_email', 'website', 'url'] as $trap) {
+        if (trim($_POST[$trap] ?? '') !== '') {
+            json_out(['ok' => true, 'inserted' => false, 'status' => 'ok']);
+        }
     }
+
+    // ---- 2. Validate -------------------------------------------------------
+    $emailRaw = trim($_POST['email'] ?? '');
+    if ($emailRaw === '' || !filter_var($emailRaw, FILTER_VALIDATE_EMAIL) || strlen($emailRaw) > 190) {
+        json_out(['ok' => false, 'error' => 'Please enter a valid email address.'], 422);
+    }
+
+    // Canonicalise so bot-generated Gmail dot/plus variants collapse to one.
+    $email = normalize_subscribe_email($emailRaw);
 
     $domain = substr(strrchr($email, '@'), 1);
-    if (!checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A')) {
-        json_out(['ok' => false, 'error' => 'Email domain does not appear to be valid. Please use a real email address.'], 422);
+    if (function_exists('checkdnsrr') && !@checkdnsrr($domain, 'MX') && !@checkdnsrr($domain, 'A')) {
+        json_out(['ok' => false, 'error' => 'That email domain does not appear to be valid. Please use a real email address.'], 422);
     }
 
-    $email   = strtolower($email);
+    // ---- 3. Rate limit (per IP) -------------------------------------------
+    $ip = subscribe_client_ip();
+    if (!subscribe_throttle_ok($db, $ip)) {
+        json_out(['ok' => false, 'error' => 'Too many sign-up attempts. Please try again later.'], 429);
+    }
+
     $country = trim($_POST['country'] ?? '');
+    if ($country !== '') {
+        $country = trim(preg_replace('/\s*\(.*?\)/', '', $country)); // strip "(native name)"
+    }
     $consent = isset($_POST['consent']) ? 1 : 0;
 
-    // Check if this email already exists
-    $chk = mysqli_prepare($db, "SELECT emailsub_id, verified FROM emailsub WHERE emailsub_email = ? LIMIT 1");
+    // ---- 4. Duplicate check (on the normalised address) --------------------
+    $chk = mysqli_prepare($db, "SELECT emailsub_id FROM emailsub WHERE emailsub_email = ? LIMIT 1");
     mysqli_stmt_bind_param($chk, 's', $email);
     mysqli_stmt_execute($chk);
-    $chkRes  = mysqli_stmt_get_result($chk);
-    $existing = mysqli_fetch_assoc($chkRes);
+    $existing = mysqli_fetch_assoc(mysqli_stmt_get_result($chk));
     mysqli_stmt_close($chk);
 
-    // Already verified — nothing more to do
-    if ($existing && (int)$existing['verified'] === 1) {
+    if ($existing) {
         json_out(['ok' => true, 'inserted' => false, 'status' => 'duplicate']);
     }
 
-    // Generate a fresh token (64 hex chars) valid for 48 hours
-    $token   = bin2hex(random_bytes(32));
-    $expires = date('Y-m-d H:i:s', strtotime('+48 hours'));
-
-    if ($existing) {
-        // Pending verification — refresh token so a new email can be sent
-        $upd = mysqli_prepare($db, "UPDATE emailsub SET verify_token = ?, verify_expires = ? WHERE emailsub_email = ?");
-        mysqli_stmt_bind_param($upd, 'sss', $token, $expires, $email);
-        mysqli_stmt_execute($upd);
-        mysqli_stmt_close($upd);
-    } else {
-        // New subscriber — insert as unverified
-        $ins = mysqli_prepare($db, "
-            INSERT INTO emailsub (emailsub_email, emailsub_country, emailsub_consent, emailsub_date, verified, verify_token, verify_expires)
-            VALUES (?, ?, ?, NOW(), 0, ?, ?)
-        ");
-        if (!$ins) {
-            db_or_500(false, $db, 'subscribe insert prepare');
-        }
-        mysqli_stmt_bind_param($ins, 'ssiss', $email, $country, $consent, $token, $expires);
-        mysqli_stmt_execute($ins);
-        if (mysqli_stmt_affected_rows($ins) < 1) {
-            mysqli_stmt_close($ins);
-            json_out(['ok' => false, 'error' => 'Could not save subscription'], 500);
-        }
-        mysqli_stmt_close($ins);
-    }
-
-    // Build the verification email
-    $verifyUrl  = app_base_url() . '/verify-email.php?token=' . urlencode($token);
-    $brandName  = brand_name();
-    $subject    = 'Confirm your subscription – ' . $brandName;
-    $fromName   = $brandName;
-    $urlEsc     = htmlspecialchars($verifyUrl, ENT_QUOTES, 'UTF-8');
-    $brandEsc   = htmlspecialchars($brandName, ENT_QUOTES, 'UTF-8');
-
-    $html = '<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>Confirm your subscription</title></head>
-<body style="font-family:Arial,sans-serif;line-height:1.6;color:#333;background:#f5f5f5;margin:0;padding:0;">
-  <div style="max-width:600px;margin:40px auto;background:#fff;padding:36px;border-radius:8px;">
-    <h2 style="color:#2c3e50;margin-top:0;">One more step!</h2>
-    <p>Thanks for subscribing to <strong>' . $brandEsc . '</strong>.</p>
-    <p>Click the button below to confirm your email address and activate your subscription:</p>
-    <p style="text-align:center;margin:32px 0;">
-      <a href="' . $urlEsc . '" style="background:#c8a96e;color:#fff;padding:14px 32px;text-decoration:none;border-radius:4px;font-weight:bold;font-size:16px;display:inline-block;">Confirm my subscription</a>
-    </p>
-    <p style="color:#666;font-size:13px;">Or paste this link into your browser:<br>
-      <a href="' . $urlEsc . '" style="color:#c8a96e;word-break:break-all;">' . $urlEsc . '</a>
-    </p>
-    <p style="color:#888;font-size:12px;margin-top:24px;">This link expires in 48 hours. If you did not subscribe, you can safely ignore this email.</p>
-    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
-    <p style="font-size:12px;color:#aaa;">' . $brandEsc . '</p>
-  </div>
-</body>
-</html>';
-
-    $sent = send_email_html($email, $subject, $html, $fromName);
-
-    // Log in mailqueue for tracking
-    $qStatus   = $sent ? 'sent' : 'smtp_failed';
-    $qSendTime = $sent ? date('Y-m-d H:i:s') : null;
-    $qStmt = mysqli_prepare($db, "
-        INSERT INTO mailqueue (sendstatus, sendto, sendtitle, sendbody, init_time, send_time)
-        VALUES (?, ?, ?, ?, NOW(), ?)
+    // ---- 5. Insert as an ACTIVE subscriber (single opt-in) -----------------
+    $ins = mysqli_prepare($db, "
+        INSERT INTO emailsub (emailsub_name, emailsub_email, emailsub_country, emailsub_consent, verified, emailsub_date)
+        VALUES ('', ?, ?, ?, 1, NOW())
     ");
-    if ($qStmt) {
-        mysqli_stmt_bind_param($qStmt, 'sssss', $qStatus, $email, $subject, $html, $qSendTime);
-        mysqli_stmt_execute($qStmt);
-        mysqli_stmt_close($qStmt);
+    if (!$ins) {
+        db_or_500(false, $db, 'subscribe insert prepare');
+    }
+    mysqli_stmt_bind_param($ins, 'ssi', $email, $country, $consent);
+    mysqli_stmt_execute($ins);
+    if (mysqli_stmt_affected_rows($ins) < 1) {
+        mysqli_stmt_close($ins);
+        json_out(['ok' => false, 'error' => 'Could not save subscription. Please try again.'], 500);
+    }
+    mysqli_stmt_close($ins);
+
+    // ---- 6. Welcome email (best-effort — never blocks the sign-up) ---------
+    $sent = false;
+    try {
+        $sent = send_subscriber_welcome_email($db, $email);
+    } catch (\Throwable $e) {
+        error_log('subscribe welcome email failed: ' . $e->getMessage());
     }
 
-    json_out(['ok' => true, 'inserted' => true, 'sent' => $sent, 'status' => 'verification_sent']);
+    json_out(['ok' => true, 'inserted' => true, 'sent' => $sent, 'status' => 'subscribed']);
 }
 
 // ============================================

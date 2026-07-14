@@ -30,6 +30,7 @@
     var widget = document.createElement('div');
     widget.id  = 'kltg-chat-widget';
     widget.innerHTML =
+        '<span id="kltg-chat-cta" aria-hidden="true">Chat Now!</span>' +
         '<button id="kltg-chat-btn" aria-label="Open KL Travel Concierge chat" title="Drag to move · Click to chat">' +
             '<canvas id="kltg-book-canvas" width="68" height="68" aria-hidden="true"></canvas>' +
             '<span id="kltg-chat-badge" aria-label="1 new message">1</span>' +
@@ -462,5 +463,9 @@
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
+
+    // ── Public API: let other page elements open/close the chat ──
+    window.kltgOpenChat   = function () { if (!isOpen) openChat(); };
+    window.kltgToggleChat = function () { isOpen ? closeChat() : openChat(); };
 
 }());

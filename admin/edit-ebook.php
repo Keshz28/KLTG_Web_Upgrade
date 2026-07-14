@@ -246,7 +246,7 @@ if ($catRes) {
 
                                             } else {
                                                 echo '<td><a class="btn btn-success" href="edit-ebook.php?disableviewebook=' . $row['ebook_id'] . '" name="disableviewebook">Enabled</a>
-                                                <a href="#" class="" onclick="editmodal(' . $row['ebook_id'] . ');" id="modaledit"><i class="fas fa-pen"></i></a></td>';
+                                                <a href="#" class="" onclick="editmodalebook(' . $row['ebook_id'] . ');" id="modaledit"><i class="fas fa-pen"></i></a></td>';
 
                                             }
                                             echo '</tr>';

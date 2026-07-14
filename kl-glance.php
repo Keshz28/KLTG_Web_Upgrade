@@ -57,7 +57,7 @@ if ($klag_result) {
     /* Solid deep-navy backdrop (replaces the photo background) so the
        transparent navbar has something to sit on top of */
     body.klag-page {
-      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%) fixed;
+      background: radial-gradient(circle at 72% 28%, #2f8fe6 0%, #1f6cc4 45%, #164f9c 100%) fixed;
     }
     body.klag-page::before {
       content: "";
@@ -104,10 +104,12 @@ if ($klag_result) {
     }
 
     .klag-tab.is-active {
-      border-bottom-color: var(--klag-accent);
-      transform: translateY(-8px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.55);
-      z-index: 2;
+      transform: translateY(-8px) scale(1.02);
+      /* bright colour lining (inset ring) + glow so the active page pops */
+      box-shadow: 0 14px 38px rgba(0,0,0,.6),
+                  inset 0 0 0 3px #19c7e6,
+                  0 0 22px rgba(25,199,230,.55);
+      z-index: 3;
     }
 
     /* Background image layer inside each tab */
@@ -116,12 +118,12 @@ if ($klag_result) {
       inset: 0;
       background-size: cover;
       background-position: center;
-      filter: brightness(0.48);
+      filter: brightness(0.7);
       transition: filter .3s;
     }
 
-    .klag-tab:hover .klag-tab__bg { filter: brightness(0.68); }
-    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.85); }
+    .klag-tab:hover .klag-tab__bg { filter: brightness(0.9); }
+    .klag-tab.is-active .klag-tab__bg { filter: brightness(1.08); }
 
     .klag-tab__label {
       position: relative;
@@ -164,7 +166,7 @@ if ($klag_result) {
     .klag-bg {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 30% 20%, #24426e 0%, #1a3157 55%, #142844 100%);
+      background: radial-gradient(circle at 72% 28%, #2f8fe6 0%, #1f6cc4 45%, #164f9c 100%);
     }
 
     .klag-bg::after {
@@ -178,15 +180,17 @@ if ($klag_result) {
     .klag-bg-text {
       position: absolute;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      left: auto;
+      right: 3%;
+      transform: translate(0, -50%);
       z-index: 2;
       font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
-      font-size: clamp(4rem, 22vw, 18rem);
+      font-size: clamp(3.5rem, 18vw, 15rem);
       font-weight: 900;
       color: transparent;
-      -webkit-text-stroke: 1.5px rgba(255,255,255,.18);
+      -webkit-text-stroke: 1.5px rgba(255,255,255,.30);
       white-space: nowrap;
+      text-align: right;
       letter-spacing: .02em;
       text-transform: uppercase;
       pointer-events: none;
@@ -215,13 +219,25 @@ if ($klag_result) {
     }
     .klag-slide.is-active .klag-featured { transform: scale(1) translateY(0); opacity: 1; }
 
+    /* Landmark slides only (not the intro): keep the image on the left so the
+       giant outline word on the right stays fully visible beside it. */
+    .klag-slide:not(.klag-slide--intro) { justify-content: flex-start; }
+    .klag-slide:not(.klag-slide--intro) .klag-featured {
+      margin-left: clamp(24px, 6vw, 110px);
+    }
+
     /* ── Bottom content strip ─────────────────────────────── */
     .klag-content {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      top: 0; bottom: 0; right: 0; left: auto;
+      width: min(52%, 640px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
       z-index: 4;
-      padding: 52px 52px 44px;
-      background: linear-gradient(0deg, rgba(0,0,0,.78) 0%, transparent 100%);
+      padding: 0 clamp(28px, 4vw, 60px) 0 8px;
+      background: none;
       transform: translateY(14px);
       opacity: 0;
       transition: transform .85s ease .48s, opacity .85s ease .48s;
@@ -250,7 +266,8 @@ if ($klag_result) {
       margin: 0;
       font-size: clamp(.84rem, 1.3vw, .97rem);
       line-height: 1.68;
-      color: rgba(255,255,255,.82);
+      color: rgba(255,255,255,.9);
+      text-shadow: 0 2px 12px rgba(0,0,0,.35);
     }
 
     /* ── Intro slide ─────────────────────────────────────── */
@@ -291,7 +308,7 @@ if ($klag_result) {
       margin: 0 auto 38px;
       font-size: clamp(.88rem, 1.5vw, 1.02rem);
       line-height: 1.68;
-      color: rgba(255,255,255,.78);
+      color: rgba(255,255,255,.96);
     }
 
     /* Animated scroll hint */
@@ -353,9 +370,12 @@ if ($klag_result) {
       :root { --klag-tabs: 90px; }
       .klag-tab__label { font-size: 12px; }
       .klag-featured img { max-height: 44vh; max-width: 88vw; }
-      .klag-content { padding: 36px 22px 30px; }
+      .klag-content { top: auto; bottom: 0; display: block; padding: 36px 22px 30px; width: auto; left: 0; right: 0; text-align: left; background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, transparent 100%); }
+      .klag-desc { margin: 0; }
       .klag-pager   { right: 10px; }
-      .klag-bg-text { font-size: clamp(3rem, 24vw, 7rem); }
+      .klag-bg-text { right: 2%; font-size: clamp(3rem, 24vw, 7rem); }
+      .klag-slide:not(.klag-slide--intro) { justify-content: center; }
+      .klag-slide:not(.klag-slide--intro) .klag-featured { margin-left: 0; margin-bottom: 20vh; }
     }
     @media (max-width: 480px) {
       :root { --klag-tabs: 76px; }

@@ -86,10 +86,12 @@ $transports = [
     }
 
     .klag-tab.is-active {
-      border-bottom-color: #0ea2bd;
-      transform: translateY(-8px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.55);
-      z-index: 2;
+      transform: translateY(-8px) scale(1.02);
+      /* bright colour lining (inset ring) + glow so the active page pops */
+      box-shadow: 0 14px 38px rgba(0,0,0,.6),
+                  inset 0 0 0 3px #19c7e6,
+                  0 0 22px rgba(25,199,230,.55);
+      z-index: 3;
     }
 
     .klag-tab__bg {
@@ -97,12 +99,12 @@ $transports = [
       inset: 0;
       background-size: cover;
       background-position: center;
-      filter: brightness(0.48);
+      filter: brightness(0.7);
       transition: filter .3s;
     }
 
-    .klag-tab:hover .klag-tab__bg { filter: brightness(0.68); }
-    .klag-tab.is-active .klag-tab__bg { filter: brightness(0.85); }
+    .klag-tab:hover .klag-tab__bg { filter: brightness(0.9); }
+    .klag-tab.is-active .klag-tab__bg { filter: brightness(1.08); }
 
     .klag-tab__label {
       position: relative;

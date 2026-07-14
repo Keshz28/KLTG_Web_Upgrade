@@ -95,6 +95,11 @@ $travelnews = mysqli_fetch_assoc($result);
     filter: brightness(0) invert(1);
   }
 
+  /* Bump the top-left logo up a touch from the default 40px */
+  #header .logo img {
+    max-height: 50px;
+  }
+
   /* Contact-us pill: glass-style outline so it's readable on video */
   body.has-video-hero #header.header-transparent .btn-getstarted {
     background-color: rgba(255, 255, 255, .14) !important;

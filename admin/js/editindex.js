@@ -1,7 +1,14 @@
-initblog();
-
-
 $(document).ready(function () {
+
+  $(document).on("click", ".modaledit-btn", function () {
+    editmodal(
+      $(this).data("id"),
+      $(this).data("name"),
+      $(this).data("category"),
+      $(this).data("postid")
+    );
+  });
+
   $("#dataTable1").DataTable({
     ordering: false,
   });
@@ -95,9 +102,6 @@ $(document).ready(function () {
   }
 });
 
-function removeHttp(url) {
-  return url.replace(/^https?:\/\//, "");
-}
 function newmodal(id) {
   // //console.log("test");
   // //console.log(id);
@@ -126,110 +130,18 @@ function newmodal(id) {
   $("#exampleModal3").modal("show");
 }
 
-function editmodal(id, title) {
-  // //console.log("test");
-  // //console.log(id);
-  // var filename = document.getElementById("filename-" + id).innerText;
-  // var name = document.getElementById("name-" + id).innerText;
-  // var order = document.getElementById("order-" + id).innerText;
+function editmodal(id, name, category, postid) {
+  document.getElementById("hiddenid").value = id;
+  document.getElementById("recommendname").value = name;
+  document.getElementById("recommendcategory").value = category || "";
 
-  // //console.log(filename);
-  // //console.log(name);
-  // //console.log(order);
-  var ida = document.getElementById("hiddenid");
-  // var formorder = document.getElementById("exampleFormControlTextarea2");
-  var name = document.getElementById("recommendname");
-  // var formid = document.getElementById("exampleFormControlTextarea8");
-  name.value = title;
-  ida.value = id;
-  // formid.value = id;
-  // formorder.value = order;
-  // formname.value = name;
-  // formfilename.value = filename;
+  var postidField = document.getElementById("recommendpostid");
+  postidField.value = "";
+  postidField.placeholder = postid
+    ? "Current Post ID: " + postid + " — leave blank to keep it"
+    : "Leave blank to keep the current post";
+
   $("#editrecommend").modal("show");
-}
-
-function initblog() {
-  const xhttp = new XMLHttpRequest();
-  var string =
-    "https://www.googleapis.com/blogger/v3/blogs/1732826187557117921/posts?key=AIzaSyC7NA9vDhkVtk4lWisJxGW--fYXLIeM__w&fetchImages=true&maxResults=500";
-
-  // //console.log(string);
-  xhttp.open("GET", string, true);
-
-  xhttp.onload = function () {
-    var data = JSON.parse(this.responseText);
-    if (data.length !== 0) {
-      // const blogposthtml = document.getElementById("postlist");
-
-      // blogposthtml.innerHTML = "";
-      const table = document.getElementById("recommendationtable");
-
-      for (var i = 0; i < data.items.length; i++) {
-        var date = new Date(data.items[i].published);
-
-        var day = date.getDate();
-        var year = date.getFullYear();
-        const months = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ];
-        var longmonth = months[date.getMonth()];
-        // //console.log(data.items[i].images[0].url);
-        // var content2 = strip_tags(data.items[i].content, "<p>");
-        var addbutton =
-          "" +
-          '<form action="edit-index.php?addrecommend#recommendcard" method="post" enctype="multipart/form-data">' +
-          '    <input   name="name" hidden value="' +
-          data.items[i].title +
-          '"></input>' +
-          '    <input   name="image2" hidden value="' +
-          removeHttp(data.items[i].images[0].url) +
-          '"></input>' +
-          '    <input   name="postid" hidden value="' +
-          data.items[i].id +
-          '"></input>' +
-          '    <button class="btn btn-primary" type="submit" name="saverecommendation"><i class=\'fas fa-plus\'></i></button>' +
-          "</form>" +
-          "";
-        var tablerow =
-          "<tr>" +
-          "<th> " +
-          i +
-          "</th>" +
-          "<th> " +
-          data.items[i].title +
-          "</th>" +
-          "<th> " +
-          data.items[i].id +
-          "</th>" +
-          "<th> " +
-          addbutton +
-          "</th>" +
-          "</tr";
-        table.insertAdjacentHTML("beforeend", tablerow);
-        // $("#newrecommendation").modal("show");
-      }
-      // //console.log(data);
-      $(document).ready(function () {
-        $("#dataTable3").DataTable({
-          ordering: false,
-        });
-      });
-    }
-  };
-  xhttp.send();
-
 }
 var toastbody = document.getElementById("toast-body");
 $("#toast11").hide();

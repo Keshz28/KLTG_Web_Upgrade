@@ -2,6 +2,23 @@
 // Guard: included by functions.php which runs on public pages too.
 if (!isset($_SESSION['username'])) return;
 
+// --- Upload diagnostics: surface failures that PHP otherwise hides ----------
+// When a POST body is larger than post_max_size, PHP discards $_POST and $_FILES
+// entirely, so none of the add/edit blocks below run and the page just reloads
+// with no message. Detect that case and report it instead of failing silently.
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST) && empty($_FILES)
+    && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0
+) {
+    $sentMB = round(((int) $_SERVER['CONTENT_LENGTH']) / 1048576, 1);
+    array_push(
+        $errors2,
+        "Upload rejected before it could be processed: you sent {$sentMB} MB, which is "
+        . "larger than the server's post_max_size (" . ini_get('post_max_size') . "). "
+        . "Raise post_max_size and upload_max_filesize on the server, then try again."
+    );
+}
+
 if (isset($_POST['editebookview2'])) {
     $id = $_POST['hiddenid'];
     $number = $_POST['valueupdate'];
@@ -88,50 +105,56 @@ if (isset($_POST['editebook2'])) {
 
     }
     if ($_FILES["fileToUpload2b"]["name"] != "") {
-        // array_push($errors2, "photo 1");
-        echo "test";
-
-        $tile1_photo1 = urlencode(uploadpdf($_FILES["fileToUpload2b"], "pdf/", $ebook_category));
-        if ($tile1_photo1) {
-            $queryselect = "SELECT * FROM ebook where ebook_id='" . $id . "'";
-            $removefile = mysqli_query($db, $queryselect);
-            // echo $query;
-            while ($row = mysqli_fetch_assoc($removefile)) {
-                //  echo $row['tile1_photo1'];
-                $status = unlink('../assets/pdf/ebook/' . $ebook_category . '/' . $row['ebook_filename']);
-
+        if ($_FILES["fileToUpload2b"]["error"] !== UPLOAD_ERR_OK) {
+            array_push($errors2, "New PDF upload failed (PHP upload error code "
+                . $_FILES["fileToUpload2b"]["error"]
+                . " — code 1/2 means it exceeds the server's upload size limit).");
+        } else {
+            $tile1_photo1 = uploadpdf($_FILES["fileToUpload2b"], "ebook", $ebook_category);
+            if ($tile1_photo1) {
+                $queryselect = "SELECT * FROM ebook where ebook_id='" . $id . "'";
+                $removefile = mysqli_query($db, $queryselect);
+                while ($row = mysqli_fetch_assoc($removefile)) {
+                    $status = @unlink('../assets/pdf/ebook/' . $ebook_category . '/' . $row['ebook_filename']);
+                }
+                if ($querycontent) {
+                    $querycontent .= ",";
+                }
+                $querycontent .= "ebook_filename='" . urlencode($tile1_photo1) . "'";
+            } else {
+                array_push($errors2, "New PDF was rejected. It must be a real .pdf under 100 MB, "
+                    . "no file with the same name may already exist in assets/pdf/ebook/"
+                    . htmlspecialchars($ebook_category) . "/, and that folder must be writable.");
             }
-            if ($querycontent) {
-                $querycontent .= ",";
-            }
-            $querycontent .= "ebook_filename='$tile1_photo1'";
-            // echo $tile1_photo1;
         }
     }
 
 
     if ($_FILES["fileToUpload3b"]["name"] != "") {
-        // array_push($errors2, "photo 1");
-
-        echo "test2";
-
-
-        $tile1_photo2 = uploadcover($_FILES["fileToUpload3b"], $ebook_category);
-        if ($tile1_photo2) {
-            $queryselect = "SELECT * FROM ebook where ebook_id='" . $id . "'";
-            $removefile = mysqli_query($db, $queryselect);
-            // echo $query;
-            while ($row = mysqli_fetch_assoc($removefile)) {
-                // Remove the previous cover file (ebook_image, not the PDF).
-                if (!empty($row['ebook_image'])) {
-                    @unlink('../assets/img/ebook/' . $ebook_category . '/' . $row['ebook_image']);
+        if ($_FILES["fileToUpload3b"]["error"] !== UPLOAD_ERR_OK) {
+            array_push($errors2, "New cover upload failed (PHP upload error code "
+                . $_FILES["fileToUpload3b"]["error"]
+                . " — code 1/2 means it exceeds the server's upload size limit).");
+        } else {
+            $tile1_photo2 = uploadcover($_FILES["fileToUpload3b"], $ebook_category);
+            if ($tile1_photo2) {
+                $queryselect = "SELECT * FROM ebook where ebook_id='" . $id . "'";
+                $removefile = mysqli_query($db, $queryselect);
+                while ($row = mysqli_fetch_assoc($removefile)) {
+                    // Remove the previous cover file (ebook_image, not the PDF).
+                    if (!empty($row['ebook_image'])) {
+                        @unlink('../assets/img/ebook/' . $ebook_category . '/' . $row['ebook_image']);
+                    }
                 }
+                if ($querycontent) {
+                    $querycontent .= ",";
+                }
+                $querycontent .= "ebook_image='$tile1_photo2'";
+            } else {
+                array_push($errors2, "New cover was rejected. It must be a jpg/jpeg/png/webp (or pdf) under 20 MB, "
+                    . "no file with the same name may already exist in assets/img/ebook/"
+                    . htmlspecialchars($ebook_category) . "/, and that folder must be writable.");
             }
-            if ($querycontent) {
-                $querycontent .= ",";
-            }
-            $querycontent .= "ebook_image='$tile1_photo2'";
-            // echo $tile1_photo2;
         }
     }
 
@@ -142,7 +165,6 @@ if (isset($_POST['editebook2'])) {
         // debug_to_console($querycontent);
 // echo $querycontent;
         $query = "UPDATE ebook SET " . $querycontent . " WHERE ebook_id='$id' ";
-        echo $query;
         $update = mysqli_query($db, $query);
         if ($update) {
             // echo "Record updated successfully";
@@ -185,6 +207,22 @@ if (isset($_POST['addebook2'])) {
     $ebook_name = $_POST['ebook_name'];
     $ebook_category = $_POST['ebook_category'];
 
+    // Report any PHP-level upload errors (size limit, partial, no temp dir, etc.)
+    foreach (['fileToUpload2' => 'E-book PDF', 'fileToUpload3' => 'Cover image'] as $field => $label) {
+        $code = $_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE;
+        if ($code !== UPLOAD_ERR_OK) {
+            $reasons = [
+                UPLOAD_ERR_INI_SIZE   => 'is larger than the server upload_max_filesize limit',
+                UPLOAD_ERR_FORM_SIZE  => 'is larger than the form allows',
+                UPLOAD_ERR_PARTIAL    => 'was only partially uploaded (connection interrupted)',
+                UPLOAD_ERR_NO_FILE    => 'was not selected',
+                UPLOAD_ERR_NO_TMP_DIR => 'has no temporary folder on the server',
+                UPLOAD_ERR_CANT_WRITE => 'could not be written to disk (folder permissions?)',
+                UPLOAD_ERR_EXTENSION  => 'was blocked by a PHP extension',
+            ];
+            array_push($errors2, "{$label} " . ($reasons[$code] ?? "failed (error code {$code})") . ".");
+        }
+    }
 
     $target_dir2 = "../assets/pdf/ebook/" . $ebook_category . "/";
     $target_file = $target_dir2 . basename($_FILES["fileToUpload2"]["name"]);
@@ -263,13 +301,17 @@ if (isset($_POST['addebook2'])) {
 
 
             $query = "INSERT INTO ebook (ebook_filename,ebook_image,ebook_name,ebook_category,ebook_viewsettings) VALUES('$filename','$filename2','$ebook_name','$ebook_category','0')";
-            mysqli_query($db, $query);
-            array_push($errors2, "Added New E-Book");
+            if (mysqli_query($db, $query)) {
+                array_push($errors2, "Added New E-Book");
+            } else {
+                array_push($errors2, "Database error adding e-book: " . mysqli_error($db));
+            }
 
 
         } else {
-            array_push($errors2, "Error While Uploading PDF");
-            echo "Error While Uploading PDF";
+            array_push($errors2, "Could not save the uploaded files to "
+                . htmlspecialchars($target_dir2) . " / " . htmlspecialchars($target_dir3)
+                . " — check the folders exist and are writable on the server.");
 
 
         }

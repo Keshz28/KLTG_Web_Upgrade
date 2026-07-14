@@ -21,7 +21,7 @@ if ($catRes) {
 }
 
 $products = [];
-$prodRes = mysqli_query($db, "SELECT merchandise_id AS id, name, image, category_id AS cat, price, buy_url FROM merchandise ORDER BY merchandise_order ASC, merchandise_id ASC");
+$prodRes = mysqli_query($db, "SELECT merchandise_id AS id, name, description, image, category_id AS cat, price, buy_url FROM merchandise ORDER BY merchandise_order ASC, merchandise_id ASC");
 if ($prodRes) {
     while ($p = mysqli_fetch_assoc($prodRes)) {
         // Uploaded images live in assets/img/merchandise/; fall back to a placeholder if blank.
@@ -31,6 +31,7 @@ if ($prodRes) {
         $products[] = [
             'id'      => (int)$p['id'],
             'name'    => $p['name'],
+            'desc'    => $p['description'] ?? '',
             'cat'     => (int)$p['cat'],
             'img'     => $img,
             'price'   => $p['price'],
@@ -96,11 +97,35 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       overflow: hidden;
     }
 
+    /* Background video */
+    .merch-hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      filter: brightness(1.18) saturate(1.35) contrast(1.05);
+    }
+
+    /* Overlay — light enough to keep the video vibrant, dark only behind text */
+    .merch-hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(10,22,40,.28) 0%, rgba(10,22,40,.12) 40%, rgba(10,22,40,.42) 100%),
+        radial-gradient(circle at 50% 42%, rgba(10,22,40,.42) 0%, transparent 62%);
+    }
+
     /* dot-grid texture */
     .merch-hero::before {
       content: '';
       position: absolute;
       inset: 0;
+      z-index: 1;
       background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
       background-size: 28px 28px;
       pointer-events: none;
@@ -110,6 +135,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
     .merch-hero::after {
       content: '';
       position: absolute;
+      z-index: 1;
       width: 600px;
       height: 600px;
       background: radial-gradient(circle, rgba(0,180,216,.25) 0%, transparent 70%);
@@ -132,6 +158,7 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       color: #00d4ff;
       text-transform: uppercase;
       margin: 0 0 14px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.5);
     }
 
     .merch-hero h1 {
@@ -142,13 +169,15 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       text-transform: uppercase;
       margin: 0 0 14px;
       line-height: 1.05;
+      text-shadow: 0 3px 24px rgba(0,0,0,.6);
     }
 
     .merch-hero-tagline {
-      color: rgba(255,255,255,.55);
+      color: rgba(255,255,255,.85);
       font-size: 1rem;
       margin: 0 0 42px;
       letter-spacing: .5px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.55);
     }
 
     /* Hero search bar */
@@ -438,12 +467,48 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
       line-height: 1.3;
     }
 
+    .merch-card-desc {
+      font-size: .8rem;
+      color: #6b7885;
+      line-height: 1.45;
+      margin: 8px 0 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     .merch-card-price {
       font-weight: 800;
       font-size: .95rem;
       color: #0077b6;
       margin: 8px 0 0;
       letter-spacing: .5px;
+    }
+
+    .merch-buy-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px 18px;
+      text-align: center;
+      background: linear-gradient(135deg, #0077b6, #00b4d8);
+      color: #fff;
+      font-weight: 800;
+      font-size: .78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 6px 18px rgba(0,119,182,.28);
+      transition: filter .2s, transform .2s;
+    }
+
+    .merch-buy-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+      color: #fff;
+      text-decoration: none;
     }
 
     /* â”€â”€ Empty state â”€â”€ */
@@ -505,6 +570,11 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
 
     <!-- â”€â”€ Hero Banner â”€â”€ -->
     <section class="merch-hero">
+      <video class="merch-hero-video" autoplay muted loop playsinline preload="auto"
+             poster="assets/img/kltgseo.jpg">
+        <source src="asset-backups/KL-merch.mp4" type="video/mp4">
+      </video>
+      <div class="merch-hero-video-overlay"></div>
       <div class="merch-hero-content">
         <p class="merch-hero-eyebrow">Official Store</p>
         <h1>Merchandise</h1>
@@ -585,9 +655,13 @@ foreach ($categories as $c) $cat_map[$c['id']] = $c['name'];
               <div class="merch-card-body">
                 <p class="merch-card-cat"><?php echo htmlspecialchars($cat_map[$p['cat']] ?? 'KL The Guide', ENT_QUOTES); ?></p>
                 <p class="merch-card-name"><?php echo htmlspecialchars($p['name'], ENT_QUOTES); ?></p>
+                <?php if (trim($p['desc']) !== ''): ?>
+                  <p class="merch-card-desc"><?php echo nl2br(htmlspecialchars($p['desc'], ENT_QUOTES)); ?></p>
+                <?php endif; ?>
                 <?php if ($p['price'] !== ''): ?>
                   <p class="merch-card-price"><?php echo htmlspecialchars($p['price'], ENT_QUOTES); ?></p>
                 <?php endif; ?>
+                <a class="merch-buy-btn" href="order.php?id=<?php echo (int)$p['id']; ?>">Buy Now</a>
               </div>
             </div>
           <?php endforeach; ?>

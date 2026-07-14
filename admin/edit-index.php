@@ -552,19 +552,25 @@ if (isset($_GET['logout'])) {
                                         <tbody>
                                             <?php
 
-                                            $query = "SELECT * FROM recommendation ";
+                                            $query = "SELECT * FROM recommendation ORDER BY recommendation_id DESC";
                                             $result = mysqli_query($db, $query);
                                             while ($row = mysqli_fetch_assoc($result)) {
 
+                                                $rname = urldecode($row['recommendation_name']);
 
                                                 echo '<tr>';
-                                                echo '<th id="order-' . $row['recommendation_id'] . '" scope="row">' . $row['recommendation_id'] . '</th>';
-                                                echo '<td id="name-' . $row['recommendation_id'] . '">' . urldecode($row['recommendation_name']) . '</td>';
-                                                echo '<td id="category-' . $row['recommendation_id'] . '">' . $row['recommendation_category'] . '</td>';
-                                                echo '<td id="postid-' . $row['recommendation_id'] . '">' . $row['recommendation_postid'] . '</td>';
+                                                echo '<th scope="row">' . htmlspecialchars($row['recommendation_id'], ENT_QUOTES) . '</th>';
+                                                echo '<td>' . htmlspecialchars($rname, ENT_QUOTES) . '</td>';
+                                                echo '<td>' . htmlspecialchars($row['recommendation_category'], ENT_QUOTES) . '</td>';
+                                                echo '<td>' . htmlspecialchars($row['recommendation_postid'], ENT_QUOTES) . '</td>';
 
                                                 echo '<td>
-                                                    <a href="#" class="" onclick="editmodal(' . $row['recommendation_id'] . ',\'' . $row['recommendation_name'] . '\');" id="modaledit"><i class="fas fa-pen"></i></a>
+                                                    <a href="#" class="modaledit-btn"
+                                                       data-id="' . htmlspecialchars($row['recommendation_id'], ENT_QUOTES) . '"
+                                                       data-name="' . htmlspecialchars($rname, ENT_QUOTES) . '"
+                                                       data-category="' . htmlspecialchars($row['recommendation_category'], ENT_QUOTES) . '"
+                                                       data-postid="' . htmlspecialchars($row['recommendation_postid'], ENT_QUOTES) . '"
+                                                       id="modaledit"><i class="fas fa-pen"></i></a>
 
                                                     </td>';
 
@@ -773,71 +779,40 @@ if (isset($_GET['logout'])) {
 
 
     <!-- Add New Recommendation Modal-->
-    <div class="modal fade" id="newrecommendation" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="newrecommendation" tabindex="-1" role="dialog" aria-labelledby="newRecommendLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">New</h5>
+                    <h5 class="modal-title" id="newRecommendLabel">Add Insider Suggestion</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <!-- <form action="edit-index.php" method="post" enctype="multipart/form-data"> -->
+                <form action="edit-index.php?addrecommend#recommendcard" method="post">
+                    <?= csrf_field() ?>
+                    <div class="modal-body">
 
-                <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newrecommendposturl" class="form-label">Blog Post Link or ID</label>
+                            <input class="form-control" id="newrecommendposturl" type="text" name="posturl"
+                                placeholder="e.g. https://kltheguide.com.my/blog-details.php?postid=123456" required>
+                            <small class="form-text text-muted">Paste the post's link from the Blog page, or just
+                                its Post ID. The title and image are pulled in automatically.</small>
+                        </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable3" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Post ID</th>
-                                    <th scope="col">
+                        <div class="mb-3">
+                            <label for="newrecommendcategory" class="form-label">Category</label>
+                            <input class="form-control" id="newrecommendcategory" type="text" name="category"
+                                placeholder="e.g. Food, Stay, Shop">
+                        </div>
 
-                                    </th>
-
-                                </tr>
-                            </thead>
-
-                            <tbody id="recommendationtable">
-
-                            </tbody>
-                        </table>
                     </div>
-
-                    <!-- <input class="form-control" id="exampleFormControlTextarea8" rows="3" name="id" hidden></input>
-                        <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" id="exampleFormControlTextarea4"
-                                class="form-label">File name</label>
-                            <input class="form-control" id="exampleFormControlTextarea3" rows="3"
-                                name="filename"></input>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" id="exampleFormControlTextarea4"
-                                class="form-label">Name</label>
-                            <input class="form-control" id="exampleFormControlTextarea1" rows="3" name="name"></input>
-                        </div>
-
-
-                        <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" class="form-label">Order</label>
-                            <input class="form-control" id="exampleFormControlTextarea2" rows="3" name="order"></input>
-                        </div> -->
-
-                </div>
-                <div class="modal-footer">
-                    <!-- <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="?logout=1">Logout</a> -->
-                    <!-- <button type="button" class="btn btn-danger " disabled>Delete</button> -->
-                    <!-- <input type="submit" class="btn btn-primary" value="Save Changes" name="editbanner"></input> -->
-                    <!-- <button class="btn btn-primary" type="submit" value="Upload Image" name="editbanner">Save
-                            Changes</button> -->
-
-                </div>
-                <!-- </form> -->
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit" name="saverecommendation">Add</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -845,47 +820,44 @@ if (isset($_GET['logout'])) {
 
 
     <!-- edit recommendation modal  -->
-    <div class="modal fade" id="editrecommend" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="editrecommend" tabindex="-1" role="dialog" aria-labelledby="editRecommendLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit Recommendation</h5>
+                    <h5 class="modal-title" id="editRecommendLabel">Edit Recommendation</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form action="edit-index.php?editrecommend" method="post" enctype="multipart/form-data">
+                <form action="edit-index.php?editrecommend" method="post">
+                    <?= csrf_field() ?>
 
                     <div class="modal-body">
 
                         <input class="form-control" id="hiddenid" name="hiddenid" hidden></input>
                         <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" id="exampleFormControlTextarea4"
-                                class="form-label">Name</label>
-                            <input class="form-control" id="recommendname" rows="3" name="recommendname"
-                                readonly></input>
+                            <label for="recommendname" class="form-label">Current Name</label>
+                            <input class="form-control" id="recommendname" readonly></input>
                         </div>
 
                         <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" id="exampleFormControlTextarea4"
-                                class="form-label">Category</label>
-                            <input class="form-control" id="recommendcategory" rows="3"
-                                name="recommendcategory"></input>
+                            <label for="recommendpostid" class="form-label">Blog Post Link or ID</label>
+                            <input class="form-control" id="recommendpostid" type="text" name="posturl"
+                                placeholder="Leave blank to keep the current post">
+                            <small class="form-text text-muted">Paste a new blog post link/ID to re-point this
+                                tile (also refreshes its title &amp; image). Leave blank to keep the current
+                                post.</small>
                         </div>
 
-
-                        <!-- <div class="mb-3">
-                            <label for="exampleFormControlTextarea1" class="form-label">Order</label>
-                            <input class="form-control" id="exampleFormControlTextarea2" rows="3" name="order"></input>
-                        </div> -->
+                        <div class="mb-3">
+                            <label for="recommendcategory" class="form-label">Category</label>
+                            <input class="form-control" id="recommendcategory" name="recommendcategory"></input>
+                        </div>
 
                     </div>
                     <div class="modal-footer">
-                        <!-- <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="?logout=1">Logout</a> -->
                         <button class="btn btn-danger" type="submit" name="deleterecommend">Delete</button>
-                        <!-- <input type="submit" class="btn btn-primary" value="Save Changes" name="editbanner"></input> -->
                         <button class="btn btn-primary" type="submit" name="editrecommend">Save
                             Changes</button>
 
@@ -929,7 +901,7 @@ if (isset($_GET['logout'])) {
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
     <!-- Page level custom scripts -->
-    <script src="js/editindex.js"></script>
+    <script src="js/editindex.js?v=20260707"></script>
     <script>document.getElementById("editnav").classList.add('active');</script>
     <!-- <script src="js/banner.js"></script> -->
     <?php include('errors2.php'); ?>

@@ -104,15 +104,15 @@ $update = mysqli_query($db, $query2);
 
   <link href="assets/vendor/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css" rel="stylesheet" type="text/css">
 
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
 
   <style>
     /* ── E-book reader frame ── */
     #ebook2 .section-header { padding-bottom: 22px; }
 
     #ebook2 .section-header h2 {
-      font-family: 'Dancing Script', cursive;
-      color: #e2231a;
+      font-family: 'Carter One', cursive;
+      color: #1520A6;
       font-weight: 700;
       font-size: clamp(2.6rem, 5.5vw, 4rem);
       line-height: 1.15;

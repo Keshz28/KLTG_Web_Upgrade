@@ -11,8 +11,22 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
+<?php
+/* DevPanel ad gate: when the visitor's IP is in devpanel_ad_block, skip the
+   AdSense loader entirely AND hide every ad slot site-wide via CSS (covers the
+   per-page <ins class="adsbygoogle"> blocks that load their own loader). For
+   everyone else, ads load exactly as before. $db comes from functions.php. */
+$kltg_hide_ads = (isset($db) && $db instanceof mysqli && function_exists('kltg_ads_hidden'))
+    ? kltg_ads_hidden($db)
+    : false;
+if (!$kltg_hide_ads):
+?>
 <script data-ad-client="ca-pub-3696733888071014" async
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<?php else: ?>
+<!-- Ads suppressed for this visitor (DevPanel ad block) -->
+<style>.adsbygoogle,ins.adsbygoogle{display:none!important;}</style>
+<?php endif; ?>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-E96H7RDVLW"></script>
