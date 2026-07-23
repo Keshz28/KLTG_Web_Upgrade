@@ -18,6 +18,8 @@
  *
  * Returns '' (no button) for rows whose title is just a bare domain — that's
  * how a small number of placeholder/junk rows show up.
+ *
+ * MEMO for the next dev — full file map is in PROJECT_GUIDE.md
  */
 if (!function_exists('viewOnMapButton')) {
   function viewOnMapButton($title, $address = '', $coords = '')

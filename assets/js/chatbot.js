@@ -123,15 +123,31 @@
     var bookCanvas = document.getElementById('kltg-book-canvas');
     if (bookCanvas) loadBookWithTransparentBg(BOT_AVATAR, bookCanvas);
 
-    // Build persistent quick-actions bar
+    // Build collapsible quick-actions bar (collapsed by default; hover/press to expand)
     var quickBar = document.getElementById('kltg-quick-actions-bar');
+
+    var quickToggle = document.createElement('div');
+    quickToggle.id = 'kltg-quick-actions-toggle';
+    quickToggle.innerHTML = '<span>✨ Quick topics</span><span class="kltg-quick-chevron" aria-hidden="true">▾</span>';
+    quickToggle.addEventListener('click', function () {
+        quickBar.classList.toggle('expanded');
+    });
+
+    var quickList = document.createElement('div');
+    quickList.id = 'kltg-quick-actions-list';
     QUICK_ACTIONS.forEach(function (a) {
         var b = document.createElement('button');
         b.className = 'kltg-quick-btn';
         b.textContent = a.label;
-        b.addEventListener('click', function () { sendMessage(a.msg); });
-        quickBar.appendChild(b);
+        b.addEventListener('click', function () {
+            sendMessage(a.msg);
+            quickBar.classList.remove('expanded');
+        });
+        quickList.appendChild(b);
     });
+
+    quickBar.appendChild(quickToggle);
+    quickBar.appendChild(quickList);
 
     // ── Element refs ─────────────────────────────────────────────
     var btn      = document.getElementById('kltg-chat-btn');

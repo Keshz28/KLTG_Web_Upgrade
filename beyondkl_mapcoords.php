@@ -11,6 +11,8 @@
  * (see git history / the resolve loop over beyondkl_i/hs/w/h/es locationurl).
  * Keyed by the trimmed, urldecoded title. Unknown titles fall back to a
  * title search in viewOnMapButton.
+ *
+ * MEMO for the next dev — full file map is in PROJECT_GUIDE.md
  */
 return [
   'Broga Hill, Semenyih' => '2.9482279,101.9016484',

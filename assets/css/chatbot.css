@@ -242,19 +242,59 @@
 #kltg-chat-messages::-webkit-scrollbar-track { background: transparent; }
 #kltg-chat-messages::-webkit-scrollbar-thumb { background: #cdd8e0; border-radius: 4px; }
 
-/* ── Persistent quick-actions bar ── */
+/* ── Collapsible quick-actions bar ── */
 #kltg-quick-actions-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 12px;
     background: #f0f7f9;
     border-top: 1px solid #dde8ec;
     border-bottom: 1px solid #dde8ec;
     flex-shrink: 0;
 }
 
-.kltg-quick-btn {  
+#kltg-quick-actions-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 7px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #0d6d80;
+    cursor: pointer;
+    user-select: none;
+    font-family: 'Poppins', sans-serif;
+}
+
+.kltg-quick-chevron {
+    font-size: 9px;
+    transition: transform 0.2s ease;
+}
+
+#kltg-quick-actions-bar.expanded .kltg-quick-chevron { transform: rotate(180deg); }
+
+#kltg-quick-actions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+}
+
+#kltg-quick-actions-bar.expanded #kltg-quick-actions-list {
+    max-height: 200px;
+    padding: 0 12px 10px;
+}
+
+/* Hover-to-preview on real pointer devices only (avoids sticky-hover on touch) */
+@media (hover: hover) and (pointer: fine) {
+    #kltg-quick-actions-bar:hover #kltg-quick-actions-list {
+        max-height: 200px;
+        padding: 0 12px 10px;
+    }
+}
+
+.kltg-quick-btn {
     background: #fff;
     border: 1.5px solid #0ea2bd;
     color: #0ea2bd;

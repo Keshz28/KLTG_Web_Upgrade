@@ -1,4 +1,28 @@
 <?php
+/* ============================================================================
+ *                              verify-email.php
+ *
+ *   Landing page for the newsletter confirmation link (/verify-email.php?token=…).
+ *
+ *   Takes the 64-char hex token from the email, looks it up in `emailsub`, and:
+ *     - bad / missing / expired token  -> friendly error card, nothing changes
+ *     - already verified               -> "already confirmed" card
+ *     - good token                     -> sets verified = 1, clears the token,
+ *                                         sends the welcome email, shows success
+ *
+ *   The welcome email uses the row in `email_templates` where
+ *   is_active_subscribe = 1 (editable in the admin panel); if no template is
+ *   active it falls back to the plain HTML hard-coded further down.
+ *
+ *   NOTE: the newsletter is currently SINGLE opt-in — functions.php sets
+ *   verified = 1 at signup — so this page is mostly a legacy/back-up path for
+ *   links that were already sent out. Don't delete it while old emails are live.
+ *
+ *   Every response is rendered by the verifyPage() helper below (self-contained
+ *   HTML card — it does not use header.php / nav.php / footer.php).
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 require_once __DIR__ . '/admin/functions.php';
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);

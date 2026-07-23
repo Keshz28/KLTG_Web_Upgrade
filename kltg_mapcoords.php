@@ -9,6 +9,10 @@
  * several rows are in Selangor/PJ/Subang).
  *
  * Keyed by trimmed, urldecoded title. To regenerate, re-run the resolver loop.
+ * Adding a new venue to one of those pages? Add its title => "lat,lng" here too,
+ * or the button silently degrades to a name search.
+ *
+ * MEMO for the next dev — full file map is in PROJECT_GUIDE.md
  */
 return [
   '1000 Miles Hotel' => '3.1490616,101.6979285',

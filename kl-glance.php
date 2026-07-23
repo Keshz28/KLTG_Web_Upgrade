@@ -288,7 +288,9 @@ if ($klag_result) {
     .klag-intro-kl {
       display: block;
       font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
-      font-size: clamp(4.5rem, 18vw, 12rem);
+      /* vmin (not vw) so the size backs off on short-but-wide laptop
+         screens too, not just narrow ones */
+      font-size: clamp(3.2rem, 13vmin, 8.5rem);
       font-weight: 900;
       color: #fff;
       line-height: .88;
@@ -296,18 +298,18 @@ if ($klag_result) {
     }
     .klag-intro-sub {
       display: block;
-      font-size: clamp(1rem, 3vw, 1.75rem);
+      font-size: clamp(.9rem, 2.6vmin, 1.5rem);
       font-weight: 700;
       letter-spacing: .22em;
       text-transform: uppercase;
       color: var(--klag-accent);
-      margin: 10px 0 28px;
+      margin: 8px 0 22px;
     }
     .klag-intro-desc {
       max-width: 500px;
-      margin: 0 auto 38px;
-      font-size: clamp(.88rem, 1.5vw, 1.02rem);
-      line-height: 1.68;
+      margin: 0 auto 28px;
+      font-size: clamp(.85rem, 1.4vmin, .98rem);
+      line-height: 1.6;
       color: rgba(255,255,255,.96);
     }
 
@@ -380,6 +382,15 @@ if ($klag_result) {
     @media (max-width: 480px) {
       :root { --klag-tabs: 76px; }
       .klag-tab__label { font-size: 10.5px; letter-spacing: 0; }
+    }
+
+    /* Small-laptop screens (short viewport height, e.g. 1366x768 with
+       browser chrome) — the intro text is vmin-based already, this just
+       reclaims a bit more vertical room so nothing gets clipped. */
+    @media (max-height: 760px) {
+      :root { --klag-tabs: 96px; }
+      .klag-intro-desc { margin-bottom: 18px; }
+      .klag-scroll-hint__line { height: 24px; }
     }
   </style>
 </head>

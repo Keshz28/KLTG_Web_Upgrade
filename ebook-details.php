@@ -108,20 +108,26 @@ $update = mysqli_query($db, $query2);
 
   <style>
     /* ── E-book reader frame ── */
-    #ebook2 .section-header { padding-bottom: 22px; }
+    #ebook2 .section-header { padding-bottom: 10px; }
 
     #ebook2 .section-header h2 {
       font-family: 'Carter One', cursive;
       color: #1520A6;
       font-weight: 700;
-      font-size: clamp(2.6rem, 5.5vw, 4rem);
+      font-size: clamp(2.2rem, 4.5vw, 3.2rem);
       line-height: 1.15;
+      margin-bottom: 0;
     }
 
+    /* The flipbook scales to fit its frame, so the frame height decides how big
+       the pages render. DearFlip also clamps its own container to the window
+       height, so the frame must never be taller than the viewport or the excess
+       shows up as empty white. sizeEbookReader() below sets the exact px height;
+       these values are only the pre-JS fallback. */
     #ebookReader {
-      height: 82vh;
-      min-height: 520px;
-      max-width: 1100px;
+      height: calc(100vh - 190px);
+      min-height: 360px;
+      max-width: 1400px;
       margin: 0 auto;
       border-radius: 12px;
       overflow: hidden;
@@ -130,11 +136,7 @@ $update = mysqli_query($db, $query2);
     #ebookReader .ebookdetails { height: 100%; }
 
     @media (max-width: 768px) {
-      #ebookReader {
-        height: 72vh;
-        min-height: 420px;
-        border-radius: 8px;
-      }
+      #ebookReader { border-radius: 8px; }
     }
   </style>
 
@@ -148,7 +150,7 @@ $update = mysqli_query($db, $query2);
   <main id="ebook2">
 
     <!-- ======= Reader Section ======= -->
-    <section id="team" class="team" style="margin-top:76px;">
+    <section id="team" class="team" style="margin-top:76px; padding-top:14px; padding-bottom:10px;">
       <div class="container" data-aos="fade-up">
 
         <div class="section-header" id="tes5">
@@ -161,8 +163,28 @@ $update = mysqli_query($db, $query2);
           <div class="_df_book ebookdetails"
             source="assets/pdf/ebook/<?php echo $ebook_category ?>/<?php echo $ebook_filename ?>"
             backgroundcolor="#f2f3f5"
-            paddingtop="16" paddingbottom="16" paddingleft="12" paddingright="12"></div>
+            paddingtop="8" paddingbottom="8" paddingleft="8" paddingright="8"></div>
         </div>
+
+        <script>
+          /* Page auto-scrolls to #team on load, so the reader gets the viewport
+             minus the title block above it. Must stay under window.innerHeight:
+             DearFlip caps its book container at the window height, and anything
+             taller than that cap renders as empty white inside the frame. */
+          (function () {
+            function sizeEbookReader() {
+              var reader = document.getElementById('ebookReader');
+              if (!reader) return;
+              var header = document.querySelector('#ebook2 .section-header');
+              var used = (header ? header.offsetHeight : 0) + 14 /* section padding-top */ + 16 /* breathing room */;
+              reader.style.height = Math.max(360, window.innerHeight - used) + 'px';
+            }
+            sizeEbookReader();
+            window.addEventListener('resize', sizeEbookReader);
+            window.addEventListener('orientationchange', sizeEbookReader);
+            window.addEventListener('load', sizeEbookReader);
+          })();
+        </script>
 
       </div>
     </section><!-- End Reader Section -->

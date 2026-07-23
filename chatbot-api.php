@@ -1,5 +1,25 @@
 <?php
-/* chatbot-api.php — Gemini API proxy for KL Travel Concierge chatbot */
+/* ============================================================================
+ *                              chatbot-api.php
+ *
+ *   Server-side proxy for the "KL Travel Concierge" chatbot bubble
+ *   (assets/js/chatbot.js posts here; the reply is rendered in the widget).
+ *
+ *   Flow: POST {message, history[]} -> Google Gemini (gemini-2.5-flash)
+ *         -> JSON {reply} back to the browser.
+ *
+ *   It exists so the GEMINI_API_KEY never reaches the browser. The key is read
+ *   straight out of the root .env with a small hand-rolled parser — this file
+ *   deliberately does NOT include admin/functions.php, to skip the DB + session
+ *   overhead on every chat message. If the key is missing, every call 500s.
+ *
+ *   What you'd change here: the $systemInstruction block below is the bot's
+ *   whole personality and its list of linkable site pages — edit that to change
+ *   how it answers or which pages it recommends. Chat history is capped to the
+ *   last 20 turns to stay inside the token budget.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md
+ * ============================================================================ */
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

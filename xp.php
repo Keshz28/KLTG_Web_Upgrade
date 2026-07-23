@@ -18,6 +18,9 @@
  *   Headline feature for this site: "Ads" tab hides ALL advertisements for a
  *   specific visitor IP (everyone else still sees ads). See header.php +
  *   kltg_ads_hidden() in admin/functions.php.
+ *
+ *   MEMO for the next dev — full file map is in PROJECT_GUIDE.md; longer write-up
+ *   in DEVPANEL.md.
  * ============================================================================ */
 
 require __DIR__ . '/admin/functions.php'; // gives $db, envv(), session, helpers

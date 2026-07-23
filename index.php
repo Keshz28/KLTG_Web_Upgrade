@@ -774,7 +774,7 @@ while ($row = mysqli_fetch_assoc($result)) {
       height: 100vh !important;
       min-height: 600px !important;
       align-items: center !important;
-      padding: 80px 16px 50px !important;
+      padding: 40px 16px 50px !important;
     }
 
     /* Video and overlay fill the full section */
@@ -802,7 +802,7 @@ while ($row = mysqli_fetch_assoc($result)) {
       #hero-animated.home-video-hero {
         height: 100vh !important;
         min-height: 560px !important;
-        padding: 70px 14px 50px !important;
+        padding: 40px 14px 50px !important;
         align-items: center !important;
       }
     }
@@ -886,7 +886,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     }
 
     #hero-animated.home-video-hero .inputemailsub::placeholder {
-      color: rgba(255, 255, 255, 0.52) !important;
+      color: #ffffff !important;
+      opacity: 1 !important;
     }
 
     #hero-animated.home-video-hero .inputemailsub:focus {
@@ -1027,7 +1028,13 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <span class="home-video-hero__title-accent"><?php echo $hero_title2 ?></span>
               </h1>
               <p>
-                <?php echo $hero_subtitle ?>
+                <?php
+                  $hero_subtitle_lines = preg_split('/(?<=\.)\s+/', trim($hero_subtitle), 2);
+                  echo $hero_subtitle_lines[0];
+                  if (isset($hero_subtitle_lines[1])) {
+                    echo '<br>' . $hero_subtitle_lines[1];
+                  }
+                ?>
               </p>
 
               <form id="subscribeForm" method="post" class="home-video-hero__form">
@@ -1233,7 +1240,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
           <div class="recos-panel" data-index="4">
             <a href="medical-tourism.php#medicaltourism" aria-label="<?php echo strip_tags($tile2_title5) ?>">
-              <img src="assets/img/recommendation/MedicalTourism.jpg"
+              <img src="assets/img/recommendation/MedicalTourism2.png"
                 alt="Medical Tourism" loading="lazy" draggable="false">
               <span class="recos-panel__label"><?php echo $tile2_title5 ?></span>
             </a>

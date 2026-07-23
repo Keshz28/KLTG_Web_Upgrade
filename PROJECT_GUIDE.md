@@ -34,8 +34,11 @@ the order you must do things in.
 2. **Syntax-check PHP before you trust it:**
    `"d:/xampp/php/php.exe" -l somefile.php` (should print *"No syntax errors detected"*).
 3. **The local database is MySQL via XAMPP.** Manage it through **phpMyAdmin**
-   (`http://localhost/phpmyadmin`). The local DB name is **`bluedale2_kltg`**. Schema changes
-   are applied **by hand** (run the `.sql` file in phpMyAdmin) — there is no migration tool.
+   (`http://localhost/phpmyadmin`). The DB actually being served locally is
+   **`kltheguidecom_bluedale2_kltg`** — that's what the root `.env` (`DB_NAME`) points at, and it
+   is the same name used in production. ⚠️ A stale near-duplicate DB called `bluedale2_kltg` also
+   exists in local phpMyAdmin; **it is not the live one** — editing it changes nothing. Schema
+   changes are applied **by hand** (run the `.sql` file in phpMyAdmin) — there is no migration tool.
 4. **Commit to git** once it works locally (single `main` branch).
 5. **Push live via cPanel.** The repository *is* the whole site — there is no separate build
    artifact for the public site. Deploy the files through cPanel; the live MySQL database is
@@ -115,20 +118,22 @@ if (!isset($_SESSION['username'])) {       // ← auth gate, redirects to login.
 | `spa.php` | Spa & wellness listings. Same map-helper pattern. |
 | `where-to-shop.php` | Shopping listings. Same map-helper pattern. |
 | `medical-tourism.php` | Medical tourism listings. Same map-helper pattern. |
-| `merchandise.php` | Merchandise / store items. |
+| `merchandise.php` | **Store front.** Merchandise items by category. The "Buy Now" button hands off to `order.php`. |
+| `order.php` | **Checkout page.** Shows the payment QR, takes buyer details + a **required** payment-receipt upload, writes the row into `merchandise_orders`, then hands the customer to WhatsApp via a `wa.me` link. Admin side: the Orders card in `admin/edit-merchandise.php`. |
 | `beyondkl.php` | "Beyond KL" day-trip destinations. Uses `beyondkl_mapcoords.php` (its own inline map button). |
 | `explorekl.php` | "Explore KL" attractions. Has its own inline map button. |
 | `event.php` | Events listing. |
+| `event-details.php` | Single event page (linked from the events listing). |
 | `kl-glance.php` | "KL at a Glance" landmark slides. CMS-managed via the `klglance` table (editor: `admin/edit-klglance.php`). |
 | `getting-around-kl.php` | Transport / getting-around guide. |
 | `travel-tips.php` | Travel tips. |
 | `map.php` | Interactive map page. Target of every "View on Map" deep-link button. |
 | `blog.php` | **Blog listing.** Renders via `assets/js/blog2.js`, which fetches from `fetch_blogger.php`. |
 | `blog-details.php` | **Single blog article.** Renders via `assets/js/blog-details.js`. Linked from the blog listing + sitemap. |
-| `ebook.php` | E-book listing. Links to `ebook-details.php`. |
+| `ebook.php` | E-book listing. Category tabs come from the `ebook_category` table (managed in `admin/edit-ebook.php`). Links to `ebook-details.php`. |
 | `ebook-details.php` | Single e-book (DearFlip flipbook viewer). |
 | `lpage.php` | Standalone **landing-page contact form** (uses `assets/css/lpage.css`). Admin side: `admin/landing-page.php`. |
-| `verify-email.php` | **Email-verification handler.** Validates the token from a verification link and renders a status card. Uses `brand_name()` / `app_base_url()` helpers from `functions.php`. |
+| `verify-email.php` | **Email-verification handler.** Validates the token from a confirmation link, flips `verified = 1` in `emailsub`, and sends the welcome email. ⚠️ The newsletter is now **single opt-in** (`functions.php` sets `verified = 1` at signup), so this page is a legacy/back-up path for links already sitting in people's inboxes — don't delete it while those are live. |
 
 ### 2b. Shared includes (chrome — not opened directly)
 
@@ -147,6 +152,8 @@ if (!isset($_SESSION['username'])) {       // ← auth gate, redirects to login.
 | `view_on_map_helper.php` | Defines `viewOnMapButton()` — renders the shared "View on Map" button for medical-tourism / where-to-shop / spa / accommodation. Pins by exact coords when available, else falls back to a Google search anchored to *Malaysia*. |
 | `kltg_mapcoords.php` | **Generated** `title => "lat,lng"` lookup for medical-tourism / shop / spa / accommodation. Returns a PHP array. Regenerate via the resolver loop (see git history). |
 | `beyondkl_mapcoords.php` | **Generated** `title => "lat,lng"` lookup for Beyond KL places. Same idea, separate dataset. |
+| `chatbot-api.php` | **Gemini proxy for the "KL Travel Concierge" chat bubble.** `assets/js/chatbot.js` POSTs `{message, history}` here; this forwards to Google Gemini and returns the reply. Exists so `GEMINI_API_KEY` never reaches the browser. Reads `.env` directly and deliberately **does not** include `admin/functions.php` (no DB/session cost per message). The bot's personality + its list of linkable pages is the `$systemInstruction` string inside. |
+| `ebook-track-download.php` | Records an e-book download (fired from the e-book pages; feeds the download stats). |
 
 ### 2d. SEO / PWA / config (don't casually edit)
 
@@ -160,15 +167,26 @@ if (!isset($_SESSION['username'])) {       // ← auth gate, redirects to login.
 | `serviceWorker.js` | PWA service worker: precaches core assets on install and handles web-push notification display/clicks. (Note: it has **no `fetch` handler**, so it warms a cache but does not serve pages offline.) |
 | `.htaccess` | Apache config — **cPanel-generated** PHP directives, caching headers, and a trailing-slash redirect. Edit via cPanel MultiPHP INI Editor, not by hand. |
 | `php.ini` / `.user.ini` | **cPanel-generated** PHP runtime settings for production. Inert on local XAMPP. Leave as-is. |
-| `db_migration_email_verification.sql` | One-time schema migration (applied by hand in phpMyAdmin / MySQL CLI). Kept as a record. |
+| `db_migration_*.sql`, `db_cleanup_*.sql`, `*_export.sql` | **Hand-applied schema changes** — there is no migration tool, so each one is a `.sql` file you run yourself in phpMyAdmin, on **both** local and live DBs. Current set: `email_verification`, `email_dedupe`, `ebook_category`, `ebook_download`, `merchandise`, `merchandise_orders`, `recommendation_pk`, `devpanel`, plus `db_cleanup_bot_subscribers.sql` (purges bot signups) and the `klglance` exports. They are kept as a record of what has been applied — **check whether a given one is already live before re-running it.** |
 
 ### 2e. Utility / misc
 
 | File | What it does |
 |------|--------------|
 | `500.php` | A custom HTTP 500 error page (static HTML). Not wired to `.htaccess` `ErrorDocument` currently. |
-| `info.php` | **⚠️ Just `phpinfo()`.** See Security flags (§6) — should be removed/blocked before going live. |
+| `xp.php` | **🔒 Hidden Dev Panel / system console.** Lives *outside* the normal `admin/` CMS: its own URL, its own auth (the single `DEV_MASTER_KEY` from `.env`, not a user login), its own API. Without a valid key **every request returns a fake 404** — the panel is invisible, not merely locked; if the key is unset, nobody can get in at all. Its headline feature is the **Ads** tab, which hides all ads for one visitor IP (via the `devpanel_ad_block` table + a gate in `header.php`). Full write-up: `DEVPANEL.md`. |
 | `gantt_website_redesign.html` | A standalone project-planning Gantt chart. **Not part of the running site** — internal planning doc. |
+
+### 2f. The other docs in this repo
+
+| File | What it does |
+|------|--------------|
+| `CLAUDE.md` | Architecture + build/run/deploy conventions. This guide's companion. |
+| `DEVPANEL.md` | Full documentation of `xp.php` (the hidden dev panel). |
+| `APP_API_REFERENCE.md` | API reference for the companion mobile app. |
+| `INFINITYFREE_DEPLOYMENT_GUIDE.md` | Notes from a trial deployment on InfinityFree hosting. Live hosting is **cPanel** — treat this as historical. |
+| `QA_TEST_PLAN.md`, `TEST_PLAN.md`, `testing-log.md` | Manual QA checklists / test log. There is **no automated test suite**. |
+| `admin security.md` | Notes on admin-panel security. |
 
 ---
 
@@ -210,10 +228,11 @@ followed by the session guard that bounces you to `login.php` if not logged in.
 | `admin/edit-beyondkl.php` | Beyond KL. |
 | `admin/edit-explorekl.php` | Explore KL. |
 | `admin/edit-event.php` | Events. |
-| `admin/edit-klglance.php` | KL at a Glance (`klglance` table). |
+| `admin/edit-klglance.php` | KL at a Glance (`klglance` table). ⚠️ Unlike the other editors this one stores **raw text**, not `htmlspecialchars`-escaped text. |
 | `admin/edit-highlights.php` | Highlights section. |
 | `admin/edit-blog.php` | Blog metadata/content. |
-| `admin/edit-ebook.php` | E-books. |
+| `admin/edit-ebook.php` | E-books **and e-book categories** — the "E-book Categories" card is full CRUD over the `ebook_category` table. A category's **code is the folder name** on disk, so renaming a code means moving files. |
+| `admin/edit-merchandise.php` | **The whole store, in one page.** Four cards: **Store Settings** (payment QR, WhatsApp number), **Categories**, **Products**, and **Orders** (every row from `merchandise_orders`, newest first, with the customer's uploaded payment receipt). This is where you go to look at what someone actually bought via `order.php`. |
 | `admin/edit-advertisement.php` | Advertisements (paired with `track_ad_click.php`). |
 | `admin/edit-voucher.php` | Vouchers. |
 | `admin/landing-page.php` | The `lpage.php` landing page. |
@@ -244,8 +263,11 @@ followed by the session guard that bounces you to `login.php` if not logged in.
 
 | File | What it does |
 |------|--------------|
-| `admin/vapid.php` | **⚠️ One-time utility** that generates a VAPID keypair for web push. Prints the keys (including the **private** key) to the browser. See Security flags (§6). |
 | `admin/cron2.php`, `cron3.php`, `cron4.php` | Cron entry points. Each simply cURLs `functions.php` with `testqueue` to **drain the email/push queue**. There is no real job runner — these are the queue tick. |
+
+> The old `admin/vapid.php` (a one-time helper that printed the web-push **private** key to the
+> browser) has been **deleted** in the pre-launch cleanup. The VAPID keys now live in `.env`; if you
+> ever need to regenerate them, do it from the CLI — don't re-add a page that prints a private key.
 
 ### 3g. Ads
 
@@ -288,7 +310,10 @@ followed by the session guard that bounces you to `login.php` if not logged in.
 | Touch the blog data pipeline | `fetch_blogger.php` (+ `cache/`), `assets/js/blog2.js`, `assets/js/blog-details.js` |
 | Add/fix a "View on Map" button | `view_on_map_helper.php`, `kltg_mapcoords.php`, `beyondkl_mapcoords.php` |
 | Work on emails | `admin/emailcampaign.php`, `admin/sendemail.php`, `admin/welcomeemail.php`, `admin/email/` |
-| Work on web push | `admin/functions.php` (WebPush wiring), `serviceWorker.js`, `admin/vapid.php` (keys) |
+| Work on web push | `admin/functions.php` (WebPush wiring), `serviceWorker.js`, VAPID keys in `.env` |
+| Change what the chatbot says / links to | `chatbot-api.php` (the `$systemInstruction` string) + `assets/js/chatbot.js` for the widget itself |
+| See customer orders / change the payment QR | `admin/edit-merchandise.php` (Orders + Store Settings cards) |
+| Get into the hidden dev panel | `/xp.php` with the `DEV_MASTER_KEY` from `.env` (see `DEVPANEL.md`) |
 | Drain the email/push queue manually | hit `admin/cron2.php` (or `cron3`/`cron4`) |
 | Apply a schema change | write a `.sql` file and run it by hand (see `db_migration_email_verification.sql`) |
 
@@ -306,18 +331,28 @@ Full details live in `CLAUDE.md`. In short:
 
 ## 6. ⚠️ Security flags to resolve before / during a live push
 
-These are safe locally but risky on the public server. Address them when deploying via cPanel:
+These are safe locally but risky on the public server. Address them when deploying via cPanel.
 
-1. **`info.php`** — exposes full `phpinfo()` (PHP version, paths, modules, env). Remove it, or
-   block it, before go-live. It's a standard recon target.
-2. **`admin/vapid.php`** — outputs the web-push **private key** in plaintext to the browser.
-   It's a one-time key-generation helper; it should **not** be reachable on production. Remove
-   it or move it out of the web root after keys are generated.
-3. **API key in `fetch_blogger.php`** — the Google Blogger API key is hard-coded. It's a public
-   read key, but consider restricting it (HTTP-referrer lock in Google Cloud) so it can't be
-   reused elsewhere.
-4. **Scratch pages** (`admin/test.php`, `admin/contest.php`, `admin/test2/`) — clean these out
-   of production; they're not gated like the rest of the admin panel.
+**Still open:**
+
+1. **🔴 Leaked credentials in git history.** The production DB password, SMTP password, and
+   `DEV_MASTER_KEY` were committed to the **public** GitHub repo. `.env` has since been untracked,
+   but **the old commits still contain the secrets and the credentials have NOT been rotated yet.**
+   Untracking a file does not remove it from history. Rotate every secret in `.env` — this is the
+   most urgent item on this page.
+2. **API key in `fetch_blogger.php`** — the Google Blogger API key is hard-coded. It's a public
+   read key, but restrict it (HTTP-referrer lock in Google Cloud) so it can't be reused elsewhere.
+3. **Scratch pages** (`admin/test.php`, `admin/contest.php`, `admin/test2/`) — still present, and
+   **not gated** like the rest of the admin panel. Delete them before go-live.
+4. **`GEMINI_API_KEY`** — lives in `.env` and is only ever used server-side by `chatbot-api.php`.
+   Keep it that way; never move the Gemini call into front-end JavaScript. Note `chatbot-api.php`
+   has **no rate limiting**, so a scraper could burn your Gemini quota — worth adding a throttle.
+
+**Resolved (kept here so nobody re-introduces them):**
+
+- ~~`info.php`~~ — the `phpinfo()` page has been **deleted**. Don't add it back on a live server.
+- ~~`admin/vapid.php`~~ — the helper that printed the web-push **private key** to the browser has
+  been **deleted**. Keys live in `.env` now.
 
 ---
 
