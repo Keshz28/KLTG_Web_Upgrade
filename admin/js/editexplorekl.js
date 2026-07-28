@@ -1,6 +1,33 @@
 function removeHttp(url) {
   return url.replace(/^https?:\/\//, "");
 }
+
+/* Fill the "current image" thumbnail in an edit modal, and clear any file the
+   user picked the last time it was open (a file input keeps its selection,
+   which would otherwise silently re-upload it on the next save). */
+function setEditImagePreview(previewId, folder, filename, fileInputId) {
+  var img = document.getElementById(previewId);
+  if (img) {
+    var name = (filename || "").trim();
+    if (name) {
+      img.src = folder + name;
+      img.classList.remove("d-none");
+    } else {
+      img.removeAttribute("src");
+      img.classList.add("d-none");
+    }
+  }
+  var fileInput = document.getElementById(fileInputId);
+  if (fileInput) fileInput.value = "";
+}
+
+/* Copy a row's map-coordinates cell into the modal field. */
+function setEditMapCoords(fieldId, cellId) {
+  var field = document.getElementById(fieldId);
+  if (!field) return;
+  var cell = document.getElementById(cellId);
+  field.value = cell ? cell.innerText.trim() : "";
+}
 function editmodalwtd(id) {
   // console.log("test");
   // console.log(id);
@@ -34,6 +61,8 @@ function editmodalwtd(id) {
   // formhours.value = hours;
   // formphone.value = phone;
   formname.value = name;
+  setEditImagePreview("previeweklwtd", "../assets/img/explorekl/wtd/", imagename, "fileToUploadeklwtdedit");
+  setEditMapCoords("mapcoordseklwtd", "mapcoordseklwtd-" + id);
   $("#editwtdmodal").modal("show");
 }
 
@@ -74,6 +103,8 @@ function editmodaleklhs(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklhs", "../assets/img/explorekl/hs/", imagename, "fileToUploadeklhsedit");
+  setEditMapCoords("mapcoordseklhs", "mapcoordseklhs-" + id);
   $("#editeklhsmodal").modal("show");
 }
 
@@ -113,6 +144,8 @@ function editmodaleklkl4k(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklkl4k", "../assets/img/explorekl/kl4k/", imagename, "fileToUploadeklkl4kedit");
+  setEditMapCoords("mapcoordseklkl4k", "mapcoordseklkl4k-" + id);
   $("#editeklkl4kmodal").modal("show");
 }
 
@@ -154,6 +187,8 @@ function editmodaleklp(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklp", "../assets/img/explorekl/p/", imagename, "fileToUploadeklpedit");
+  setEditMapCoords("mapcoordseklp", "mapcoordseklp-" + id);
   $("#editeklpmodal").modal("show");
 }
 
@@ -199,6 +234,8 @@ function editmodaleklpwor(id) {
   formorder.value = order;
   formname.value = name;
   formcategory.value = category;
+  setEditImagePreview("previeweklpwor", "../assets/img/explorekl/pwor/", imagename, "fileToUploadeklpworedit");
+  setEditMapCoords("mapcoordseklpwor", "mapcoordseklpwor-" + id);
   $("#editeklpwormodal").modal("show");
 }
 
@@ -241,6 +278,8 @@ function editmodaleklnl(id) {
   formorder.value = order;
   formname.value = name;
   formcategory.value = category;
+  setEditImagePreview("previeweklnl", "../assets/img/explorekl/nl/", imagename, "fileToUploadeklnledit");
+  setEditMapCoords("mapcoordseklnl", "mapcoordseklnl-" + id);
   $("#editeklnlmodal").modal("show");
 }
 
@@ -283,6 +322,8 @@ function editmodaleklss(id) {
   formorder.value = order;
   formname.value = name;
   formcategory.value = category;
+  setEditImagePreview("previeweklss", "../assets/img/explorekl/ss/", imagename, "fileToUploadeklssedit");
+  setEditMapCoords("mapcoordseklss", "mapcoordseklss-" + id);
   $("#editeklssmodal").modal("show");
 }
 
@@ -327,6 +368,8 @@ function editmodaleklwtesf(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklwtesf", "../assets/img/explorekl/wte/sf/", imagename, "fileToUploadeklwtesfedit");
+  setEditMapCoords("mapcoordseklwtesf", "mapcoordseklwtesf-" + id);
   $("#editeklwtesfmodal").modal("show");
 }
 
@@ -371,6 +414,8 @@ function editmodaleklwtec(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklwtec", "../assets/img/explorekl/wte/c/", imagename, "fileToUploadeklwtecedit");
+  setEditMapCoords("mapcoordseklwtec", "mapcoordseklwtec-" + id);
   $("#editeklwtecmodal").modal("show");
 }
 
@@ -418,24 +463,19 @@ function editmodaleklwter(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previeweklwter", "../assets/img/explorekl/wte/r/", imagename, "fileToUploadeklwteredit");
+  setEditMapCoords("mapcoordseklwter", "mapcoordseklwter-" + id);
   $("#editeklwtermodal").modal("show");
 }
 
-var toastbody = document.getElementById("toast-body");
-$("#toast11").hide();
+/* Bootstrap 4 has no global `bootstrap` object (that is Bootstrap 5), so the old
+   `new bootstrap.Toast(...)` threw a ReferenceError on every save and the admin
+   never saw a success/failure toast. errors2.php calls this, so use the BS4
+   jQuery plugin instead. */
 function toastupdate(body) {
-  console.log("test");
-
-  const toastLiveExample = document.getElementById("liveToast");
-
-  const toast = new bootstrap.Toast(toastLiveExample);
-
   var toastbody = document.getElementById("toast-body");
-  toastbody.innerHTML = body;
-  $(".toast").toast("show");
-  $("#toast11").toast("show");
-
-  toast.show();
+  if (toastbody) toastbody.innerHTML = body;
+  $("#liveToast").toast("show");
 }
 
 

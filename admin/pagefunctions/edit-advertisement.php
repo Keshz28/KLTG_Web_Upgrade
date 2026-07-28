@@ -9,11 +9,21 @@ if (isset($_POST['add_advertisement'])) {
     $filename = uploadimage($_FILES['ad_image'], 'advertisement', '');
 
     if ($filename) {
+        // NOTE: functions.php sets mysqli_report(MYSQLI_REPORT_OFF), so a failed
+        // query returns false silently. Check the return so a missing table or
+        // permission problem surfaces instead of showing a false "success".
         $query = "INSERT INTO advertisement (image, link_url, is_active) VALUES ('$filename', '$link_url', 0)";
-        mysqli_query($db, $query);
-        array_push($errors2, "Advertisement added successfully.");
+        if (mysqli_query($db, $query)) {
+            array_push($errors2, "Advertisement added successfully.");
+        } else {
+            // Roll back the uploaded file so it doesn't orphan on disk.
+            $orphan = '../assets/img/advertisement/' . $filename;
+            if (is_file($orphan)) unlink($orphan);
+            array_push($errors, "Database error saving the advertisement: " . mysqli_error($db) .
+                " (if this says the 'advertisement' table is missing, run admin/advertisement_migration.sql on the live database).");
+        }
     } else {
-        array_push($errors, "Image upload failed. Use JPG/PNG/GIF/WEBP under 5 MB.");
+        array_push($errors, "Image upload failed. Use JPG/PNG/GIF/WEBP under 5 MB, and make sure a file with the same name wasn't already uploaded.");
     }
 }
 

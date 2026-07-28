@@ -202,7 +202,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['accommodation_top_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['accommodation_top_title']), urldecode($row['accommodation_top_location']), $kltg_coords[trim(urldecode($row['accommodation_top_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['accommodation_top_title']), urldecode($row['accommodation_top_location']), $row['accommodation_top_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['accommodation_top_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['accommodation_top_hours']) { ?>
@@ -277,7 +277,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h5 class="card-title">' . urldecode($row['accommodation_h_title']) . '</h5>';
                 if ($row['accommodation_h_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_h_locationurl'] . '">' . urldecode($row['accommodation_h_location']) . '</a></p>';
-                  echo viewOnMapButton(urldecode($row['accommodation_h_title']), urldecode($row['accommodation_h_location']), $kltg_coords[trim(urldecode($row['accommodation_h_title']))] ?? '');
+                  echo viewOnMapButton(urldecode($row['accommodation_h_title']), urldecode($row['accommodation_h_location']), $row['accommodation_h_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['accommodation_h_title']))] ?? '');
                 }
                 if ($row['accommodation_h_hours']) {
                   echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_h_hours']) . '</p>';
@@ -327,7 +327,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h4 class="card-title"><strong>' . urldecode($row['accommodation_bh_title']) . '</strong></h4>';
                 if ($row['accommodation_bh_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_bh_locationurl'] . '">' . urldecode($row['accommodation_bh_location']) . '</a></p>';
-                  echo viewOnMapButton(urldecode($row['accommodation_bh_title']), urldecode($row['accommodation_bh_location']), $kltg_coords[trim(urldecode($row['accommodation_bh_title']))] ?? '');
+                  echo viewOnMapButton(urldecode($row['accommodation_bh_title']), urldecode($row['accommodation_bh_location']), $row['accommodation_bh_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['accommodation_bh_title']))] ?? '');
                 }
                 if ($row['accommodation_bh_hours']) {
                   echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bh_hours']) . '</p>';
@@ -387,7 +387,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 echo '          <h4 class="card-title"><strong>' . urldecode($row['accommodation_bks_title']) . '</strong></h4>';
                 if ($row['accommodation_bks_location']) {
                   echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['accommodation_bks_locationurl'] . '">' . urldecode($row['accommodation_bks_location']) . '</a></p>';
-                  echo viewOnMapButton(urldecode($row['accommodation_bks_title']), urldecode($row['accommodation_bks_location']), $kltg_coords[trim(urldecode($row['accommodation_bks_title']))] ?? '');
+                  echo viewOnMapButton(urldecode($row['accommodation_bks_title']), urldecode($row['accommodation_bks_location']), $row['accommodation_bks_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['accommodation_bks_title']))] ?? '');
                 }
                 if ($row['accommodation_bks_hours']) {
                   echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['accommodation_bks_hours']) . '</p>';

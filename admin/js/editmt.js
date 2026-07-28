@@ -1,6 +1,34 @@
 function removeHttp(url) {
   return url.replace(/^https?:\/\//, "");
 }
+
+/* Fill the "current image" thumbnail in an edit modal, and clear any file the
+   user picked the last time the modal was open (a file input keeps its
+   selection, which would otherwise re-upload it on the next save). */
+function setEditImagePreview(previewId, folder, filename, fileInputId) {
+  var img = document.getElementById(previewId);
+  if (img) {
+    var name = (filename || "").trim();
+    if (name) {
+      img.src = folder + name;
+      img.classList.remove("d-none");
+    } else {
+      img.removeAttribute("src");
+      img.classList.add("d-none");
+    }
+  }
+  var fileInput = document.getElementById(fileInputId);
+  if (fileInput) fileInput.value = "";
+}
+
+/* Copy a row's map-coordinates cell into the modal, when the page has the field. */
+function setEditMapCoords(fieldId, cellId) {
+  var field = document.getElementById(fieldId);
+  if (!field) return;
+  var cell = document.getElementById(cellId);
+  field.value = cell ? cell.innerText.trim() : "";
+}
+
 function editmodalhc(id) {
   // console.log("test");
   // console.log(id);
@@ -13,6 +41,10 @@ function editmodalhc(id) {
   var imagename = document.getElementById("filenamehc-" + id).innerText;
   var hours = document.getElementById("hourshc-" + id).innerText;
   var phone = document.getElementById("phonehc-" + id).innerText;
+  // Was missing: formorder.value = order threw "order is not defined", which
+  // aborted this function before .modal("show") — the Healthcare edit button
+  // simply did nothing.
+  var order = document.getElementById("orderhc-" + id).innerText;
   // console.log(filename);
   // console.log(name);
   // console.log(order);
@@ -35,6 +67,8 @@ function editmodalhc(id) {
   formhours.value = hours;
   formphone.value = phone;
   formname.value = name;
+  setEditImagePreview("previewmthc", "../assets/img/medical_tourism/hc/", imagename, "fileToUploadhcedit");
+  setEditMapCoords("mapcoordsmthc", "mapcoordshc-" + id);
 
   $("#edithcmodal").modal("show");
 }
@@ -76,6 +110,8 @@ function editmodaldtl(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previewmtdtl", "../assets/img/medical_tourism/dtl/", imagename, "fileToUploaddtleditmt");
+  setEditMapCoords("mapcoordsmtdtl", "mapcoordsdtl-" + id);
   $("#editdtlmodal").modal("show");
 }
 
@@ -116,6 +152,8 @@ function editmodalder(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previewmtder", "../assets/img/medical_tourism/der/", imagename, "fileToUploadderedit");
+  setEditMapCoords("mapcoordsmtder", "mapcoordsder-" + id);
   $("#editdermodal").modal("show");
 }
 
@@ -156,6 +194,8 @@ function editmodaloph(id) {
   formphone.value = phone;
   formorder.value = order;
   formname.value = name;
+  setEditImagePreview("previewmtoph", "../assets/img/medical_tourism/oph/", imagename, "fileToUploadophedit");
+  setEditMapCoords("mapcoordsmtoph", "mapcoordsoph-" + id);
   $("#editophmodal").modal("show");
 }
 
@@ -202,22 +242,17 @@ function editmodalps(id) {
   formname.value = name;
   formwebsite.value = website;
   formarticle.value = article;
+  setEditImagePreview("previewmtps", "../assets/img/medical_tourism/ps/", imagename, "fileToUploadpsedit");
+  setEditMapCoords("mapcoordsmtps", "mapcoordsps-" + id);
   $("#editpsmodal").modal("show");
 }
 
-var toastbody = document.getElementById("toast-body");
-$("#toast11").hide();
+/* Bootstrap 4 has no global `bootstrap` object (that is Bootstrap 5), so the old
+   `new bootstrap.Toast(...)` threw a ReferenceError on every save and the admin
+   never saw a success/failure toast. errors2.php calls this, so use the BS4
+   jQuery plugin instead. */
 function toastupdate(body) {
-  console.log("test");
-
-  const toastLiveExample = document.getElementById("liveToast");
-
-  const toast = new bootstrap.Toast(toastLiveExample);
-
   var toastbody = document.getElementById("toast-body");
-  toastbody.innerHTML = body;
-  $(".toast").toast("show");
-  $("#toast11").toast("show");
-
-  toast.show();
+  if (toastbody) toastbody.innerHTML = body;
+  $("#liveToast").toast("show");
 }

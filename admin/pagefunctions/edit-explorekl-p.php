@@ -3,12 +3,13 @@
 
 // --- UPLOAD (Create) ---
 if (isset($_POST['upload_eklp'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $uploaded_file = $_FILES["fileToUploadeklp"]; // Get the file array
 
@@ -70,11 +71,11 @@ if (isset($_POST['upload_eklp'])) {
                                 $new_order = isset($order_row['max_order']) ? $order_row['max_order'] + 1 : 1;
 
                                 // Insert data into DB
-                                $query = "INSERT INTO explorekl_p (explorekl_p_title,explorekl_p_content,explorekl_p_location,explorekl_p_locationurl,explorekl_p_image,explorekl_p_hours,explorekl_p_phone,explorekl_p_order)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                                $query = "INSERT INTO explorekl_p (explorekl_p_title,explorekl_p_content,explorekl_p_location,explorekl_p_locationurl,explorekl_p_image,explorekl_p_hours,explorekl_p_phone,explorekl_p_order,explorekl_p_mapcoords)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                                 $stmt = mysqli_prepare($db, $query);
                                 if ($stmt) {
-                                    mysqli_stmt_bind_param($stmt, "sssssssi", $name, $content, $location, $locationurl, $newfilename, $hours, $phone, $new_order);
+                                    mysqli_stmt_bind_param($stmt, "sssssssis", $name, $content, $location, $locationurl, $newfilename, $hours, $phone, $new_order, $mapcoords);
                                     $insert_result = mysqli_stmt_execute($stmt);
 
                                     if ($insert_result) {
@@ -223,12 +224,13 @@ if (isset($_POST['deleteeklp'])) {
 
 // --- EDIT ---
 if (isset($_POST['editeklp'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $order = (int)$_POST['order']; // Cast to integer
     $id = (int)$_POST['eklpid']; // Cast to integer
@@ -294,11 +296,13 @@ if (isset($_POST['editeklp'])) {
               explorekl_p_locationurl=?,
               explorekl_p_content=?,
               explorekl_p_hours=?,
-              explorekl_p_phone=?
+              explorekl_p_phone=?,
+              explorekl_p_image=?,
+              explorekl_p_mapcoords=?
               WHERE explorekl_p_id=?";
     $stmt = mysqli_prepare($db, $query);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "sisssssi", $name, $order, $location, $locationurl, $content, $hours, $phone, $id);
+        mysqli_stmt_bind_param($stmt, "sisssssssi", $name, $order, $location, $locationurl, $content, $hours, $phone, $new_filename, $mapcoords, $id);
         $update_result = mysqli_stmt_execute($stmt);
 
         if ($update_result) {

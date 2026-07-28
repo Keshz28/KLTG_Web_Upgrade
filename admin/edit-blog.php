@@ -150,34 +150,6 @@ if (isset($_GET['logout'])) {
                     </div>
 
 
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Blog SITEMAP
-                            </h6>
-                        </div>
-                        <div class="card-body">
-
-                            <?php
-
-                            $query = "SELECT * , blog_view+blog_view2 FROM blog  ORDER BY blog_id DESC";
-                            $result = mysqli_query($db, $query);
-
-                            $var_counter = mysqli_num_rows($result);
-
-                            while ($row = mysqli_fetch_assoc($result)) {
-                                echo htmlspecialchars("<url>");
-
-                                echo htmlspecialchars("<loc>https://www.kltheguide.com.my/blog-details.php?postid=" . $row['blog_postid'] . "</loc>");
-                                echo htmlspecialchars("<lastmod>2023-07-20T13:12:39+00:00</lastmod><priority>0.80</priority></url>");
-                                echo "<br/>";
-                                // if (!$row['banner_order']) {s
-                            }
-                            ?>
-
-                        </div>
-                    </div>
-
-
                 </div>
                 <!-- /.container-fluid -->
 

@@ -545,198 +545,48 @@ $tile1_title3 = $row['tile1_title3'];
           </nav>
 
           <!-- RIGHT: Accordion Panel -->
+          <!-- Items are CMS-managed (traveltips table, admin/edit-traveltips.php).
+               The 5 sections a–e and their icons stay fixed in the tab bar above. -->
           <div class="tt-panel">
-
-            <!-- ── Section A: Communication & Connectivity ── -->
-            <div class="tt-content active" id="tt-a">
-
-              <div class="tt-acc open">
+            <?php foreach (['a', 'b', 'c', 'd', 'e'] as $tt_skey):
+                $tt_items = mysqli_query($db, "SELECT * FROM traveltips WHERE tt_section = '" . $tt_skey . "' ORDER BY tt_order ASC, tt_id ASC");
+            ?>
+            <div class="tt-content<?php echo $tt_skey === 'a' ? ' active' : ''; ?>" id="tt-<?php echo $tt_skey; ?>">
+              <?php
+                $tt_first = true;
+                while ($tt_items && $tt = mysqli_fetch_assoc($tt_items)):
+              ?>
+              <div class="tt-acc<?php echo $tt_first ? ' open' : ''; ?>">
                 <div class="tt-acc-hd">
-                  Mobile Services
+                  <?php echo htmlspecialchars($tt['tt_header']); ?>
                   <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
                 </div>
                 <div class="tt-acc-bd">
                   <div class="tt-acc-inner">
-                    <p class="tt-q">"Where is the most convenient place to purchase a local 5G prepaid SIM card upon arrival?"</p>
-                    <p class="tt-a">You can find dedicated service provider kiosks from Maxis, CelcomDigi, and U Mobile immediately after exiting the international arrival gates at KLIA 1 &amp; KLIA 2. These counters operate 24 hours a day and offer tourist-specific data packages starting from RM15 for 7-day unlimited plans.</p>
+                    <?php if (trim((string)$tt['tt_question']) !== ''): ?>
+                    <p class="tt-q"><?php echo htmlspecialchars($tt['tt_question']); ?></p>
+                    <?php endif; ?>
+                    <?php if (trim((string)$tt['tt_answer']) !== ''): ?>
+                    <p class="tt-a"><?php echo htmlspecialchars($tt['tt_answer']); ?></p>
+                    <?php endif; ?>
+                    <?php if (trim((string)$tt['tt_extra']) !== ''): ?>
+                    <?php echo $tt['tt_extra']; // raw HTML, admin-managed ?>
+                    <?php endif; ?>
+                    <?php if ($tt['tt_cta_type'] === 'map' && trim((string)$tt['tt_cta_value']) !== ''): ?>
                     <div class="tt-cta-row">
-                      <button class="tt-cta tt-map-btn" data-map-query="Maxis CelcomDigi U Mobile SIM card shop">
-                        <svg width="11" height="14" viewBox="0 0 11 14" fill="currentColor" style="margin-right:5px;vertical-align:-1px" aria-hidden="true"><path d="M5.5 0C3.02 0 1 2.02 1 4.5c0 3.37 4.5 9.5 4.5 9.5S10 7.87 10 4.5C10 2.02 7.98 0 5.5 0zm0 6.25a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5z"/></svg>Find SIM Shops
+                      <button class="tt-cta tt-map-btn" data-map-query="<?php echo htmlspecialchars($tt['tt_cta_value'], ENT_QUOTES); ?>">
+                        <svg width="11" height="14" viewBox="0 0 11 14" fill="currentColor" style="margin-right:5px;vertical-align:-1px" aria-hidden="true"><path d="M5.5 0C3.02 0 1 2.02 1 4.5c0 3.37 4.5 9.5 4.5 9.5S10 7.87 10 4.5C10 2.02 7.98 0 5.5 0zm0 6.25a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5z"/></svg><?php echo htmlspecialchars($tt['tt_cta_label']); ?>
                       </button>
                     </div>
+                    <?php elseif ($tt['tt_cta_type'] === 'link' && trim((string)$tt['tt_cta_value']) !== ''): ?>
+                    <div class="tt-cta-row"><a class="tt-cta" href="<?php echo htmlspecialchars($tt['tt_cta_value'], ENT_QUOTES); ?>" target="_blank" rel="noopener noreferrer"><?php echo htmlspecialchars($tt['tt_cta_label']); ?></a></div>
+                    <?php endif; ?>
                   </div>
                 </div>
               </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Calling Logistics
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"How do I make affordable international calls back home while in KL?"</p>
-                    <p class="tt-a">The easiest method is to use internet-based apps like WhatsApp, Telegram, or FaceTime over your local data plan — these are free and widely used in Malaysia. For traditional calls, purchase a prepaid SIM with an international calling add-on from Maxis or CelcomDigi, offering rates from as low as RM0.09 per minute to most countries.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.gulfsip.com/rates/calls/Malaysia" target="_blank" rel="noopener noreferrer">Compare Call Rates</a></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Online Access
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Is free public WiFi widely available across Kuala Lumpur?"</p>
-                    <p class="tt-a">Yes! KL offers free WiFi under the 'KL Free WiFi' initiative at over 5,000 hotspots covering LRT/MRT stations, shopping malls, public parks, and major tourist attractions. Simply search for "KL Free WiFi" on your device. For faster, consistent connectivity, a local prepaid data SIM remains the most reliable option for extended stays.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.google.com/maps/search/free+wifi+near+me/" target="_blank" rel="noopener noreferrer">Find WiFi Hotspots</a></div>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /tt-a -->
-
-            <!-- ── Section B: Essential Information ── -->
-            <div class="tt-content" id="tt-b">
-
-              <div class="tt-acc open">
-                <div class="tt-acc-hd">
-                  Safety
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Which areas of KL should I be cautious in, and what are the most common tourist scams to avoid?"</p>
-                    <p class="tt-a">Kuala Lumpur is a safe and welcoming destination for most visitors, with popular areas such as Bukit Bintang, KLCC, and Petaling Street attracting millions of tourists each year. As in any major city, visitors should stay aware of their surroundings in crowded places and be cautious of common issues such as taxi overcharging, counterfeit goods, and unofficial ticket sellers. Using ride-hailing apps, securing valuables, and purchasing from trusted sources are simple steps that help ensure a smooth and enjoyable visit.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Environment
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Are there any environmental laws or local practices I should be aware of as a visitor in KL?"</p>
-                    <p class="tt-a">Malaysia enforces strict anti-littering laws with fines up to RM500. Smoking is banned in all air-conditioned public spaces, restaurants, bars, and within 3 metres of any food premises — penalties can reach RM10,000. Many malls and attractions have gone plastic-bag-free, so carrying a reusable tote is strongly recommended. Haze season (June–October) can occasionally affect air quality; check the daily API index before outdoor activities.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.elaw.my/Default.aspx?returnUrl=https%3a%2f%2fwww.elaw.my%2f" target="_blank" rel="noopener noreferrer">Read Local Rules</a></div>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /tt-b -->
-
-            <!-- ── Section C: Finance & Documents ── -->
-            <div class="tt-content" id="tt-c">
-
-              <div class="tt-acc open">
-                <div class="tt-acc-hd">
-                  Legal
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"What are the key laws tourists most commonly and unknowingly break in Malaysia?"</p>
-                    <p class="tt-a">Drug possession carries a mandatory death penalty in Malaysia — never carry any controlled substances across the border or within the country. Public displays of affection can result in fines. Jaywalking is a ticketable offence. When visiting mosques or Hindu temples, dress modestly by covering shoulders and knees; many mosques such as Masjid Negara provide loaner robes free of charge at the entrance.</p>
-                    <p class="tt-legal-sub">Key Local Laws and Cultural Norms</p>
-                    <ul class="tt-legal-list">
-                      <li><strong>Drugs:</strong> Malaysia has mandatory death penalties for drug trafficking and strict penalties for possession.</li>
-                      <li><strong>Public Behavior:</strong> Public displays of affection (PDA) are frowned upon; public nudity or indecent clothing can lead to arrest.</li>
-                      <li><strong>Alcohol/Smoking:</strong> Alcohol is not served everywhere, especially in rural areas. Smoking is prohibited in most public spaces.</li>
-                      <li><strong>Dress Code:</strong> Dress conservatively, especially at religious sites. Covering shoulders and knees is advised.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Currency
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Where is the best place to exchange foreign currency for the most competitive rates in KL?"</p>
-                    <p class="tt-a">Licensed money changers inside major malls — such as Suria KLCC, Pavilion KL, and Mid Valley Megamall — consistently offer rates far superior to airport exchange counters or bank branches. Avoid hotel exchange desks. ATMs on the Visa or Mastercard network are widely available citywide and offer competitive mid-market rates. The Malaysian Ringgit (MYR / RM) is the sole legal tender.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.google.com/maps/search/money+changer+near+me/" target="_blank" rel="noopener noreferrer">Find Money Changers</a></div>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /tt-c -->
-
-            <!-- ── Section D: Packing & Gear ── -->
-            <div class="tt-content" id="tt-d">
-
-              <div class="tt-acc open">
-                <div class="tt-acc-hd">
-                  Apparel
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"What should I pack to wear in KL given its multicultural environment and tropical climate?"</p>
-                    <p class="tt-a">Opt for lightweight, breathable fabrics like cotton or linen to cope with constant heat and humidity. Casual wear is perfectly acceptable in malls and tourist areas. Pack a light shawl or sarong for mosque and temple visits — shoulders and knees must be covered. Many mosques such as Masjid Negara provide loaner robes at the entrance at no charge. Comfortable closed-toe walking shoes are a must for KL's hilly terrain and tiled surfaces.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Weather Protection
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"How do I best prepare for KL's intense sun and sudden heavy rainstorms?"</p>
-                    <p class="tt-a">Always carry a compact umbrella or light rain poncho — heavy afternoon downpours between 3pm and 5pm are extremely common, particularly from October to March during the Northeast Monsoon season. Apply SPF50+ sunscreen daily, as UV Index levels regularly reach "Extreme" (11+). Stay well-hydrated; the combination of tropical heat and high humidity can cause fatigue and dehydration quickly.</p>
-                    <div class="tt-cta-row"><a class="tt-cta" href="https://www.google.com/search?q=weather+in+kuala+lumpur" target="_blank" rel="noopener noreferrer">Check KL Weather</a></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tt-acc">
-                <div class="tt-acc-hd">
-                  Health
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Do I need any vaccinations or special medications before travelling to Kuala Lumpur?"</p>
-                    <p class="tt-a">No mandatory vaccinations are required to enter Malaysia for most nationalities. However, the WHO recommends being current on Hepatitis A &amp; B and Typhoid vaccines for travel to KL. Dengue fever is present year-round, so apply DEET-based mosquito repellent especially in parks and forested areas like FRIM or Bukit Nanas. Tap water is treated but bottled or filtered water is widely preferred by both residents and visitors.</p>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /tt-d -->
-
-            <!-- ── Section E: Logistics ── -->
-            <div class="tt-content" id="tt-e">
-
-              <div class="tt-acc open">
-                <div class="tt-acc-hd">
-                  Accommodation
-                  <span class="tt-acc-icon"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
-                </div>
-                <div class="tt-acc-bd">
-                  <div class="tt-acc-inner">
-                    <p class="tt-q">"Which neighbourhood in KL is the best base for first-time visitors who plan to rely on public transport?"</p>
-                    <p class="tt-a">The Golden Triangle area — spanning Bukit Bintang, KLCC, and Chow Kit — is ideal for first-time visitors. It provides direct access to multiple LRT, MRT, and Monorail lines, is walkable to iconic attractions including the Petronas Twin Towers, Berjaya Times Square, and Pavilion KL, and offers accommodation at every price point from budget guesthouses and hostels to international 5-star hotels.</p>
-                    <div class="tt-cta-row">
-                      <button class="tt-cta tt-map-btn" data-map-query="hotels near me">
-                        <svg width="11" height="14" viewBox="0 0 11 14" fill="currentColor" style="margin-right:5px;vertical-align:-1px" aria-hidden="true"><path d="M5.5 0C3.02 0 1 2.02 1 4.5c0 3.37 4.5 9.5 4.5 9.5S10 7.87 10 4.5C10 2.02 7.98 0 5.5 0zm0 6.25a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5z"/></svg>Find Nearby Hotels
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div><!-- /tt-e -->
-
+              <?php $tt_first = false; endwhile; ?>
+            </div><!-- /tt-<?php echo $tt_skey; ?> -->
+            <?php endforeach; ?>
           </div><!-- /tt-panel -->
         </div><!-- /tt-layout -->
       </div><!-- /tt-wrap -->

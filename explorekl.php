@@ -51,42 +51,10 @@ while ($row = mysqli_fetch_assoc($result)) {
   $tile4_subtitle = $row['tile4_subtitle'];
 }
 
-/**
- * Renders a "View on Map" button that deep-links to map.php, focusing the
- * location. Pass the card's title AND address (already decoded, as displayed).
- * The map search query is built as "<title>, <address>, Kuala Lumpur, Malaysia"
- * because the well-known place name pins far more reliably than a bare street
- * address (e.g. "No. 10, Jalan Hang Kasturi" alone won't find Pasar Seni).
- * Returns '' when there's nothing usable to search.
- */
-function viewOnMapButton($title, $address = '')
-{
-  $title = trim((string) $title);
-  $addr  = trim((string) $address);
-
-  // Some rows have a URL pasted into the address field — never search on that.
-  if ($addr !== '' && preg_match('~^https?://~i', $addr)) {
-    $addr = '';
-  }
-
-  $parts = array_filter([$title, $addr], static fn($p) => $p !== '');
-  if (!$parts) {
-    return '';
-  }
-
-  $query = implode(', ', $parts);
-  // Anchor the search to KL/Malaysia, but only add what's not already there.
-  if (stripos($query, 'lumpur') === false) {
-    $query .= ', Kuala Lumpur';
-  }
-  if (stripos($query, 'malaysia') === false) {
-    $query .= ', Malaysia';
-  }
-
-  return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
-    . 'href="map.php?q=' . urlencode($query) . '">'
-    . '<i class="bi bi-pin-map"></i> View on Map</a>';
-}
+// Shared implementation (view_on_map_helper.php). The copy that used to live
+// here had no support for exact coordinates and appended ", Kuala Lumpur" to
+// every search, which mislocated the many Explore KL rows outside the city.
+require_once __DIR__ . '/view_on_map_helper.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -237,7 +205,7 @@ function viewOnMapButton($title, $address = '')
                               <?php echo urldecode($row['explorekl_wtd_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['explorekl_wtd_title']), urldecode($row['explorekl_wtd_location'])); ?>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_wtd_title']), urldecode($row['explorekl_wtd_location']), $row['explorekl_wtd_mapcoords'] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_wtd_hours']) { ?>
@@ -352,7 +320,7 @@ function viewOnMapButton($title, $address = '')
                               <?php echo urldecode($row['explorekl_hs_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['explorekl_hs_title']), urldecode($row['explorekl_hs_location'])); ?>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_hs_title']), urldecode($row['explorekl_hs_location']), $row['explorekl_hs_mapcoords'] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_hs_hours']) { ?>
@@ -462,7 +430,7 @@ function viewOnMapButton($title, $address = '')
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
-                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']), $row['explorekl_pwor_mapcoords'] ?? '');
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -513,7 +481,7 @@ function viewOnMapButton($title, $address = '')
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
-                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']), $row['explorekl_pwor_mapcoords'] ?? '');
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -562,7 +530,7 @@ function viewOnMapButton($title, $address = '')
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
-                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']), $row['explorekl_pwor_mapcoords'] ?? '');
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -612,7 +580,7 @@ function viewOnMapButton($title, $address = '')
                             echo '          <h5 class="card-title">' . urldecode($row['explorekl_pwor_title']) . '</h5>';
                             if ($row['explorekl_pwor_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-alt-fill" style="color: black;"></i> <a href="' . $row['explorekl_pwor_locationurl'] . '">' . urldecode($row['explorekl_pwor_location']) . '</a></p>';
-                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']));
+                              echo viewOnMapButton(urldecode($row['explorekl_pwor_title']), urldecode($row['explorekl_pwor_location']), $row['explorekl_pwor_mapcoords'] ?? '');
                             }
                             if ($row['explorekl_pwor_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . urldecode($row['explorekl_pwor_hours']) . '</p>';
@@ -734,7 +702,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_wte_sf_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_wte_sf_title']), urldecode($row['explorekl_wte_sf_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_wte_sf_title']), urldecode($row['explorekl_wte_sf_location']), $row['explorekl_wte_sf_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_wte_sf_hours']) { ?>
@@ -810,7 +778,7 @@ function viewOnMapButton($title, $address = '')
                             echo '          <h5 class="card-title">' . $row['explorekl_wte_c_title'] . '</h5>';
                             if ($row['explorekl_wte_c_location']) {
                               echo '          <p class="card-text"><i class="bi bi-geo-fill" style="color: black;"></i> <a href="' . $row['explorekl_wte_c_locationurl'] . '">' . $row['explorekl_wte_c_location'] . '</a></p>';
-                              echo viewOnMapButton($row['explorekl_wte_c_title'], $row['explorekl_wte_c_location']);
+                              echo viewOnMapButton($row['explorekl_wte_c_title'], $row['explorekl_wte_c_location'], $row['explorekl_wte_c_mapcoords'] ?? '');
                             }
                             if ($row['explorekl_wte_c_hours']) {
                               echo '          <p class="card-text"><i class="bi bi-clock-fill" style="color: black;"></i> ' . $row['explorekl_wte_c_hours'] . '</p>';
@@ -897,7 +865,7 @@ function viewOnMapButton($title, $address = '')
                                                   <?php echo $row['explorekl_wte_r_location'] ?>
                                                 </a>
                                               </p>
-                                              <?php echo viewOnMapButton($row['explorekl_wte_r_title'], $row['explorekl_wte_r_location']); ?>
+                                              <?php echo viewOnMapButton($row['explorekl_wte_r_title'], $row['explorekl_wte_r_location'], $row['explorekl_wte_r_mapcoords'] ?? ''); ?>
                                             <?php } ?>
 
                                             <?php if ($row['explorekl_wte_r_hours']) { ?>
@@ -1048,7 +1016,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location']), $row['explorekl_nl_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1187,7 +1155,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location']), $row['explorekl_nl_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1310,7 +1278,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_nl_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_nl_title']), urldecode($row['explorekl_nl_location']), $row['explorekl_nl_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_nl_hours']) { ?>
@@ -1453,7 +1421,7 @@ function viewOnMapButton($title, $address = '')
                               <?php echo urldecode($row['explorekl_kl4k_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['explorekl_kl4k_title']), urldecode($row['explorekl_kl4k_location'])); ?>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_kl4k_title']), urldecode($row['explorekl_kl4k_location']), $row['explorekl_kl4k_mapcoords'] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_kl4k_hours']) { ?>
@@ -1593,7 +1561,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location']), $row['explorekl_ss_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1703,7 +1671,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location']), $row['explorekl_ss_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1813,7 +1781,7 @@ function viewOnMapButton($title, $address = '')
                                           <?php echo urldecode($row['explorekl_ss_location']) ?>
                                         </a>
                                       </p>
-                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location'])); ?>
+                                      <?php echo viewOnMapButton(urldecode($row['explorekl_ss_title']), urldecode($row['explorekl_ss_location']), $row['explorekl_ss_mapcoords'] ?? ''); ?>
                                     <?php } ?>
 
                                     <?php if ($row['explorekl_ss_hours']) { ?>
@@ -1932,7 +1900,7 @@ function viewOnMapButton($title, $address = '')
                               <?php echo urldecode($row['explorekl_p_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['explorekl_p_title']), urldecode($row['explorekl_p_location'])); ?>
+                          <?php echo viewOnMapButton(urldecode($row['explorekl_p_title']), urldecode($row['explorekl_p_location']), $row['explorekl_p_mapcoords'] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['explorekl_p_hours']) { ?>

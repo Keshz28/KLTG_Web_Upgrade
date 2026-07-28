@@ -353,6 +353,59 @@ These are safe locally but risky on the public server. Address them when deployi
 - ~~`info.php`~~ — the `phpinfo()` page has been **deleted**. Don't add it back on a live server.
 - ~~`admin/vapid.php`~~ — the helper that printed the web-push **private key** to the browser has
   been **deleted**. Keys live in `.env` now.
+- ~~**Unauthenticated CMS writes**~~ — every admin page starts with `include('functions.php')` and
+  only checks `$_SESSION['username']` *after* that include returns, so all 26 `pagefunctions/`
+  handlers used to run before any login check (and the CSRF guard is skipped when there's no
+  session, by design). An anonymous POST to any admin URL could insert, edit or delete CMS rows
+  and upload files. **Fixed**: the `pagefunctions/` includes are now wrapped in a single admin
+  session gate in `functions.php`. The public blog/page view counters were split out into
+  `pagefunctions/public-viewcount.php`, which stays outside the gate — anonymous visitors hit
+  those via `assets/js/blog-details.js`. Don't add anything to that file that isn't safe to expose.
+
+---
+
+## 7. Admin CRUD + map pins (the six place sections)
+
+Explore KL, Beyond KL, Medical Tourism, Places to Shop, Spa, Place to Stay.
+Full deployment steps: **`ADMIN_CRUD_FIX_DEPLOY.md`**.
+
+**Schema, applied by hand in this order** (files in `admin/`):
+`mapcoords_migration.sql` → `mapcoords_seed.sql` → `primarykey_migration.sql`.
+`accommodation_dedupe.sql` is optional and deletes rows — its DELETEs ship commented out.
+
+**The big one:** fifteen tables had `<prefix>_id int(11) NOT NULL` with no primary key and no
+auto-increment, so every CMS-added row was saved with **id 0**. Edit and delete identify a row by
+that id, so "Save Changes" rewrote *every* id-0 row and "Delete" removed all of them.
+`primarykey_migration.sql` renumbers and adds `AUTO_INCREMENT`. If you ever create a new place
+table, **give it a real primary key** or you will reintroduce this.
+
+**Shared CMS helpers now in `functions.php`** — use these instead of writing another handler by hand:
+
+| Helper | Job |
+|---|---|
+| `cms_place_crud($db, $cfg)` | Whole add/edit/delete/reorder cycle for a place table. Drives `edit-mt.php`, `edit-accomodation.php`, `edit-spa.php`. |
+| `cms_store_image($file, $folder, &$err)` | Validates + stores an upload with a timestamped name. Unlike the old `uploadimage()` it does **not** fail when a file of that name already exists (which used to insert rows with an empty image and still report success). |
+| `mapcoords_from_post()` | Normalises the Map Coordinates field. Accepts `lat,lng`, a pasted `@lat,lng` fragment, or a full Google Maps URL (`!3d…!4d…`). |
+| `cms_sectionnav_crud(...)` in `pagefunctions/edit-sectionnav.php` | The four `*_nav` tile tables (explorekl / beyondkl / accommodation / medical_tourism). Previously buried at the bottom of `edit-mt.php`. |
+
+**Text encoding is per-file and deliberate.** `edit-mt.php`, `edit-accomodation.php` and
+`edit-spa.php` store `urlencode()`d text; the newer `pagefunctions/edit-*` handlers store
+`htmlspecialchars()`d text; **every public page `urldecode()`s on output**. Don't "tidy" one side
+without the other — you will mangle live content.
+
+**Map pins.** Every place table now has a `<prefix>_mapcoords` column, editable from the
+Map Coordinates field on every add/edit modal. `viewOnMapButton()` (now shared —
+`view_on_map_helper.php`, used by all six sections) resolves in this order:
+
+1. the row's own `_mapcoords` — the only source an editor can correct, so it always wins
+2. the generated lookup files `kltg_mapcoords.php` / `beyondkl_mapcoords.php` (legacy fallback)
+3. a Google text search of `"<title>, <address>, Malaysia"` — a guess; never anchor it to
+   "Kuala Lumpur", since many rows are in Selangor / PJ / Subang
+
+The seeded coordinates were resolved from each row's **own** stored Google Maps link (the place
+marker's `!3d`/`!4d` values), not from a name search, and cross-checked against the two
+hand-verified lookup files — 130 overlapping titles all agreed to within 200 m. 259 of 341 rows
+are filled; the rest had no usable link and fall back to step 2/3 until someone fills them in.
 
 ---
 

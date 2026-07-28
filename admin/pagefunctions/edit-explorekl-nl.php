@@ -3,13 +3,14 @@
 
 // --- UPLOAD (Create) ---
 if (isset($_POST['upload_eklnl'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
-    $category = htmlspecialchars($_POST['category'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
+    $category = htmlspecialchars($_POST['category'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $uploaded_file = $_FILES["fileToUploadeklnl"]; // Get the file array
 
@@ -71,11 +72,11 @@ if (isset($_POST['upload_eklnl'])) {
                                 $new_order = isset($order_row['max_order']) ? $order_row['max_order'] + 1 : 1;
 
                                 // Insert data into DB
-                                $query = "INSERT INTO explorekl_nl (explorekl_nl_title,explorekl_nl_category,explorekl_nl_content,explorekl_nl_location,explorekl_nl_locationurl,explorekl_nl_image,explorekl_nl_hours,explorekl_nl_phone,explorekl_nl_order)
-                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                $query = "INSERT INTO explorekl_nl (explorekl_nl_title,explorekl_nl_category,explorekl_nl_content,explorekl_nl_location,explorekl_nl_locationurl,explorekl_nl_image,explorekl_nl_hours,explorekl_nl_phone,explorekl_nl_order,explorekl_nl_mapcoords)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                                 $stmt = mysqli_prepare($db, $query);
                                 if ($stmt) {
-                                    mysqli_stmt_bind_param($stmt, "ssssssssi", $name, $category, $content, $location, $locationurl, $newfilename, $hours, $phone, $new_order);
+                                    mysqli_stmt_bind_param($stmt, "ssssssssis", $name, $category, $content, $location, $locationurl, $newfilename, $hours, $phone, $new_order, $mapcoords);
                                     $insert_result = mysqli_stmt_execute($stmt);
 
                                     if ($insert_result) {
@@ -224,13 +225,14 @@ if (isset($_POST['deleteeklnl'])) {
 
 // --- EDIT ---
 if (isset($_POST['editeklnl'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
-    $category = htmlspecialchars($_POST['category'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
+    $category = htmlspecialchars($_POST['category'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $order = (int)$_POST['order']; // Cast to integer
     $id = (int)$_POST['eklnlid']; // Cast to integer
@@ -297,11 +299,13 @@ if (isset($_POST['editeklnl'])) {
               explorekl_nl_locationurl=?,
               explorekl_nl_content=?,
               explorekl_nl_hours=?,
-              explorekl_nl_phone=?
+              explorekl_nl_phone=?,
+              explorekl_nl_image=?,
+              explorekl_nl_mapcoords=?
               WHERE explorekl_nl_id=?";
     $stmt = mysqli_prepare($db, $query);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssssssi", $name, $category, $order, $location, $locationurl, $content, $hours, $phone, $id);
+        mysqli_stmt_bind_param($stmt, "ssssssssssi", $name, $category, $order, $location, $locationurl, $content, $hours, $phone, $new_filename, $mapcoords, $id);
         $update_result = mysqli_stmt_execute($stmt);
 
         if ($update_result) {

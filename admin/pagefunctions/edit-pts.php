@@ -3,13 +3,14 @@
 
 // --- UPLOAD (Create) ---
 if (isset($_POST['upload_pts'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
-    $website = htmlspecialchars($_POST['website'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
+    $website = htmlspecialchars($_POST['website'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $uploaded_file = $_FILES["fileToUpload"]; // Get the file array
 
@@ -63,11 +64,11 @@ if (isset($_POST['upload_pts'])) {
                             $new_order = isset($order_row['max_order']) ? $order_row['max_order'] + 1 : 1;
 
                             // Insert data into DB
-                            $query = "INSERT INTO place_shop (place_shop_title,place_shop_content,place_shop_location,place_shop_locationurl,place_shop_image,place_shop_hours,place_shop_phone,place_shop_website,place_shop_order)
-                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            $query = "INSERT INTO place_shop (place_shop_title,place_shop_content,place_shop_location,place_shop_locationurl,place_shop_image,place_shop_hours,place_shop_phone,place_shop_website,place_shop_order,place_shop_mapcoords)
+                                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                             $stmt = mysqli_prepare($db, $query);
                             if ($stmt) {
-                                mysqli_stmt_bind_param($stmt, "ssssssssi", $name, $content, $location, $locationurl, $newfilename, $hours, $phone, $website, $new_order);
+                                mysqli_stmt_bind_param($stmt, "ssssssssis", $name, $content, $location, $locationurl, $newfilename, $hours, $phone, $website, $new_order, $mapcoords);
                                 $insert_result = mysqli_stmt_execute($stmt);
 
                                 if ($insert_result) {
@@ -215,13 +216,14 @@ if (isset($_POST['deletepts'])) {
 
 // --- EDIT ---
 if (isset($_POST['editpts'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $location = htmlspecialchars($_POST['location'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-    $hours = htmlspecialchars($_POST['hours'], ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8');
-    $website = htmlspecialchars($_POST['website'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
+    $hours = htmlspecialchars($_POST['hours'] ?? '', ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8');
+    $website = htmlspecialchars($_POST['website'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $order = (int)$_POST['order']; // Cast to integer
     $id = (int)$_POST['ptsid']; // Cast to integer
@@ -288,11 +290,13 @@ if (isset($_POST['editpts'])) {
               place_shop_content=?,
               place_shop_hours=?,
               place_shop_phone=?,
-              place_shop_website=?
+              place_shop_website=?,
+              place_shop_image=?,
+              place_shop_mapcoords=?
               WHERE place_shop_id=?";
     $stmt = mysqli_prepare($db, $query);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "sissssssi", $name, $order, $location, $locationurl, $content, $hours, $phone, $website, $id);
+        mysqli_stmt_bind_param($stmt, "sissssssssi", $name, $order, $location, $locationurl, $content, $hours, $phone, $website, $new_filename, $mapcoords, $id);
         $update_result = mysqli_stmt_execute($stmt);
 
         if ($update_result) {

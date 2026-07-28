@@ -1,6 +1,33 @@
 function removeHttp(url) {
   return url.replace(/^https?:\/\//, "");
 }
+
+/* Fill the "current image" thumbnail in an edit modal, and clear any file the
+   user picked the last time it was open (a file input keeps its selection,
+   which would otherwise silently re-upload it on the next save). */
+function setEditImagePreview(previewId, folder, filename, fileInputId) {
+  var img = document.getElementById(previewId);
+  if (img) {
+    var name = (filename || "").trim();
+    if (name) {
+      img.src = folder + name;
+      img.classList.remove("d-none");
+    } else {
+      img.removeAttribute("src");
+      img.classList.add("d-none");
+    }
+  }
+  var fileInput = document.getElementById(fileInputId);
+  if (fileInput) fileInput.value = "";
+}
+
+/* Copy a row's map-coordinates cell into the modal field. */
+function setEditMapCoords(fieldId, cellId) {
+  var field = document.getElementById(fieldId);
+  if (!field) return;
+  var cell = document.getElementById(cellId);
+  field.value = cell ? cell.innerText.trim() : "";
+}
 function editmodalpts(id) {
   // console.log("test");
   // console.log(id);
@@ -39,22 +66,17 @@ function editmodalpts(id) {
   formhours.value = hours;
   formphone.value = phone;
   formname.value = name;
+  setEditImagePreview("previewpts", "../assets/img/place_to_shop/", imagename, "fileToUploadptsedit");
+  setEditMapCoords("mapcoordspts", "mapcoords-" + id);
   $("#editmodal").modal("show");
 }
 
-var toastbody = document.getElementById("toast-body");
-$("#toast11").hide();
+/* Bootstrap 4 has no global `bootstrap` object (that is Bootstrap 5), so the old
+   `new bootstrap.Toast(...)` threw a ReferenceError on every save and the admin
+   never saw a success/failure toast. errors2.php calls this, so use the BS4
+   jQuery plugin instead. */
 function toastupdate(body) {
-  console.log("test");
-
-  const toastLiveExample = document.getElementById("liveToast");
-
-  const toast = new bootstrap.Toast(toastLiveExample);
-
   var toastbody = document.getElementById("toast-body");
-  toastbody.innerHTML = body;
-  $(".toast").toast("show");
-  $("#toast11").toast("show");
-
-  toast.show();
+  if (toastbody) toastbody.innerHTML = body;
+  $("#liveToast").toast("show");
 }

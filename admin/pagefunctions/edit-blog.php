@@ -70,51 +70,12 @@ if (isset($_POST['refreshblogitem'])) {
 
 }
 
-if (isset($_GET['postidviews'])) {
+// NOTE: the three public blog/page view-counter actions that used to live here
+// (postidviews, postidviewsupdate, updatepageview) moved to
+// pagefunctions/public-viewcount.php. They are hit by anonymous site visitors
+// via assets/js/blog-details.js and blog2.js, so they must stay OUTSIDE the
+// admin-session gate that now wraps the rest of the pagefunctions includes.
 
-    $postid = $_GET['postidviews'];
-
-    $query = "SELECT * FROM blog WHERE blog_postid='$postid'";
-    // debug_to_console($query);
-    $update = mysqli_query($db, $query);
-    while ($row = mysqli_fetch_assoc($update)) {
-        if ($row['blog_viewsettings'] == 1) {
-            echo $row['blog_view'];
-
-        } else {
-            echo 0;
-        }
-    }
-    ;
-
-}
-
-if (isset($_GET['updatepageview'])) {
-
-    $urlpageview = $_GET['updatepageview'];
-
-
-    $query4 = "INSERT INTO pageview (url, views) 
-        VALUES('$urlpageview', '1')";
-    mysqli_query($db, $query4);
-
-}
-
-if (isset($_GET['postidviewsupdate'])) {
-
-    $postid = $_GET['postidviewsupdate'];
-
-    $query = "UPDATE blog SET blog_view=blog_view + 1 WHERE blog_postid='$postid'";
-    // debug_to_console($query);
-    $update = mysqli_query($db, $query);
-    if ($update) {
-        echo "success";
-    } else {
-        echo "fail";
-
-    }
-
-}
 if (isset($_GET['enableview'])) {
 
     $postid = $_GET['enableview'];

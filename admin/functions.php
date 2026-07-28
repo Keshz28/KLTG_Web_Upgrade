@@ -913,6 +913,264 @@ function login_rate_limit_clear(): void {
     @unlink(sys_get_temp_dir() . '/kltg_login_' . md5($ip) . '.json');
 }
 
+/**
+ * Store an uploaded CMS image under assets/img/<folder>/ and return the stored
+ * filename.
+ *
+ * Returns null when no file was chosen (a normal "keep the current image" edit).
+ * Returns null AND sets $err when a file WAS chosen but is unusable — the caller
+ * must surface that rather than saving an empty filename.
+ *
+ * Unlike the older uploadimage(), this never fails just because a file of the
+ * same name already exists: it prefixes a timestamp, so re-uploading
+ * "photo.jpg" works instead of silently writing an empty image column (which is
+ * why several "Create" buttons appeared to add a row with no picture).
+ */
+function cms_store_image(?array $file, string $folder, ?string &$err = null): ?string
+{
+    $err = null;
+    if (!$file || !isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        return null;                       // nothing chosen — not an error
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        $err = ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE)
+            ? 'That image is larger than the server upload limit.'
+            : 'Image upload failed (error code ' . (int) $file['error'] . ').';
+        return null;
+    }
+    if ($file['size'] > 5 * 1024 * 1024) {
+        $err = 'That image is larger than 5 MB.';
+        return null;
+    }
+    $ext = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+        $err = 'Only JPG, JPEG, PNG, GIF and WEBP images are allowed.';
+        return null;
+    }
+    if (!@getimagesize($file['tmp_name'])) {
+        $err = 'That file is not a readable image.';
+        return null;
+    }
+
+    $dir = '../assets/img/' . trim($folder, '/') . '/';
+    ensure_dir($dir);
+
+    $base = preg_replace('/[^a-zA-Z0-9._-]/', '', basename((string) $file['name']));
+    $name = time() . '_' . ($base !== '' ? $base : 'image.' . $ext);
+
+    if (!move_uploaded_file($file['tmp_name'], $dir . $name)) {
+        $err = 'Could not save the uploaded image — check folder permissions on ' . $dir . '.';
+        return null;
+    }
+    return $name;
+}
+
+/**
+ * Add / edit / delete for the "place" CMS tables that all share the same shape:
+ * <p>_id, _title, _content, _location, _locationurl, _image, _hours, _phone,
+ * _order and (new) _mapcoords.
+ *
+ * Replaces thirteen near-identical hand-written copies in edit-mt.php,
+ * edit-accomodation.php and edit-spa.php, which between them:
+ *   - never saved a replacement image on edit (no _image in the UPDATE),
+ *   - interpolated $_POST straight into SQL,
+ *   - silently inserted an empty image when the filename already existed,
+ *   - didn't redirect after POST, so a refresh re-ran the add or the delete.
+ *
+ * Text encoding is deliberately per-field and caller-supplied: these tables hold
+ * a mix of urlencode()d and plain values and every public page urldecode()s on
+ * output, so changing the encoding here would visibly mangle live content.
+ *
+ * $c keys:
+ *   table, folder, label          — table name, image dir under assets/img/, UI name
+ *   add, edit, delete             — the submit-button names that trigger each action
+ *   file                          — the $_FILES key for the image input
+ *   id_field, img_field           — POST keys holding the row id / current filename
+ *   orderup, orderdown, order_id  — GET keys used by the up/down chevrons
+ *   fields                        — [column_suffix => [post_key, encoder|null]]
+ */
+function cms_place_crud(mysqli $db, array $c): void
+{
+    $t      = $c['table'];
+    $idCol  = $t . '_id';
+    $fields = $c['fields'];
+
+    $flash = static function (string $type, string $msg): void {
+        $_SESSION['alert_type'] = $type;
+        $_SESSION['alert_msg']  = $msg;
+    };
+    $back = static function (): void {
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
+    };
+
+    // Read + encode every configured field from $_POST.
+    $read = static function () use ($fields): array {
+        $out = [];
+        foreach ($fields as $col => [$postKey, $encoder]) {
+            if ($col === 'mapcoords') { $out[$col] = mapcoords_from_post($postKey); continue; }
+            $raw = (string) ($_POST[$postKey] ?? '');
+            $out[$col] = $encoder ? $encoder($raw) : $raw;
+        }
+        return $out;
+    };
+
+    /* ---------------------------------------------------------------- ADD -- */
+    if (isset($_POST[$c['add']])) {
+        $vals = $read();
+
+        $filename = cms_store_image($_FILES[$c['file']] ?? null, $c['folder'], $err);
+        if ($err !== null) { $flash('error', $err); $back(); }
+        if ($filename === null) { $flash('error', 'Please choose an image for the new entry.'); $back(); }
+
+        // New rows go to the top of the list, matching the "ORDER BY ... DESC"
+        // the pages use. The old code hard-coded 0, so every new entry landed at
+        // the bottom regardless.
+        $max = mysqli_fetch_assoc(mysqli_query($db, "SELECT MAX(`{$t}_order`) AS m FROM `$t`"));
+        $order = (int) ($max['m'] ?? 0) + 1;
+
+        $cols = array_map(fn($k) => "`{$t}_{$k}`", array_keys($vals));
+        $cols[] = "`{$t}_image`";
+        $cols[] = "`{$t}_order`";
+        $args = array_values($vals);
+        $args[] = $filename;
+        $args[] = $order;
+
+        $sql = "INSERT INTO `$t` (" . implode(',', $cols) . ') VALUES ('
+             . implode(',', array_fill(0, count($args), '?')) . ')';
+        $stmt = mysqli_prepare($db, $sql);
+        if (!$stmt) { $flash('error', 'Database error: ' . mysqli_error($db)); $back(); }
+        mysqli_stmt_bind_param($stmt, str_repeat('s', count($args) - 1) . 'i', ...$args);
+        $ok = mysqli_stmt_execute($stmt);
+        if (!$ok) error_log("cms_place_crud add $t: " . mysqli_stmt_error($stmt));
+        mysqli_stmt_close($stmt);
+
+        $flash($ok ? 'success' : 'error', $ok ? 'Added new ' . $c['label'] : 'Could not add the entry: ' . mysqli_error($db));
+        $back();
+    }
+
+    /* --------------------------------------------------------------- EDIT -- */
+    if (isset($_POST[$c['edit']])) {
+        $vals = $read();
+        $id   = (int) ($_POST[$c['id_field']] ?? 0);
+        $current = basename((string) ($_POST[$c['img_field']] ?? ''));
+        $order   = (int) ($_POST['order'] ?? 0);
+        if ($id <= 0) { $flash('error', 'Missing record id — nothing was saved.'); $back(); }
+
+        $uploaded = cms_store_image($_FILES[$c['file']] ?? null, $c['folder'], $err);
+        if ($err !== null) { $flash('error', $err); $back(); }
+
+        // Only swap the image (and delete the old file) once the new one is safely
+        // stored, so a failed upload can never leave the row pointing at nothing.
+        $filename = $uploaded ?? $current;
+
+        $sets = array_map(fn($k) => "`{$t}_{$k}`=?", array_keys($vals));
+        $sets[] = "`{$t}_image`=?";
+        $sets[] = "`{$t}_order`=?";
+        $args = array_values($vals);
+        $args[] = $filename;
+        $args[] = $order;
+        $args[] = $id;
+
+        $sql  = "UPDATE `$t` SET " . implode(',', $sets) . " WHERE `$idCol`=?";
+        $stmt = mysqli_prepare($db, $sql);
+        if (!$stmt) { $flash('error', 'Database error: ' . mysqli_error($db)); $back(); }
+        mysqli_stmt_bind_param($stmt, str_repeat('s', count($args) - 2) . 'ii', ...$args);
+        $ok = mysqli_stmt_execute($stmt);
+        if (!$ok) error_log("cms_place_crud edit $t #$id: " . mysqli_stmt_error($stmt));
+        mysqli_stmt_close($stmt);
+
+        if ($ok && $uploaded !== null && $current !== '' && $current !== $uploaded) {
+            $old = '../assets/img/' . trim($c['folder'], '/') . '/' . $current;
+            if (is_file($old)) @unlink($old);
+        }
+
+        $flash($ok ? 'success' : 'error', $ok ? 'Changes saved' : 'Could not save changes: ' . mysqli_error($db));
+        $back();
+    }
+
+    /* ------------------------------------------------------------- DELETE -- */
+    if (isset($_POST[$c['delete']])) {
+        $id = (int) ($_POST[$c['id_field']] ?? 0);
+        $filename = basename((string) ($_POST[$c['img_field']] ?? ''));
+        if ($id <= 0) { $flash('error', 'Missing record id — nothing was deleted.'); $back(); }
+
+        $stmt = mysqli_prepare($db, "DELETE FROM `$t` WHERE `$idCol`=?");
+        if (!$stmt) { $flash('error', 'Database error: ' . mysqli_error($db)); $back(); }
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        $ok = mysqli_stmt_execute($stmt);
+        $rows = $ok ? mysqli_stmt_affected_rows($stmt) : 0;
+        mysqli_stmt_close($stmt);
+
+        if ($ok && $rows > 0) {
+            // The row is gone either way; a leftover file is worth a warning but
+            // must not be reported as a failed delete.
+            if ($filename !== '') {
+                $path = '../assets/img/' . trim($c['folder'], '/') . '/' . $filename;
+                if (is_file($path)) @unlink($path);
+            }
+            $flash('success', 'Deleted');
+        } elseif ($ok) {
+            $flash('warning', 'No matching record to delete.');
+        } else {
+            $flash('error', 'Could not delete: ' . mysqli_error($db));
+        }
+        $back();
+    }
+
+    /* ------------------------------------------------------- ORDER UP/DOWN -- */
+    foreach ([['orderup', +1], ['orderdown', -1]] as [$key, $delta]) {
+        if (!isset($_GET[$c[$key]])) continue;
+        $order = (int) $_GET[$c[$key]] + $delta;
+        $id    = (int) ($_GET[$c['order_id']] ?? 0);
+        $stmt  = mysqli_prepare($db, "UPDATE `$t` SET `{$t}_order`=? WHERE `$idCol`=?");
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 'ii', $order, $id);
+            $ok = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            $flash($ok ? 'success' : 'error', $ok ? 'Order changed' : 'Could not change order.');
+        }
+        $back();
+    }
+}
+
+/**
+ * Normalise the "Map Coordinates" field posted by the CMS editors.
+ *
+ * Every place row now carries a <prefix>_mapcoords column holding a plain
+ * "lat,lng" pair, which viewOnMapButton() uses to drop an EXACT pin instead of
+ * guessing from a Google text search of the place name. Admins paste this
+ * straight out of Google Maps, so accept the shapes that produces —
+ * "3.1580207, 101.7116671", a "@lat,lng,17z" fragment, or a full maps URL
+ * containing !3d<lat>!4d<lng> — and store the bare pair.
+ *
+ * Returns '' for anything that isn't a usable coordinate (including an empty
+ * field), which makes the row fall back to the old lookup-file/search path
+ * rather than pinning somewhere wrong.
+ */
+function mapcoords_from_post(string $key = 'mapcoords'): string
+{
+    $raw = trim((string) ($_POST[$key] ?? ''));
+    if ($raw === '') return '';
+
+    // A pasted Google Maps URL: !3d<lat>!4d<lng> is the place pin, /@lat,lng is
+    // only the viewport centre, so prefer the former.
+    if (preg_match('~!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)~', $raw, $m)) {
+        $raw = $m[1] . ',' . $m[2];
+    } elseif (preg_match('~@(-?\d+\.\d+),(-?\d+\.\d+)~', $raw, $m)) {
+        $raw = $m[1] . ',' . $m[2];
+    }
+
+    $raw = preg_replace('~\s+~', '', $raw);
+    if (!preg_match('~^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$~', $raw, $m)) return '';
+
+    $lat = (float) $m[1];
+    $lng = (float) $m[2];
+    if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) return '';
+
+    return $m[1] . ',' . $m[2];
+}
+
 // === CSRF helpers ===
 function csrf_token(): string {
     return $_SESSION['csrf_token'] ?? '';
@@ -1586,6 +1844,26 @@ if (!empty($_POST) && isset($_SESSION['username']) && strpos($_SERVER['PHP_SELF'
     csrf_check();
 }
 
+// Public blog/page view counters — anonymous visitors hit these, so they stay
+// outside the admin gate below. See the file header for why.
+include 'pagefunctions/public-viewcount.php';
+
+/* ---------------------------------------------------------------------------
+ * CMS write handlers — admin session required.
+ *
+ * Every admin page starts with include('functions.php') and only checks
+ * $_SESSION['username'] AFTER that include returns, so the handlers below used
+ * to run before any login check. The CSRF guard above is also skipped when
+ * there is no session (by design — it protects a logged-in admin from
+ * cross-site POSTs, it is not an auth check). Net effect: an anonymous POST to
+ * any admin URL could insert, edit or delete CMS rows and upload files.
+ *
+ * Gating the includes fixes that in one place rather than in 26 handlers. All
+ * of these are admin-only actions; the PUBLIC newsletter signup does not come
+ * through here — it posts to admin/sub_handler.php, which is untouched.
+ * ------------------------------------------------------------------------- */
+if (isset($_SESSION['username']) && $_SESSION['username'] !== '') {
+
 include 'pagefunctions/sub.php';
 
 include 'pagefunctions/edit-index.php';
@@ -1621,8 +1899,12 @@ include 'pagefunctions/edit-pts.php';
 include 'pagefunctions/edit-spa.php';
 
 include 'pagefunctions/edit-mt.php';
+include 'pagefunctions/edit-sectionnav.php';   // explorekl/beyondkl/accommodation/mt nav tiles
 include 'pagefunctions/edit-ev.php';
 include 'pagefunctions/edit-advertisement.php';
+include 'pagefunctions/edit-traveltips.php';
+
+} // end admin-session gate around the CMS write handlers
 
 
 if (isset($_POST['fetch_events'])) {

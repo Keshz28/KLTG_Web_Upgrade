@@ -202,7 +202,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_hc_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_hc_title']), urldecode($row['medical_tourism_hc_location']), $kltg_coords[trim(urldecode($row['medical_tourism_hc_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_hc_title']), urldecode($row['medical_tourism_hc_location']), $row['medical_tourism_hc_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['medical_tourism_hc_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_hc_hours']) { ?>
@@ -312,7 +312,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_dtl_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_dtl_title']), urldecode($row['medical_tourism_dtl_location']), $kltg_coords[trim(urldecode($row['medical_tourism_dtl_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_dtl_title']), urldecode($row['medical_tourism_dtl_location']), $row['medical_tourism_dtl_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['medical_tourism_dtl_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_dtl_hours']) { ?>
@@ -422,7 +422,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_der_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_der_title']), urldecode($row['medical_tourism_der_location']), $kltg_coords[trim(urldecode($row['medical_tourism_der_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_der_title']), urldecode($row['medical_tourism_der_location']), $row['medical_tourism_der_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['medical_tourism_der_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_der_hours']) { ?>
@@ -533,7 +533,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_oph_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_oph_title']), urldecode($row['medical_tourism_oph_location']), $kltg_coords[trim(urldecode($row['medical_tourism_oph_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_oph_title']), urldecode($row['medical_tourism_oph_location']), $row['medical_tourism_oph_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['medical_tourism_oph_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_oph_hours']) { ?>
@@ -644,7 +644,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['medical_tourism_ps_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_ps_title']), urldecode($row['medical_tourism_ps_location']), $kltg_coords[trim(urldecode($row['medical_tourism_ps_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['medical_tourism_ps_title']), urldecode($row['medical_tourism_ps_location']), $row['medical_tourism_ps_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['medical_tourism_ps_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['medical_tourism_ps_hours']) { ?>

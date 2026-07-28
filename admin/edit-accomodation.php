@@ -160,7 +160,7 @@ if (isset($_GET['logout'])) {
 
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <table class="table table-bordered" id="dataTable1" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
                                                 <th scope="col">#</th>
@@ -174,6 +174,7 @@ if (isset($_GET['logout'])) {
                                                 <th scope="col">File Name</th>
                                                 <th scope="col" class="th-lg">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" class="th-lg">Content</th>
                                                 <th scope="col">Hours</th>
                                                 <th scope="col">Phone</th>
@@ -197,6 +198,7 @@ if (isset($_GET['logout'])) {
                                                 echo '<td id="filenameatop-' . $row['accommodation_top_id'] . '">' . $row['accommodation_top_image'] . '</td>';
                                                 echo '<td id="locationatop-' . $row['accommodation_top_id'] . '">' . urldecode($row['accommodation_top_location']) . '</td>';
                                                 echo '<td id="locationurlatop-' . $row['accommodation_top_id'] . '">' . urldecode($row['accommodation_top_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsatop-' . $row['accommodation_top_id'] . '">' . htmlspecialchars((string) $row['accommodation_top_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentatop-' . $row['accommodation_top_id'] . '">' . urldecode($row['accommodation_top_content']) . '</td>';
                                                 echo '<td id="hoursatop-' . $row['accommodation_top_id'] . '">' . urldecode($row['accommodation_top_hours']) . '</td>';
                                                 echo '<td id="phoneatop-' . $row['accommodation_top_id'] . '">' . $row['accommodation_top_phone'] . '</td>';
@@ -243,6 +245,7 @@ if (isset($_GET['logout'])) {
                                                 <th scope="col">File Name</th>
                                                 <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col">Content</th>
                                                 <th scope="col">Hours</th>
                                                 <th scope="col">Phone</th>
@@ -268,6 +271,7 @@ if (isset($_GET['logout'])) {
                                                 echo '<td id="filenameah-' . $row['accommodation_h_id'] . '">' . urldecode($row['accommodation_h_image']) . '</td>';
                                                 echo '<td id="locationah-' . $row['accommodation_h_id'] . '">' . urldecode($row['accommodation_h_location']) . '</td>';
                                                 echo '<td id="locationurlah-' . $row['accommodation_h_id'] . '">' . urldecode($row['accommodation_h_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsah-' . $row['accommodation_h_id'] . '">' . htmlspecialchars((string) $row['accommodation_h_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentah-' . $row['accommodation_h_id'] . '">' . urldecode($row['accommodation_h_content']) . '</td>';
                                                 echo '<td id="hoursah-' . $row['accommodation_h_id'] . '">' . urldecode($row['accommodation_h_hours']) . '</td>';
                                                 echo '<td id="phoneah-' . $row['accommodation_h_id'] . '">' . $row['accommodation_h_phone'] . '</td>';
@@ -310,6 +314,7 @@ if (isset($_GET['logout'])) {
                                                 <th scope="col">File Name</th>
                                                 <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col">Content</th>
                                                 <th scope="col">Hours</th>
                                                 <th scope="col">Phone</th>
@@ -335,6 +340,7 @@ if (isset($_GET['logout'])) {
                                                 echo '<td id="filenameabh-' . $row['accommodation_bh_id'] . '">' . urldecode($row['accommodation_bh_image']) . '</td>';
                                                 echo '<td id="locationabh-' . $row['accommodation_bh_id'] . '">' . urldecode($row['accommodation_bh_location']) . '</td>';
                                                 echo '<td id="locationurlabh-' . $row['accommodation_bh_id'] . '">' . urldecode($row['accommodation_bh_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsabh-' . $row['accommodation_bh_id'] . '">' . htmlspecialchars((string) $row['accommodation_bh_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentabh-' . $row['accommodation_bh_id'] . '">' . urldecode($row['accommodation_bh_content']) . '</td>';
                                                 echo '<td id="hoursabh-' . $row['accommodation_bh_id'] . '">' . urldecode($row['accommodation_bh_hours']) . '</td>';
                                                 echo '<td id="phoneabh-' . $row['accommodation_bh_id'] . '">' . $row['accommodation_bh_phone'] . '</td>';
@@ -364,7 +370,7 @@ if (isset($_GET['logout'])) {
 
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0">
+                                    <table class="table table-bordered" id="dataTable4" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
                                                 <th scope="col">#</th>
@@ -378,6 +384,7 @@ if (isset($_GET['logout'])) {
                                                 <th scope="col">File Name</th>
                                                 <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col">Content</th>
                                                 <th scope="col">Hours</th>
                                                 <th scope="col">Phone</th>
@@ -403,6 +410,7 @@ if (isset($_GET['logout'])) {
                                                 echo '<td id="filenameabks-' . $row['accommodation_bks_id'] . '">' . urldecode($row['accommodation_bks_image']) . '</td>';
                                                 echo '<td id="locationabks-' . $row['accommodation_bks_id'] . '">' . urldecode($row['accommodation_bks_location']) . '</td>';
                                                 echo '<td id="locationurlabks-' . $row['accommodation_bks_id'] . '">' . urldecode($row['accommodation_bks_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsabks-' . $row['accommodation_bks_id'] . '">' . htmlspecialchars((string) $row['accommodation_bks_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentabks-' . $row['accommodation_bks_id'] . '">' . urldecode($row['accommodation_bks_content']) . '</td>';
                                                 echo '<td id="hoursabks-' . $row['accommodation_bks_id'] . '">' . urldecode($row['accommodation_bks_hours']) . '</td>';
                                                 echo '<td id="phoneabks-' . $row['accommodation_bks_id'] . '">' . $row['accommodation_bks_phone'] . '</td>';
@@ -518,6 +526,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
                             <input type="file" class="form-control-file" id="fileToUploadatop" name="fileToUploadatop">
                         </div>
@@ -574,6 +588,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderatop">Order</label>
                             <input type="text" class="form-control" id="orderatop" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsatop">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsatop" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewatop" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadatopedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadatopedit"
+                                name="fileToUploadatop" accept="image/*">
                         </div>
                         <input class="form-control" id="atopid" name="atopid" hidden></input>
                         <input class="form-control" id="imagenameatop" name="imagenameatop" hidden></input>
@@ -637,6 +665,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
                             <input type="file" class="form-control-file" id="fileToUploadah" name="fileToUploadah">
                         </div>
@@ -694,6 +728,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderah">Order</label>
                             <input type="text" class="form-control" id="orderah" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsah">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsah" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewah" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadahedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadahedit"
+                                name="fileToUploadah" accept="image/*">
                         </div>
                         <input class="form-control" id="ahid" name="ahid" hidden></input>
                         <input class="form-control" id="imagenameah" name="imagenameah" hidden></input>
@@ -756,6 +804,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
                             <input type="file" class="form-control-file" id="fileToUploadabh" name="fileToUploadabh">
                         </div>
@@ -813,6 +867,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbh">Order</label>
                             <input type="text" class="form-control" id="orderabh" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsabh">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsabh" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewabh" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadabhedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadabhedit"
+                                name="fileToUploadabh" accept="image/*">
                         </div>
                         <input class="form-control" id="abhid" name="abhid" hidden></input>
                         <input class="form-control" id="imagenameabh" name="imagenameabh" hidden></input>
@@ -875,6 +943,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+
+                        <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
                             <input type="file" class="form-control-file" id="fileToUploadabks" name="fileToUploadabks">
                         </div>
@@ -932,6 +1006,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderabks">Order</label>
                             <input type="text" class="form-control" id="orderabks" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsabks">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsabks" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewabks" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadabksedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadabksedit"
+                                name="fileToUploadabks" accept="image/*">
                         </div>
                         <input class="form-control" id="abksid" name="abksid" hidden></input>
                         <input class="form-control" id="imagenameabks" name="imagenameabks" hidden></input>

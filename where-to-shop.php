@@ -156,7 +156,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                               <?php echo urldecode($row['place_shop_location']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['place_shop_title']), urldecode($row['place_shop_location']), $kltg_coords[trim(urldecode($row['place_shop_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['place_shop_title']), urldecode($row['place_shop_location']), $row['place_shop_mapcoords'] ?? '', $kltg_coords[trim(urldecode($row['place_shop_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['place_shop_hours']) { ?>

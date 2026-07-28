@@ -54,49 +54,9 @@ while ($row = mysqli_fetch_assoc($result)) {
 // Exact "lat,lng" per place, resolved once from the goo.gl location links.
 $beyondkl_coords = include __DIR__ . '/beyondkl_mapcoords.php';
 
-/**
- * Renders a "View on Map" button that deep-links to map.php, focusing the
- * location. Beyond KL places are spread across Malaysia (not just KL), so for
- * an exact marker we pin by precise coordinates ($coords = "lat,lng") whenever
- * they're known — see beyondkl_mapcoords.php. When coords are missing we fall
- * back to a name search anchored to Malaysia (NOT Kuala Lumpur, which would
- * mislocate places like Pangkor or Langkawi). Returns '' when there's nothing
- * usable to search.
- */
-function viewOnMapButton($title, $address = '', $coords = '')
-{
-  $coords = trim((string) $coords);
-
-  // Exact coordinates pin the precise spot — preferred when available.
-  if ($coords !== '' && preg_match('~^-?[0-9.]+,-?[0-9.]+$~', $coords)) {
-    return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
-      . 'href="map.php?q=' . urlencode($coords) . '">'
-      . '<i class="bi bi-pin-map"></i> View on Map</a>';
-  }
-
-  $title = trim((string) $title);
-  $addr  = trim((string) $address);
-
-  // Some rows have a URL pasted into the address field — never search on that.
-  if ($addr !== '' && preg_match('~^https?://~i', $addr)) {
-    $addr = '';
-  }
-
-  $parts = array_filter([$title, $addr], static fn($p) => $p !== '');
-  if (!$parts) {
-    return '';
-  }
-
-  $query = implode(', ', $parts);
-  // Anchor to Malaysia only — these places are nationwide, not KL-bound.
-  if (stripos($query, 'malaysia') === false) {
-    $query .= ', Malaysia';
-  }
-
-  return '<a class="btn btn-sm btn-primary view-on-map-btn mt-1 mb-2" '
-    . 'href="map.php?q=' . urlencode($query) . '">'
-    . '<i class="bi bi-pin-map"></i> View on Map</a>';
-}
+// Shared implementation — resolves the pin from the row's own mapcoords
+// column first, then $beyondkl_coords, then a name search.
+require_once __DIR__ . '/view_on_map_helper.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -249,7 +209,7 @@ function viewOnMapButton($title, $address = '', $coords = '')
                               <?php echo urldecode($row['beyondkl_i_title']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['beyondkl_i_title']), urldecode($row['beyondkl_i_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_i_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_i_title']), urldecode($row['beyondkl_i_location']), $row['beyondkl_i_mapcoords'] ?? '', $beyondkl_coords[trim(urldecode($row['beyondkl_i_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_i_hours']) { ?>
@@ -365,7 +325,7 @@ function viewOnMapButton($title, $address = '', $coords = '')
                               <?php echo urldecode($row['beyondkl_hs_title']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['beyondkl_hs_title']), urldecode($row['beyondkl_hs_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_hs_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_hs_title']), urldecode($row['beyondkl_hs_location']), $row['beyondkl_hs_mapcoords'] ?? '', $beyondkl_coords[trim(urldecode($row['beyondkl_hs_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_hs_hours']) { ?>
@@ -479,7 +439,7 @@ function viewOnMapButton($title, $address = '', $coords = '')
                               <?php echo urldecode($row['beyondkl_w_title']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['beyondkl_w_title']), urldecode($row['beyondkl_w_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_w_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_w_title']), urldecode($row['beyondkl_w_location']), $row['beyondkl_w_mapcoords'] ?? '', $beyondkl_coords[trim(urldecode($row['beyondkl_w_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_w_hours']) { ?>
@@ -595,7 +555,7 @@ function viewOnMapButton($title, $address = '', $coords = '')
                               <?php echo urldecode($row['beyondkl_h_title']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['beyondkl_h_title']), urldecode($row['beyondkl_h_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_h_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_h_title']), urldecode($row['beyondkl_h_location']), $row['beyondkl_h_mapcoords'] ?? '', $beyondkl_coords[trim(urldecode($row['beyondkl_h_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_h_hours']) { ?>
@@ -709,7 +669,7 @@ function viewOnMapButton($title, $address = '', $coords = '')
                               <?php echo urldecode($row['beyondkl_es_title']) ?>
                             </a>
                           </p>
-                          <?php echo viewOnMapButton(urldecode($row['beyondkl_es_title']), urldecode($row['beyondkl_es_location']), $beyondkl_coords[trim(urldecode($row['beyondkl_es_title']))] ?? ''); ?>
+                          <?php echo viewOnMapButton(urldecode($row['beyondkl_es_title']), urldecode($row['beyondkl_es_location']), $row['beyondkl_es_mapcoords'] ?? '', $beyondkl_coords[trim(urldecode($row['beyondkl_es_title']))] ?? ''); ?>
                         <?php } ?>
 
                         <?php if ($row['beyondkl_es_hours']) { ?>

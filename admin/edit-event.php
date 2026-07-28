@@ -92,7 +92,7 @@ sort($years);
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>KLTG ADMIN - Upcoming Highlights</title>
+    <title>KLTG ADMIN - Event</title>
 
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -301,7 +301,7 @@ sort($years);
                 <div class="container-fluid" id="sched">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-1 text-gray-800">Upcoming Highlights</h1>
+                    <h1 class="h3 mb-1 text-gray-800">Event</h1>
                     <p class="mb-4 text-muted">Plan and schedule the events shown on the public Events page. Add, edit and reorder them by month below.</p>
 
                     <!-- Toolbar: Add + Filters -->

@@ -4,9 +4,11 @@
 
 // --- UPLOAD (Create) ---
 if (isset($_POST['upload_bklw'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $uploaded_file = $_FILES["fileToUploadbklw"]; // Get the file array
 
@@ -68,11 +70,11 @@ if (isset($_POST['upload_bklw'])) {
                                 $new_order = isset($order_row['max_order']) ? $order_row['max_order'] + 1 : 1;
 
                                 // Insert data into DB
-                                $query = "INSERT INTO beyondkl_w (beyondkl_w_title,beyondkl_w_content,beyondkl_w_location,beyondkl_w_locationurl,beyondkl_w_image,beyondkl_w_order)
-                                        VALUES (?, ?, ?, ?, ?, ?)";
+                                $query = "INSERT INTO beyondkl_w (beyondkl_w_title,beyondkl_w_content,beyondkl_w_location,beyondkl_w_locationurl,beyondkl_w_image,beyondkl_w_order,beyondkl_w_mapcoords)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?)";
                                 $stmt = mysqli_prepare($db, $query);
                                 if ($stmt) {
-                                    mysqli_stmt_bind_param($stmt, "sssssi", $name, $content, $locationurl, $locationurl, $newfilename, $new_order);
+                                    mysqli_stmt_bind_param($stmt, "sssssis", $name, $content, $location, $locationurl, $newfilename, $new_order, $mapcoords);
                                     $insert_result = mysqli_stmt_execute($stmt);
 
                                     if ($insert_result) {
@@ -221,9 +223,11 @@ if (isset($_POST['deletebklw'])) {
 
 // --- EDIT ---
 if (isset($_POST['editbklw'])) {
-    $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
-    $locationurl = htmlspecialchars($_POST['locationurl'], ENT_QUOTES, 'UTF-8');
-    $content = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
+    $name = htmlspecialchars($_POST['name'] ?? '', ENT_QUOTES, 'UTF-8');
+    $mapcoords = mapcoords_from_post();   // exact "lat,lng" for the View on Map pin
+    $location = htmlspecialchars($_POST['location'] ?? '', ENT_QUOTES, 'UTF-8');
+    $locationurl = htmlspecialchars($_POST['locationurl'] ?? '', ENT_QUOTES, 'UTF-8');
+    $content = htmlspecialchars($_POST['content'] ?? '', ENT_QUOTES, 'UTF-8');
 
     $order = (int)$_POST['order']; // Cast to integer
     $id = (int)$_POST['bklwid']; // Cast to integer
@@ -287,11 +291,13 @@ if (isset($_POST['editbklw'])) {
               beyondkl_w_order=?,
               beyondkl_w_location=?,
               beyondkl_w_locationurl=?,
-              beyondkl_w_content=?
+              beyondkl_w_content=?,
+              beyondkl_w_image=?,
+              beyondkl_w_mapcoords=?
               WHERE beyondkl_w_id=?";
     $stmt = mysqli_prepare($db, $query);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "sisssi", $name, $order, $locationurl, $locationurl, $content, $id);
+        mysqli_stmt_bind_param($stmt, "sisssssi", $name, $order, $location, $locationurl, $content, $new_filename, $mapcoords, $id);
         $update_result = mysqli_stmt_execute($stmt);
 
         if ($update_result) {

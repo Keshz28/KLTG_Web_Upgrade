@@ -150,6 +150,9 @@ if (isset($db)) {
                     <div class="col-6 footer-links">
                             <a href="contribute.php" class="text-reset"><i class="bi bi-pencil-square"></i> Contribute An Article</a>
                     </div>
+                    <div class="col-6 footer-links">
+                            <a href="ebook.php" class="text-reset"><i class="bi bi-book"></i> KLTG E-book</a>
+                    </div>
                     </div>
                 </div>
 

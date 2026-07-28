@@ -173,7 +173,9 @@ if (isset($_GET['logout'])) {
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">File Name</th>
+                                                <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" style="min-width:600px">Content</th>
 
                                             </tr>
@@ -194,7 +196,9 @@ if (isset($_GET['logout'])) {
                                             </td>';
                                                 echo '<td id="namebkli-' . $row['beyondkl_i_id'] . '">' . urldecode($row['beyondkl_i_title']) . '</td>';
                                                 echo '<td id="filenamebkli-' . $row['beyondkl_i_id'] . '">' . $row['beyondkl_i_image'] . '</td>';
+                                                echo '<td id="locationbkli-' . $row['beyondkl_i_id'] . '">' . urldecode((string) $row['beyondkl_i_location']) . '</td>';
                                                 echo '<td id="locationurlbkli-' . $row['beyondkl_i_id'] . '">' . urldecode($row['beyondkl_i_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsbkli-' . $row['beyondkl_i_id'] . '">' . htmlspecialchars((string) $row['beyondkl_i_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentbkli-' . $row['beyondkl_i_id'] . '">' . urldecode($row['beyondkl_i_content']) . '</td>';
 
 
@@ -238,7 +242,9 @@ if (isset($_GET['logout'])) {
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">File Name</th>
+                                                <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" style="min-width:600px">Content</th>
 
                                             </tr>
@@ -259,7 +265,9 @@ if (isset($_GET['logout'])) {
                                             </td>';
                                                 echo '<td id="namebklhs-' . $row['beyondkl_hs_id'] . '">' . urldecode($row['beyondkl_hs_title']) . '</td>';
                                                 echo '<td id="filenamebklhs-' . $row['beyondkl_hs_id'] . '">' . $row['beyondkl_hs_image'] . '</td>';
+                                                echo '<td id="locationbklhs-' . $row['beyondkl_hs_id'] . '">' . urldecode((string) $row['beyondkl_hs_location']) . '</td>';
                                                 echo '<td id="locationurlbklhs-' . $row['beyondkl_hs_id'] . '">' . urldecode($row['beyondkl_hs_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsbklhs-' . $row['beyondkl_hs_id'] . '">' . htmlspecialchars((string) $row['beyondkl_hs_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentbklhs-' . $row['beyondkl_hs_id'] . '">' . urldecode($row['beyondkl_hs_content']) . '</td>';
 
 
@@ -303,7 +311,9 @@ if (isset($_GET['logout'])) {
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">File Name</th>
+                                                <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" style="min-width:600px">Content</th>
 
                                             </tr>
@@ -324,7 +334,9 @@ if (isset($_GET['logout'])) {
                                             </td>';
                                                 echo '<td id="namebklw-' . $row['beyondkl_w_id'] . '">' . urldecode($row['beyondkl_w_title']) . '</td>';
                                                 echo '<td id="filenamebklw-' . $row['beyondkl_w_id'] . '">' . $row['beyondkl_w_image'] . '</td>';
+                                                echo '<td id="locationbklw-' . $row['beyondkl_w_id'] . '">' . urldecode((string) $row['beyondkl_w_location']) . '</td>';
                                                 echo '<td id="locationurlbklw-' . $row['beyondkl_w_id'] . '">' . urldecode($row['beyondkl_w_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsbklw-' . $row['beyondkl_w_id'] . '">' . htmlspecialchars((string) $row['beyondkl_w_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentbklw-' . $row['beyondkl_w_id'] . '">' . urldecode($row['beyondkl_w_content']) . '</td>';
 
 
@@ -369,7 +381,9 @@ if (isset($_GET['logout'])) {
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">File Name</th>
+                                                <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" style="min-width:600px">Content</th>
 
                                             </tr>
@@ -390,7 +404,9 @@ if (isset($_GET['logout'])) {
                                             </td>';
                                                 echo '<td id="namebklh-' . $row['beyondkl_h_id'] . '">' . urldecode($row['beyondkl_h_title']) . '</td>';
                                                 echo '<td id="filenamebklh-' . $row['beyondkl_h_id'] . '">' . $row['beyondkl_h_image'] . '</td>';
+                                                echo '<td id="locationbklh-' . $row['beyondkl_h_id'] . '">' . urldecode((string) $row['beyondkl_h_location']) . '</td>';
                                                 echo '<td id="locationurlbklh-' . $row['beyondkl_h_id'] . '">' . urldecode($row['beyondkl_h_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsbklh-' . $row['beyondkl_h_id'] . '">' . htmlspecialchars((string) $row['beyondkl_h_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentbklh-' . $row['beyondkl_h_id'] . '">' . urldecode($row['beyondkl_h_content']) . '</td>';
 
 
@@ -435,7 +451,9 @@ if (isset($_GET['logout'])) {
                                                 </th>
                                                 <th scope="col">Name</th>
                                                 <th scope="col">File Name</th>
+                                                <th scope="col">Location</th>
                                                 <th scope="col">Location URL</th>
+                                                <th scope="col">Map Coords</th>
                                                 <th scope="col" style="min-width:600px">Content</th>
 
                                             </tr>
@@ -456,7 +474,9 @@ if (isset($_GET['logout'])) {
                                             </td>';
                                                 echo '<td id="namebkles-' . $row['beyondkl_es_id'] . '">' . urldecode($row['beyondkl_es_title']) . '</td>';
                                                 echo '<td id="filenamebkles-' . $row['beyondkl_es_id'] . '">' . $row['beyondkl_es_image'] . '</td>';
+                                                echo '<td id="locationbkles-' . $row['beyondkl_es_id'] . '">' . urldecode((string) $row['beyondkl_es_location']) . '</td>';
                                                 echo '<td id="locationurlbkles-' . $row['beyondkl_es_id'] . '">' . urldecode($row['beyondkl_es_locationurl']) . '</td>';
+                                                echo '<td id="mapcoordsbkles-' . $row['beyondkl_es_id'] . '">' . htmlspecialchars((string) $row['beyondkl_es_mapcoords'], ENT_QUOTES, 'UTF-8') . '</td>';
                                                 echo '<td id="contentbkles-' . $row['beyondkl_es_id'] . '">' . urldecode($row['beyondkl_es_content']) . '</td>';
 
 
@@ -547,6 +567,11 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <textarea type="text" class="form-control form-control-user" id="location"
+                                placeholder="Location (street address)" name="location" rows="1"></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <textarea type="text" class="form-control form-control-user" id="locationurl"
                                 placeholder="Location URL" name="locationurl" rows="3"></textarea>
                         </div>
@@ -558,6 +583,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
 
+
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
 
                         <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
@@ -595,6 +626,10 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <label for="locationbkli">Location (street address)</label>
+                            <textarea type="text" class="form-control" id="locationbkli" name="location"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label for="locationurlbkli">Location URL</label>
                             <input type="text" class="form-control" id="locationurlbkli" name="locationurl">
                         </div>
@@ -606,6 +641,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbkli">Order</label>
                             <input type="text" class="form-control" id="orderbkli" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsbkli">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsbkli" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewbkli" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadbkliedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadbkliedit"
+                                name="fileToUploadbkli" accept="image/*">
                         </div>
                         <input class="form-control" id="bkliid" name="bkliid" hidden></input>
                         <input class="form-control" id="imagenamebkli" name="imagenamebkli" hidden></input>
@@ -645,6 +694,11 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <textarea type="text" class="form-control form-control-user" id="location"
+                                placeholder="Location (street address)" name="location" rows="1"></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <textarea type="text" class="form-control form-control-user" id="locationurl"
                                 placeholder="Location URL" name="locationurl" rows="3"></textarea>
                         </div>
@@ -656,6 +710,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
 
+
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
 
                         <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
@@ -694,6 +754,10 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <label for="locationbklhs">Location (street address)</label>
+                            <textarea type="text" class="form-control" id="locationbklhs" name="location"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label for="locationurlbklhs">Location URL</label>
                             <input type="text" class="form-control" id="locationurlbklhs" name="locationurl">
                         </div>
@@ -705,6 +769,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbklhs">Order</label>
                             <input type="text" class="form-control" id="orderbklhs" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsbklhs">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsbklhs" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewbklhs" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadbklhsedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadbklhsedit"
+                                name="fileToUploadbklhs" accept="image/*">
                         </div>
                         <input class="form-control" id="bklhsid" name="bklhsid" hidden></input>
                         <input class="form-control" id="imagenamebklhs" name="imagenamebklhs" hidden></input>
@@ -745,6 +823,11 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <textarea type="text" class="form-control form-control-user" id="location"
+                                placeholder="Location (street address)" name="location" rows="1"></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <textarea type="text" class="form-control form-control-user" id="locationurl"
                                 placeholder="Location URL" name="locationurl" rows="3"></textarea>
                         </div>
@@ -756,6 +839,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
 
+
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
 
                         <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
@@ -793,6 +882,10 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <label for="locationbklw">Location (street address)</label>
+                            <textarea type="text" class="form-control" id="locationbklw" name="location"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label for="locationurlbklw">Location URL</label>
                             <input type="text" class="form-control" id="locationurlbklw" name="locationurl">
                         </div>
@@ -804,6 +897,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbklw">Order</label>
                             <input type="text" class="form-control" id="orderbklw" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsbklw">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsbklw" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewbklw" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadbklwedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadbklwedit"
+                                name="fileToUploadbklw" accept="image/*">
                         </div>
                         <input class="form-control" id="bklwid" name="bklwid" hidden></input>
                         <input class="form-control" id="imagenamebklw" name="imagenamebklw" hidden></input>
@@ -844,6 +951,11 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <textarea type="text" class="form-control form-control-user" id="location"
+                                placeholder="Location (street address)" name="location" rows="1"></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <textarea type="text" class="form-control form-control-user" id="locationurl"
                                 placeholder="Location URL" name="locationurl" rows="3"></textarea>
                         </div>
@@ -855,6 +967,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
 
+
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
 
                         <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
@@ -892,6 +1010,10 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <label for="locationbklh">Location (street address)</label>
+                            <textarea type="text" class="form-control" id="locationbklh" name="location"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label for="locationurlbklh">Location URL</label>
                             <input type="text" class="form-control" id="locationurlbklh" name="locationurl">
                         </div>
@@ -903,6 +1025,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbklh">Order</label>
                             <input type="text" class="form-control" id="orderbklh" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsbklh">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsbklh" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewbklh" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadbklhedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadbklhedit"
+                                name="fileToUploadbklh" accept="image/*">
                         </div>
                         <input class="form-control" id="bklhid" name="bklhid" hidden></input>
                         <input class="form-control" id="imagenamebklh" name="imagenamebklh" hidden></input>
@@ -943,6 +1079,11 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <textarea type="text" class="form-control form-control-user" id="location"
+                                placeholder="Location (street address)" name="location" rows="1"></textarea>
+                        </div>
+
+                        <div class="form-group">
                             <textarea type="text" class="form-control form-control-user" id="locationurl"
                                 placeholder="Location URL" name="locationurl" rows="3"></textarea>
                         </div>
@@ -954,6 +1095,12 @@ if (isset($_GET['logout'])) {
                         </div>
 
 
+
+                        <div class="form-group">
+                            <input type="text" class="form-control form-control-user" name="mapcoords"
+                                placeholder="Map Coordinates — e.g. 3.1580207,101.7116671 (optional)">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
 
                         <div class="form-group">
                             <label for="exampleFormControlFile1">Select image to upload :</label>
@@ -992,6 +1139,10 @@ if (isset($_GET['logout'])) {
                         </div>
 
                         <div class="form-group">
+                            <label for="locationbkles">Location (street address)</label>
+                            <textarea type="text" class="form-control" id="locationbkles" name="location"></textarea>
+                        </div>
+                        <div class="form-group">
                             <label for="locationurlbkles">Location URL</label>
                             <input type="text" class="form-control" id="locationurlbkles" name="locationurl">
                         </div>
@@ -1003,6 +1154,20 @@ if (isset($_GET['logout'])) {
                         <div class="form-group">
                             <label for="orderbkles">Order</label>
                             <input type="text" class="form-control" id="orderbkles" name="order">
+                        </div>
+                        <div class="form-group">
+                            <label for="mapcoordsbkles">Map Coordinates (lat,lng)</label>
+                            <input type="text" class="form-control" id="mapcoordsbkles" name="mapcoords"
+                                placeholder="e.g. 3.1580207,101.7116671">
+                            <small class="form-text text-muted">Sets the exact &quot;View on Map&quot; pin. Right-click the place in Google Maps &rarr; click the coordinates to copy, or just paste the whole map link.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Current image</label><br>
+                            <img id="previewbkles" src="" alt="Current image"
+                                class="img-thumbnail d-none" style="max-height:120px">
+                            <label for="fileToUploadbklesedit" class="mt-2 mb-1 d-block">Replace image <span class="text-muted">(leave empty to keep the current one)</span></label>
+                            <input type="file" class="form-control-file" id="fileToUploadbklesedit"
+                                name="fileToUploadbkles" accept="image/*">
                         </div>
                         <input class="form-control" id="bklesid" name="bklesid" hidden></input>
                         <input class="form-control" id="imagenamebkles" name="imagenamebkles" hidden></input>

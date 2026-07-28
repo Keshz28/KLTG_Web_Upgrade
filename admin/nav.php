@@ -109,28 +109,11 @@
             <i class="fas fa-fw fa-chart-area"></i>
             <span>Subscribers</span></a>
     </li>
-    <li class="nav-item" id="campaignnav">
-        <a class="nav-link" href="emailcampaign.php">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Email Campaign</span></a>
-    </li>
-
-    <li class="nav-item" id="pageviewnav">
-        <a class="nav-link" href="pageviews.php">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Page Views</span></a>
-    </li>
     <li class="nav-item" id="blognav">
         <a class="nav-link" href="blogviews2.php">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>Blog Views</span></a>
     </li>
-    <li class="nav-item" id="bannernav">
-        <a class="nav-link" href="bannerreach.php">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Ad Popup Reach</span></a>
-    </li>
-    
     <li class="nav-item" id="ebooknav">
         <a class="nav-link" href="ebookviews.php">
             <i class="fas fa-fw fa-chart-area"></i>
@@ -140,13 +123,6 @@
         <a class="nav-link" href="landing-page.php">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>QR Code Landing Page</span></a>
-    </li>
-
-<!-- New Nav Item for contest.php -->
-<li class="nav-item" id="contestnav">
-        <a class="nav-link" href="contest.php">
-            <i class="fas fa-fw fa-trophy"></i>
-            <span>Voucher Claims Contest</span></a>
     </li>
 
     <li class="nav-item" id="advertisementnav">
@@ -175,17 +151,17 @@
                 <a class="collapse-item" href="edit-index.php">Index</a>
                 <a class="collapse-item" href="edit-highlights.php">Highlights</a>
                 <a class="collapse-item" href="edit-klglance.php">KL @ A Glance</a>
+                <a class="collapse-item" href="edit-traveltips.php">Travel Tips</a>
                 <a class="collapse-item" href="edit-blog.php">Blog</a>
                 <a class="collapse-item" href="edit-ebook.php">E-book</a>
                 <a class="collapse-item" href="edit-merchandise.php">Merchandise</a>
-                <a class="collapse-item" href="edit-pageviews.php">Page Views</a>
                 <a class="collapse-item" href="edit-explorekl.php">Explore KL</a>
                 <a class="collapse-item" href="edit-beyondkl.php">Beyond KL</a>
                 <a class="collapse-item" href="edit-medical-tourism.php">Medical Tourism</a>
                 <a class="collapse-item" href="edit-places-to-shop.php">Places To Shop</a>
                 <a class="collapse-item" href="edit-spa.php">Spa</a>
                 <a class="collapse-item" href="edit-accomodation.php">Place To Stay</a>
-                <a class="collapse-item" href="edit-event.php">Upcoming Highlights</a>
+                <a class="collapse-item" href="edit-event.php">Event</a>
                 <a class="collapse-item" href="edit-voucher.php">Manage Vouchers</a>
 
 
